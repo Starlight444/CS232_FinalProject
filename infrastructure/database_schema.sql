@@ -59,7 +59,7 @@ CREATE TABLE announcements (
 CREATE INDEX idx_announcements_course
 ON announcements(course_id);
 
-CREATE TYPE assignment_status AS ENUM ('draft', 'published', 'closed');
+CREATE TYPE assignment_status AS ENUM ('published', 'closed');
 
 CREATE TABLE assignments (
     assignment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -86,7 +86,7 @@ CREATE TABLE assignments (
 CREATE INDEX idx_assignment_course
 ON assignments(course_id);
 
-CREATE TYPE submission_status AS ENUM ('submitted', 'late', 'graded');
+CREATE TYPE submission_status AS ENUM ('submitted', 'pending' , 'graded', 'missing');
 
 CREATE TABLE submissions (
     submission_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -136,8 +136,9 @@ CREATE TABLE attachments (
     
     CONSTRAINT check_attachment_reference
         CHECK (
-            assignment_id IS NOT NULL
-            OR submission_id IS NOT NULL
+            (assignment_id IS NOT NULL AND submission_id IS NULL)
+            OR
+            (assignment_id IS NULL AND submission_id IS NOT NULL)
         )
 );
 
