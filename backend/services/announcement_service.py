@@ -6,7 +6,7 @@ from repositories.announcement_repository import AnnouncementRepository
 
 logger = logging.getLogger(__name__)  # เพิ่ม
 
-ALLOWED_ROLES = {"Professor", "TA"}
+ALLOWED_ROLES = {"teacher", "ta"}
 
 class AnnouncementService:
     def __init__(self, repo: AnnouncementRepository):
