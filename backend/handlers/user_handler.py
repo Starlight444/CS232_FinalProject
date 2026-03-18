@@ -19,11 +19,12 @@ def login(
     repo = UserRepository(db)
     service = UserService(repo)
     
-    user = service.login(request.email, request.password)
+    user, token = service.login(request.email, request.password)  # unpack tuple
     
     return {
         "success": True,
         "data": {
+            "token": token,           # ส่ง token กลับไปให้ frontend เก็บ
             "user_id": user.user_id,
             "email": user.email,
             "first_name": user.first_name,

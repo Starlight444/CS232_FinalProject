@@ -1,4 +1,7 @@
 from passlib.context import CryptContext
+import jwt
+from datetime import datetime, timedelta
+from config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 
@@ -16,4 +19,10 @@ class UserService:
         if not pwd_context.verify(password, user.password_hash):
             raise Exception("Invalid password")
         
-        return user
+        # generate JWT token
+        payload = {
+            "user_id": str(user.user_id),
+            "exp": datetime.utcnow() + timedelta(hours=24)
+        }
+        token = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
+        return user, token
