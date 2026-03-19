@@ -21,8 +21,11 @@ class UserService:
         
         # generate JWT token
         payload = {
-            "user_id": str(user.user_id),
-            "exp": datetime.utcnow() + timedelta(hours=24)
+            "user_id":    str(user.user_id),
+            "email":      user.email,     
+            "first_name": user.first_name,  
+            "last_name":  user.last_name,    
+            "exp":        datetime.utcnow() + timedelta(hours=24)
         }
         token = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
         return user, token
