@@ -1,6 +1,7 @@
 from models.submission_model import Submission
 from models.attachment_model import Attachment
 import uuid
+import os
 
 
 class SubmissionService:
@@ -16,7 +17,7 @@ class SubmissionService:
 
         role = self.member_repo.get_role(student_id, course_id)
 
-        if role != "student":
+        if not role or role != "student":
             raise Exception("Only students can submit assignments")
 
         submission = Submission(
@@ -27,23 +28,40 @@ class SubmissionService:
 
         created = self.repo.create(submission)
 
-        key = f"submissions/{assignment_id}/{student_id}/{uuid.uuid4()}"
+        filename = file.filename
+        filetype = filename.split(".")[-1]
+        
+        if self.storage:
+            key = f"submissions/{assignment_id}/{student_id}/{uuid.uuid4()}"
+            file_url = self.storage.upload_file(file.file, key)
 
-        file_url = self.storage.upload_file(file.file, key)
+        else:
+            os.makedirs("uploads/submissions", exist_ok=True)
+
+            unique_name = f"{uuid.uuid4()}_{filename}"
+            file_path = f"uploads/submissions/{unique_name}"
+
+            with open(file_path, "wb") as f:
+                file.file.seek(0)
+                f.write(file.file.read())
+
+            file_url = file_path
+
 
         attachment = Attachment(
             submission_id=created.submission_id,
-            file_name=file.filename,
+            file_name=filename,
             file_url=file_url,
-            file_type=file.filename.split(".")[-1]
+            file_type=filetype
         )
 
         self.attachment_repo.create(attachment)
 
         return {
-            "submission_id": created.submission_id,
+            "submission_id": str(created.submission_id),
             "file_url": file_url
         }
+    
     def grade_submission(self, submission_id, grader_id, course_id, score, feedback):
 
         role = self.member_repo.get_role(grader_id, course_id)

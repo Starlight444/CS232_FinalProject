@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Depends
+from fastapi import APIRouter, UploadFile, File, Depends, Form
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -10,7 +10,7 @@ from repositories.attachment_repository import AttachmentRepository
 
 from services.submission_service import SubmissionService
 
-from storage.s3_storage import S3Storage
+#from storage.s3_storage import S3Storage
 
 
 router = APIRouter(prefix="/submissions")
@@ -18,9 +18,9 @@ router = APIRouter(prefix="/submissions")
 
 @router.post("/")
 async def submit_assignment(
-    assignment_id: UUID,
-    course_id: UUID,
-    student_id: UUID,
+    assignment_id: UUID = Form(...),
+    course_id: UUID = Form(...),
+    student_id: UUID = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -29,7 +29,8 @@ async def submit_assignment(
     member_repo = CourseMemberRepository(db)
     attachment_repo = AttachmentRepository(db)
 
-    storage = S3Storage()
+    #storage = S3Storage()
+    storage = None
 
     service = SubmissionService(repo, member_repo, attachment_repo, storage)
 
