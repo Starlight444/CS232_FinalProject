@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
@@ -27,10 +27,8 @@ def create_assignment(
     request: CreateAssignmentRequest,
     db: Session = Depends(get_db)
 ):
-    
     repo = AssignmentRepository(db)
     member_repo = CourseMemberRepository(db)
-    
     service = AssignmentService(repo, member_repo)
 
     assignment = service.create_assignment(
@@ -41,11 +39,21 @@ def create_assignment(
         request.course_id,
         request.created_by,
         request.allowed_file_types
-    )
+        )
 
     return {
         "success": True,
-        "data": assignment
+        "data": {
+            "assignment_id": str(assignment.assignment_id),
+            "title": assignment.title,
+            "description": assignment.description,
+            "due_date": assignment.due_date,
+            "max_score": assignment.max_score,
+            "course_id": str(assignment.course_id),
+            "created_by": str(assignment.created_by),
+            "status": assignment.status,
+            "allowed_file_types": assignment.allowed_file_types
+        }
     }
 
 @router.get("/{course_id}")

@@ -6,7 +6,7 @@ from database import get_db
 
 from repositories.attachment_repository import AttachmentRepository
 from services.attachment_service import AttachmentService
-from storage.s3_storage import S3Storage
+#from storage.s3_storage import S3Storage
 
 
 router = APIRouter(prefix="/attachments")
@@ -20,7 +20,8 @@ async def upload_assignment_attachment(
 ):
 
     repo = AttachmentRepository(db)
-    storage = S3Storage()
+    #storage = S3Storage()
+    storage = None
 
     service = AttachmentService(repo, storage)
 
@@ -31,7 +32,12 @@ async def upload_assignment_attachment(
 
     return {
         "success": True,
-        "data": attachment
+        "data": {
+            "attachment_id": str(attachment.attachment_id),
+            "file_name": attachment.file_name,
+            "file_url": attachment.file_url,
+            "file_type": attachment.file_type
+        }
     }
 
 
@@ -43,7 +49,8 @@ async def upload_submission_attachment(
 ):
 
     repo = AttachmentRepository(db)
-    storage = S3Storage()
+    #storage = S3Storage()
+    storage = None
 
     service = AttachmentService(repo, storage)
 
@@ -54,7 +61,12 @@ async def upload_submission_attachment(
 
     return {
         "success": True,
-        "data": attachment
+        "data": {
+            "attachment_id": str(attachment.attachment_id),
+            "file_name": attachment.file_name,
+            "file_url": attachment.file_url,
+            "file_type": attachment.file_type
+        }
     }
 
 

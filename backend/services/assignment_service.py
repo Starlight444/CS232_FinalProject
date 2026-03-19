@@ -21,7 +21,7 @@ class AssignmentService:
 
         role = self.member_repo.get_role(created_by, course_id)
 
-        if role not in ["teacher", "ta"]:
+        if not role or getattr(role, "value", role) not in ["teacher", "ta"]:
             raise Exception("Only teacher or TA can create assignments")
 
         assignment = Assignment(
@@ -31,7 +31,6 @@ class AssignmentService:
             max_score=max_score,
             course_id=course_id,
             created_by=created_by,
-            status="published",
             allowed_file_types=allowed_file_types
         )
 

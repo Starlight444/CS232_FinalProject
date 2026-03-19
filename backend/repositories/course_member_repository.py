@@ -2,5 +2,24 @@ from sqlalchemy.orm import Session
 from models.course_member_model import CourseMember
 import uuid
 
-def get_members_by_course(db: Session, course_id: uuid.UUID):
-    return db.query(CourseMember).filter(CourseMember.course_id == course_id).all()
+
+class CourseMemberRepository:
+    def __init__(self, db):
+        self.db = db
+        
+    def get_members_by_course(self, course_id: uuid.UUID):
+        return self.db.query(CourseMember).filter(
+            CourseMember.course_id == course_id
+        ).all()
+    
+    def get_role(self, user_id, course_id):
+        member = (
+            self.db.query(CourseMember)
+            .filter(
+                CourseMember.user_id == user_id,
+                CourseMember.course_id == course_id
+            )
+            .first()
+        )
+
+        return member.role if member else None
