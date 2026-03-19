@@ -71,7 +71,7 @@ CREATE TABLE assignments (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     course_id UUID NOT NULL,
     created_by UUID NOT NULL,
-    status assignment_status NOT NULL,
+    status assignment_status NOT NULL DEFAULT 'published',
     allowed_file_types VARCHAR(100) NOT NULL,
 
     CONSTRAINT fk_assignment_course
