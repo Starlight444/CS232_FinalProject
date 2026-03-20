@@ -1,0 +1,93 @@
+:root {
+
+    --white: #ffffff;
+    --white-dim: rgba(255, 255, 255, 0.75);
+    --accent: #9b6dff;
+    --radius: 12px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/*Navbar*/
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--SUPER, linear-gradient(90deg, var(--Purple, #3A0373) 0.61%, var(--Blueple, #6E6CDF) 51.91%, var(--Red, #CF2D2D) 100.34%));
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 24px;
+}
+
+/*Right*/
+.navbar-right {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/*Icon Buttons*/
+.icon-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    transition: background 0.2s;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/*Profile Button Circle*/
+.profile-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.profile-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/*Number Notification Bell Icon*/
+.badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: #ff4466;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.badge.hidden {
+    display: none;
+}
