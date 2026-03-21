@@ -1,7 +1,12 @@
 from sqlalchemy.orm import Session
 import uuid
-from models.course_member_model import CourseMember
-from repositories import course_member_repository
+from repositories.course_member_repository import CourseMemberRepository
 
-def get_students(db: Session, course_id: uuid.UUID):
-    return course_member_repository.get_members_by_course(db, course_id)
+
+class CourseMemberService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repo = CourseMemberRepository(db)
+
+    def get_students(self, course_id: uuid.UUID):
+        return self.repo.get_members_by_course(course_id)
