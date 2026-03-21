@@ -12,22 +12,46 @@
 <body>
 
     <header class="navbar">
-        <!-- Right: Actions -->
+        <div class="navbar-left"></div>
+
         <div class="navbar-right">
-            <!-- Notification Bell -->
-            <button class="icon-btn bell-btn" id="bell-btn" aria-label="Notifications">
+            <button class="icon-btn" id="bell-btn">
                 <i class="fa-solid fa-bell"></i>
-                <span class="badge" id="notif-badge">3</span>
+                <span class="badge" id="notif-badge">2</span>
             </button>
 
-            <!-- Profile -->
-            <button class="icon-btn profile-btn" id="profile-btn" aria-label="Profile">
-                <i class="fa-regular fa-user"></i>
+            <div class="notif-dropdown" id="notif-dropdown">
+                <div class="notif-header">
+                    <span>Notifications</span>
+                    <button class="clear-btn" id="clear-btn">Clear all</button>
+                </div>
+                <ul class="notif-list" id="notif-list">
+                    <li class="notif-item">
+                        <div class="notif-subject-tag">CS251</div>
+                        <div class="notif-body">
+                            <p class="notif-text">ประกาศ พุธที่ 14 ม.ค. 2569 13:30-15:00 น. ทั้ง Section 090001 และ
+                                090002 เรียนรวมกันที่ห้อง LC5-S204</p>
+                            <p class="notif-time">4 ชั่วโมงที่ผ่านมา</p>
+                        </div>
+                    </li>
+                    <li class="notif-item">
+                        <div class="notif-subject-tag">CS251</div>
+                        <div class="notif-body">
+                            <p class="notif-text">ตรวจสอบคะแนนสอบกลางภาคได้แล้วในระบบ</p>
+                            <p class="notif-time">1 วันที่ผ่านมา</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <button class="icon-btn profile-btn">
+                <i class="fa-solid fa-user"></i>
             </button>
         </div>
 
     </header>
 
+    <script src="student-navbar.js"></script>
 </body>
 
 </html>
