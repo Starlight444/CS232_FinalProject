@@ -3,21 +3,37 @@ const notifDropdown = document.getElementById('notif-dropdown');
 const clearBtn = document.getElementById('clear-btn');
 const notifList = document.getElementById('notif-list');
 const notifBadge = document.getElementById('notif-badge');
+const profileBtn = document.getElementById('profile-btn');
+const profileDropdown = document.getElementById('profile-dropdown');
 
-//เปิด Dropdown
+//เปิด Notification Dropdown
 bellBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    // ปิด Profile 
+    profileDropdown.classList.remove('open');
     notifDropdown.classList.toggle('open');
+});
+
+//เปิด Profile Dropdown
+profileBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // ปิด Notification 
+    notifDropdown.classList.remove('open');
+    profileDropdown.classList.toggle('open');
 });
 
 //ปิด Dropdown
 document.addEventListener('click', () => {
     notifDropdown.classList.remove('open');
+    profileDropdown.classList.remove('open');
 });
 
 //ป้องกันการปิด Dropdown เมื่อคลิกข้างในตัวมันเอง
 notifDropdown.addEventListener('click', (e) => {
     e.stopPropagation();
+});
+profileDropdown.addEventListener('click', (e) => {
+    e.stopPropagation()
 });
 
 //Clear All
