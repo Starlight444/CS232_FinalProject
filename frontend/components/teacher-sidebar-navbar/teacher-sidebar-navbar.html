@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Sidebar</title>
+    <title>Teacher Sidebar and Navbar</title>
     <link rel="stylesheet" href="../student-sidebar/sidebar.css">
+    <link rel="stylesheet" href="../student-navbar/student-navbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -65,6 +66,28 @@
     </aside>
 
     <script src="../student-sidebar/sidebar.js"></script>
+
+    <!--Navbar-->
+    <div class="navbar">
+        <div class="navbar-left"></div>
+
+        <div class="navbar-right">
+            <button class="icon-btn profile-btn" id="profile-btn">
+                <i class="fa-solid fa-user"></i>
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="profile-info">
+                    <div class="avatar-gradient">S</div>
+                    <div class="user-details">
+                        <p class="user-name">ชีวัน วงศ์นคร</p>
+                        <p class="user-email">shewan.won@dome.tu.ac.th</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </body>
 
 </html>
