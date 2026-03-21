@@ -8,7 +8,7 @@
 .navbar {
     position: fixed;
     top: 0;
-    left: 0;
+    left: var(--sidebar-width);
     right: 0;
     height: 60px;
     background: var(--SUPER, linear-gradient(90deg, var(--Purple, #3A0373) 0.61%, var(--Blueple, #6E6CDF) 51.91%, var(--Red, #CF2D2D) 100.34%));
@@ -17,6 +17,11 @@
     justify-content: space-between;
     padding: 0 24px;
     z-index: 1000;
+    transition: left var(--transition);
+}
+
+.sidebar.collapsed~.navbar {
+    left: var(--sidebar-collapsed-width);
 }
 
 .navbar-right {
