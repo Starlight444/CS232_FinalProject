@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS232 - Assignment Grading (HTML Structure Only)</title>
 </head>
+
 <body>
 
     <fieldset>
         <legend>Assignment Info</legend>
-        
+
+        <div class="flex flex-col items-end gap-2">
+            <div class="flex gap-2">
+                <button
+                    class="text-gray-500 hover:text-indigo-600 flex items-center gap-1 text-sm border border-gray-300 rounded px-2 py-1">
+                    <span class="material-symbols-outlined text-sm">edit</span> Edit
+                </button>
+                <button
+                    class="text-gray-500 hover:text-red-600 flex items-center gap-1 text-sm border border-gray-300 rounded px-2 py-1">
+                    <span class="material-symbols-outlined text-sm">delete</span> Delete
+                </button>
+            </div>
+            <div class="text-lg font-medium mt-2">100 Points</div>
+        </div>
+
         <h1>&lt;Assignment Title&gt;</h1>
         <p>Due date on WE 11 Mar 26, 11:59 PM</p>
-        
+
         <h2>คำสั่ง</h2>
         <p>ยายมอยขายหมี ยายมีขายหอย หมีบอยยายแหย่หอยยายมี หอยยายมีกัดหมีบอยยายมอย</p>
-        
+
         <h2>File</h2>
         <br>
         <div style="border: 1px solid black; width: 100px; height: 100px;">
@@ -27,24 +43,24 @@
 
         <p>100 Points</p>
     </fieldset>
-    
+
     <br><br>
 
     <fieldset>
         <legend>Grading Table Section</legend>
-        
+
         <div>
             <button type="button">Needs Grading</button>
             <button type="button">Fully Graded</button>
             <button type="button">Missing</button>
         </div>
-        
+
         <br>
-        
+
         <div align="right">
             <input type="search" placeholder="Search">
         </div>
-        
+
         <br>
 
         <table border="1" width="100%" cellpadding="5" cellspacing="0">
