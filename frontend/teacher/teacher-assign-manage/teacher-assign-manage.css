@@ -28,6 +28,16 @@ body {
     padding: 2rem;
     margin: 0;
 }
+/*icon*/
+/* ตัวอย่างที่ก้อปมาจะเป็นประมาณนี้ */
+.mynaui--file-x-solid {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor; /* สีไอคอนจะเปลี่ยนตามสีตัวอักษร */
+  -webkit-mask-image: url("data:image/svg+xml;..."); /* ตัวโค้ดไอคอนจะอยู่ในนี้ */
+  mask-image: url("data:image/svg+xml;...");
+}
 
 /* คลาสอรรถประโยชน์ */
 .max-w-6xl { max-width: 1152px; }
@@ -99,6 +109,11 @@ p {
     gap: 8px;
     float: right; /* ดึงไปทางขวา */
     margin-left: 24px;
+}
+
+.button-group {
+    gap: 10px;
+    display:flex;
 }
 
 .points-text {
@@ -197,10 +212,10 @@ p {
 
 /* สถานะ Submitted (สีเขียวพร้อมจุด) */
 .status-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
+    align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+    gap: 8px; /* เว้นระยะห่างระหว่างจุดกับข้อความ */
+    height: 100%; /* ให้สูงเต็มพื้นที่ td */
+    white-space: nowrap; /* ป้องกันข้อความตัดบรรทัดจนทำให้อันอื่นดูหด */
 }
 
 .status-cell.submitted {
@@ -209,11 +224,12 @@ p {
 
 .status-cell.submitted::before {
     content: "";
-    display: inline-block;
+    flex-shrink: 0; /* สำคัญมาก: ห้ามไม่ให้จุดโดนบีบ */
     width: 8px;
     height: 8px;
-    background-color: var(--status-submitted);
     border-radius: 50%;
+    background-color: #28a745; /* สีเขียวสำหรับ Submitted */
+    display: none !important;
 }
 
 /* ช่อง Input คะแนนในตาราง */
@@ -330,4 +346,12 @@ p {
 .btn-outline:hover {
     color: var(--primary-color);
     border-color: var(--primary-color);
+}
+
+.btn-outline-danger{
+    border: none;
+}
+
+.btn-outline-danger:hover {
+    color: var(--pdf-red);
 }

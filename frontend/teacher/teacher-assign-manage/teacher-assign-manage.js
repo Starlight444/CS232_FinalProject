@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ฟังก์ชันสร้างตารางใหม่ตามแท็บที่เลือก
+    // ฟังก์ชันสร้างตารางใหม่ตามแท็บที่เลือก
     function renderTable(tabName) {
         tbody.innerHTML = ''; // ล้างข้อมูลเก่าออกก่อน
         const data = mockData[tabName];
@@ -34,13 +35,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = document.createElement('tr');
             tr.className = 'table-row';
 
-            // 1. จัดการสีของ Status
+            // 1. จัดการสีของ Status และ ไอคอน (Iconify)
             let statusClass = '';
-            if (student.status === 'Submitted') statusClass = 'submitted'; // สีเขียว
-            else if (student.status === 'Graded') statusClass = 'graded'; // สีม่วง
-            else if (student.status === 'Missing') statusClass = 'missing'; // สีแดง
+            let statusContent = ''; 
 
-            // 2. จัดการช่องไฟล์แนบ (ถ้าไม่มีไฟล์ให้แสดงคำว่า No File)
+            if (student.status === 'Submitted') {
+                statusClass = 'submitted'; 
+                statusContent = `<div style="display: flex; align-items: center; gap: 6px; color: #28a745;">
+                                    <span style="width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; flex-shrink: 0;"></span>
+                                    <span>${student.status}</span>
+                                 </div>`;
+            } 
+            else if (student.status === 'Graded') {
+                statusClass = 'graded'; 
+                statusContent = `<div style="display: flex; align-items: center; gap: 6px; color: #6E6CDF;">
+                                    <span style="width: 8px; height: 8px; background-color: #6E6CDF; border-radius: 50%; flex-shrink: 0;"></span>
+                                    <span>${student.status}</span>
+                                 </div>`;
+            } 
+            else if (student.status === 'Missing') {
+                statusClass = 'missing'; 
+                statusContent = `<div style="display: flex; align-items: center; gap: 6px; color: #DC3545;">
+                                    <span style="width: 8px; height: 8px; background-color: #DC3545; border-radius: 50%; flex-shrink: 0;"></span>
+                                    <span>${student.status}</span>
+                                 </div>`;
+            }
+
+            // 2. จัดการช่องไฟล์แนบ
             let submissionContent = '';
             if (student.file) {
                 submissionContent = `<button class="file-btn" type="button"><span class="icon icon-pdf">picture_as_pdf</span> ${student.file}</button>`;
@@ -51,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. จัดการจุดสีเขียวบนไอคอนแชท (Feedback)
             let feedbackIcon = student.hasFeedback
                 ? `<div style="position: relative; display: inline-block;">
-                       <span class="icon" style="color: var(--text-main);">chat</span>
-                       <span style="position: absolute; top: -2px; right: -4px; width: 8px; height: 8px; background-color: var(--status-submitted); border-radius: 50%; border: 1.5px solid white;"></span>
+                       <span class="icon" style="color: #333;">chat</span>
+                       <span style="position: absolute; top: -2px; right: -4px; width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; border: 1.5px solid white;"></span>
                    </div>`
                 : `<span class="icon">chat</span>`;
 
@@ -61,10 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${student.id}</td>
                 <td>${student.name}</td>
                 <td>${student.date}</td>
-                <td class="status-cell ${statusClass}">${student.status}</td>
+                <td class="status-cell ${statusClass}">${statusContent}</td>
                 <td>${submissionContent}</td>
                 <td><input type="text" class="grade-input" size="3" value="${student.grade}"></td>
-                <td align="center"><button class="feedback-btn" type="button">${feedbackIcon}</button></td>
+                <td align="center"><button class="feedback-btn" type="button" style="background: none; border: none; cursor: pointer;">${feedbackIcon}</button></td>
             `;
             tbody.appendChild(tr);
         });
