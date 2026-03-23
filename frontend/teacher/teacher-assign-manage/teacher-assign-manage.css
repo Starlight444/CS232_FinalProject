@@ -1,0 +1,333 @@
+/* นำเข้าฟอนต์จาก Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sarabun:wght@400;500&display=swap');
+/* นำเข้าไอคอนจาก Google Material Icons */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* กำหนดตัวแปรสีให้ตรงกับธีม Figma */
+:root {
+    --primary-color: #6366f1; /* สีม่วงอมฟ้า */
+    --primary-hover: #4f46e5;
+    --primary-muted: #e0e7ff; /* สีม่วงอ่อนสำหรับแท็บ inactive/ปุ่มรอง */
+    --bg-light: #f4f5f7;
+    --card-bg: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --text-active-tab: #ffffff;
+    --border-color: #e5e7eb;
+    --border-card: #d1d5db; /* ขอบการ์ดในดีไซน์ดั้งเดิม */
+    --status-submitted: #10b981; /* สีเขียว */
+    --pdf-red: #ef4444; /* สีแดงไอคอน PDF */
+    --icon-muted: #d1d5db; /* สีเทาไอคอน Feedback */
+}
+
+/* ตั้งค่าพื้นฐาน */
+body {
+    font-family: 'Inter', 'Sarabun', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    padding: 2rem;
+    margin: 0;
+}
+
+/* คลาสอรรถประโยชน์ */
+.max-w-6xl { max-width: 1152px; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mt-2 { margin-top: 8px; }
+.mt-6 { margin-top: 24px; }
+.mb-8 { margin-bottom: 32px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+
+/* ไอคอน */
+.icon {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.25rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+.icon-pdf {
+    color: var(--pdf-red);
+}
+
+/* =========================================
+   ส่วนของการ์ด (Card Style)
+========================================= */
+.assignment-card, .grading-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color); /* ปรับขอบให้เป็นตาม Figma */
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* ซ่อน Legend */
+legend {
+    display: none; 
+}
+
+/* จัด Typography */
+h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+}
+
+p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0 0 16px 0;
+}
+
+/* จัดส่วนหัวของการ์ด assignment */
+.header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    float: right; /* ดึงไปทางขวา */
+    margin-left: 24px;
+}
+
+.points-text {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+/* พรีวิวไฟล์ */
+.file-preview-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.file-preview-rect {
+    border: 1px solid var(--border-color);
+    background-color: #f1f3f5;
+    width: 150px;
+    height: 100px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 12px;
+}
+
+/* =========================================
+   ส่วนของตาราง (Table & Section)
+========================================= */
+/* Tabs */
+.tabs-container {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 24px;
+}
+
+.tab-item {
+    background: none;
+    border: none;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent; /* เตรียมเส้นขอบล่าง */
+}
+
+/* แท็บที่เลือก (Active Tab) ปรับให้เหมือน Figma */
+.tab-item.active {
+    background-color: var(--primary-color);
+    color: var(--text-active-tab);
+    border-radius: 12px 12px 0 0; /* มุมโค้งมนด้านบน */
+    border-bottom: 3px solid var(--primary-color); /* เส้นขอบล่างสีม่วง */
+    margin-bottom: -2px; /* ดึงเส้นทับเส้นขอบล่าง */
+}
+
+.tab-item:hover:not(.active) {
+    color: var(--primary-color);
+    background-color: #f8fafc;
+}
+
+/* ตารางข้อมูล */
+.grading-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    background-color: var(--card-bg);
+}
+
+.grading-table th {
+    text-align: left;
+    padding: 16px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #f9fafb; /* พื้นหลังหัวตารางสีเทาอ่อนมาก */
+}
+
+.grading-table td {
+    padding: 16px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+/* แถวสลับสี (Zebra stripe) */
+.grading-table tbody tr.table-row:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* สถานะ Submitted (สีเขียวพร้อมจุด) */
+.status-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.status-cell.submitted {
+    color: var(--status-submitted);
+}
+
+.status-cell.submitted::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--status-submitted);
+    border-radius: 50%;
+}
+
+/* ช่อง Input คะแนนในตาราง */
+.grade-input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    text-align: center;
+    outline: none;
+}
+
+.grade-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+/* ปุ่มและไอคอนอรรถประโยชน์ */
+.file-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: background 0.2s;
+    font-size: 0.8rem;
+}
+
+.file-btn:hover {
+    background-color: var(--bg-light);
+}
+
+.feedback-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--icon-muted);
+    font-size: 1.25rem;
+    transition: color 0.2s;
+}
+
+.feedback-btn:hover {
+    color: var(--primary-color);
+}
+
+/* ช่อง Search */
+.search-bar-group {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.search-bar-group input[type="search"] {
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    width: 250px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.search-bar-group input[type="search"]:focus {
+    border-color: var(--primary-color);
+}
+
+/* ปุ่ม Save Grades / Download */
+.bottom-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--primary-muted);
+    color: var(--primary-color);
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #d1dcff;
+}
+
+.btn-outline {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.btn-outline:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
