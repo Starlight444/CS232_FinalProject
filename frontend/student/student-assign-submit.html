@@ -47,13 +47,14 @@
             <section class="assign-section">
                 <h2 class="section-label">งานของฉัน</h2>
                 <div class="work-box">
-                    <div class="work-files">
+                    <div class="work-files" id="work-files">
                         <!-- Uploaded files appear here -->
                     </div>
                     <!-- Add file button -->
-                    <label class="add-file-btn">
+                    <label class="add-file-btn" for="file-input" title="Add file">
                         <i class="fa-solid fa-plus"></i>
                     </label>
+                    <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.zip" hidden />
                 </div>
             </section>
 
@@ -61,7 +62,7 @@
 
         <!-- Submit bar -->
         <div class="submit-bar">
-            <button class="submit-btn">Submit</button>
+            <button class="submit-btn" id="submit-btn">Submit</button>
         </div>
     </main>
 
