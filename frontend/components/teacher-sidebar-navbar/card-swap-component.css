@@ -1,0 +1,189 @@
+/* =========================================
+   ส่วนของการ์ด (Card Style)
+========================================= */
+.assignment-card, .grading-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color, #E0E0E0); /* ใส่ Fallback ไว้เผื่อไม่มีตัวแปร */
+    border-radius: 12px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* ซ่อน Legend */
+legend {
+    display: none; 
+}
+
+/* จัด Typography */
+h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--black); /* ใช้สีดำตาม root ใหม่ */
+}
+
+h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+    color: var(--black);
+}
+
+p {
+    color: var(--text-main); /* ใช้ text-main ตาม root ใหม่ */
+    font-size: 0.9rem;
+    margin: 0 0 16px 0;
+}
+
+/* จัดส่วนหัวของการ์ด assignment */
+.header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    float: right; /* ดึงไปทางขวา */
+    margin-left: 24px;
+}
+
+.button-group {
+    gap: 10px;
+    display:flex;
+}
+
+.points-text {
+    font-size: 1rem;
+    color: var(--text-muted); /* เปลี่ยนเป็น text-muted ให้ดูรองลงมานิดนึง */
+}
+
+/* พรีวิวไฟล์ */
+.file-preview-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.file-preview-rect {
+    border: 1px solid var(--border-color, #E0E0E0);
+    background-color: var(--bg-body); /* ใช้ bg-body แทนสีเทาแข็งๆ */
+    width: 150px;
+    height: 100px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 12px;
+}
+
+/* =========================================
+   ส่วนของตาราง (Table & Section)
+========================================= */
+/* Tabs */
+.tabs-container {
+    display: flex;
+    border-bottom: 2px solid var(--border-color, #E0E0E0);
+    margin-bottom: 24px;
+}
+
+.tab-item {
+    background: none;
+    border: none;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent; 
+}
+
+/* แท็บที่เลือก (Active Tab) ปรับให้เหมือน Figma (สีม่วงทึบ) */
+.tab-item.active {
+    background-color: var(--primary); /* ใช้ม่วงหลัก */
+    color: var(--white); /* ตัวหนังสือขาว */
+    border-radius: 12px 12px 0 0; 
+    border-bottom: none; 
+}
+
+.tab-item:hover:not(.active) {
+    color: var(--primary);
+    background-color: var(--bg-body);
+}
+
+/* ตารางข้อมูล */
+.grading-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    background-color: var(--white);
+}
+
+.grading-table th {
+    text-align: left;
+    padding: 16px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color, #E0E0E0);
+    background-color: var(--bg-body); 
+}
+
+.grading-table td {
+    padding: 16px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color, #E0E0E0);
+    vertical-align: middle;
+}
+
+/* แถวสลับสี (Zebra stripe) */
+.grading-table tbody tr.table-row:nth-child(even) {
+    background-color: var(--bg-body);
+}
+
+/* สถานะ (Status Cell) */
+.status-cell {
+    align-items: center; 
+    height: 100%; 
+    white-space: nowrap; 
+}
+
+/* ดึงสี Positive จาก root มาใช้กับ Submitted */
+.status-cell.submitted {
+    color: var(--green-positive);
+}
+
+/* ซ่อนจุดกลมๆ ไว้ก่อนตามที่เคยคุยกัน แต่ถ้าจะใช้ก็อ้างอิงสีเขียวใหม่ได้เลย */
+.status-cell.submitted::before {
+    content: "";
+    flex-shrink: 0; 
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--green-positive); 
+    display: none !important;
+}
+
+/* ช่อง Input คะแนนในตาราง */
+.grade-input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid var(--border-color, #E0E0E0);
+    border-radius: 6px;
+    text-align: center;
+    outline: none;
+}
+
+.grade-input:focus {
+    border-color: var(--primary); /* ใช้ม่วงหลักเวลาโฟกัส */
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* จัดตำแหน่งปุ่มล่างสุด (ตัวปุ่มเองไปดึงสไตล์จาก components.css นะ) */
+.bottom-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
