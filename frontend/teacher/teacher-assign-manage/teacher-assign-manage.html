@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS232 - Assignment Grading</title>
     <link rel="stylesheet" href="teacher-assign-manage.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/card-swap-component.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/all.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/buttons.css">
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 </head>
 
@@ -19,29 +22,34 @@
             <div class="header-actions">
                 <div class="button-group">
                     <button class="btn btn-outline">
-                        <span class="icon">edit</span> Edit
+                        <iconify-icon icon="material-symbols:edit-outline-rounded" width="20"
+                            height="20"></iconify-icon> Edit
                     </button>
                     <button class="btn btn-outline btn-outline-danger">
-                        <span class="icon">delete</span>
+                        <iconify-icon icon="tabler:trash" width="24" height="24"></iconify-icon>
                     </button>
                 </div>
-                <div class="points-text mt-2">100 Points</div>
+                <div class="points-text mt-2" id="display-points">- Points</div>
             </div>
 
             <div class="assignment-details">
-                <h1>&lt;Assignment Title&gt;</h1>
-                <p>Due date on WE 11 Mar 26, 11:59 PM</p>
-
+                <h1 id="display-title">Loading Title...</h1>
+                <p id="display-due-date">Loading date...</p>
                 <h2>คำสั่ง</h2>
-                <p>ยายมอยขายหมี ยายมีขายหอย หมีบอยยายแหย่หอยยายมี หอยยายมีกัดหมีบอยยายมอย</p>
+                <p id="display-instructions">Loading instructions...</p>
+
+                <h2>Supported Formats</h2>
+                <div id="display-allowed-formats" class="format-badges-group">
+                </div>
 
                 <h2>File</h2>
                 <div class="file-preview-group mt-2">
                     <div class="file-preview-rect">
-                        <p>File Preview (Image/Icon)</p>
+                        <p>PDF Document<br><span style="font-size: 0.75rem;" id="display-file-size">-</span></p>
                     </div>
                     <button class="file-btn" type="button">
-                        <span class="icon icon-pdf">picture_as_pdf</span> assign_01.pdf
+                        <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
+                        <span id="display-file-name">loading_file.pdf</span>
                     </button>
                 </div>
             </div>
@@ -58,55 +66,67 @@
                 <button class="tab-item" type="button">Missing</button>
             </div>
 
-            <div class="grading-content">
-                <div class="search-bar-group">
+            <div class="search-bar-group">
+                <div class="search-wrapper">
+                    <iconify-icon icon="jam:search" class="search-icon" width="20" height="20"></iconify-icon>
+
                     <input type="search" placeholder="Search">
                 </div>
+            </div>
 
-                <br>
+            <br>
 
-                <table class="grading-table">
-                    <thead>
-                        <tr>
-                            <th>Students ID</th>
-                            <th>Students Name</th>
-                            <th>Turn in Date</th>
-                            <th>Status</th>
-                            <th>Submissions</th>
-                            <th>Grade</th>
-                            <th>Feedback</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="table-row">
-                            <td>67091111111</td>
-                            <td>นางสาวขวัญใจ เมืองน่าน</td>
-                            <td>12 Feb 2026</td>
-                            <td class="status-cell submitted"><iconify-icon icon="MynauiFileXSolid"></iconify-icon>Submitted</td>
-                            <td><button class="file-btn" type="button">
+            <table class="grading-table">
+                <thead>
+                    <tr>
+                        <th>Students ID</th>
+                        <th>Students Name</th>
+                        <th>Turn in Date</th>
+                        <th>Status</th>
+                        <th>Submissions</th>
+                        <th>Grade</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-row">
+                        <td>67091111111</td>
+                        <td>นางสาวขวัญใจ เมืองน่าน</td>
+                        <td>12 Feb 2026</td>
+                        <td class="status-cell submitted"><iconify-icon icon="MynauiFileXSolid"></iconify-icon>Submitted
+                        </td>
+                        <td><button class="file-btn" type="button">
                                 <span class="icon icon-pdf">picture_as_pdf</span> assign_01.pdf
                             </button></td>
-                            <td><input type="text" class="grade-input" size="3"></td>
-                            <td align="center"><button class="feedback-btn" type="button">💬</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <td><input type="text" class="grade-input" size="3"></td>
+                        <td align="center"><button class="feedback-btn" type="button">💬</button></td>
+                    </tr>
+                </tbody>
+            </table>
 
-                <br>
+            <br>
+            <div class="bottom-actions mt-6"
+                style="display: flex; justify-content: space-between; align-items: center;">
 
-                <div class="bottom-actions mt-6">
-                    <button class="btn btn-secondary flex items-center gap-2">
-                        <span class="icon">download</span> Download All Submissions
+                <button class="btn btn-secondary flex items-center gap-2">
+                    <iconify-icon icon="material-symbols:download" width="20" height="20"></iconify-icon>
+                    Download All Submissions
+                </button>
+
+                <div class="button-group" style="display: flex; gap: 10px;">
+                    <button class="btn btn-outline" id="edit-grades-btn">
+                        <iconify-icon icon="material-symbols:edit-outline-rounded" width="20"
+                            height="20"></iconify-icon>Edit
                     </button>
                     <button class="btn btn-primary">
                         Save Grades
                     </button>
                 </div>
+
             </div>
+
         </fieldset>
-
     </div>
-
     <script src="teacher-assign-manage.js"></script>
 
 </body>
