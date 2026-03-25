@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: 60px;
+    flex: 1;
+    padding: 40px;
+    transition: margin-left var(--transition);
+    background: #fff;
+    min-height: 100vh;
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* main page*/
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #4b3b8c;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search */
+.search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid #ddd;
+    border-radius: 30px;
+    padding: 7px 16px;
+    width: 220px;
+    transition: border-color 0.2s;
+}
+
+.search-wrap:focus-within {
+    border-color: #7c6fc4;
+}
+
+.search-wrap iconify-icon {
+    color: #bbb;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: #bbb;
+}
+
+/* Sort Newest Closest*/
+.sort-group {
+    display: flex;
+    gap: 8px;
+}
+
+.sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    border-radius: 30px;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.sort-btn.active {
+    background: #5b4fcf;
+    border-color: #5b4fcf;
+    color: #fff;
+}
+
+.sort-btn:not(.active):hover {
+    border-color: #5b4fcf;
+    color: #5b4fcf;
+}
+
+/* Filter button */
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+    padding: 7px 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    margin-left: auto;
+}
+
+.filter-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
