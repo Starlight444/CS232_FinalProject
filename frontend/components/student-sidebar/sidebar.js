@@ -70,3 +70,7 @@ document.querySelectorAll('.sub-link').forEach(link => {
         setActiveLink(courseBtn);
     });
 });
+toggleBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed");
+    document.body.classList.toggle("sidebar-collapsed");
+});

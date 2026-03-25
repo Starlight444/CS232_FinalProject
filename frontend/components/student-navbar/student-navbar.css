@@ -20,7 +20,7 @@
     transition: left var(--transition);
 }
 
-.sidebar.collapsed~.navbar {
+body.sidebar-collapsed .navbar {
     left: var(--sidebar-collapsed-width);
 }
 
