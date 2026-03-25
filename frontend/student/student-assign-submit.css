@@ -157,6 +157,22 @@ body.sidebar-collapsed .main-content {
     object-fit: cover;
 }
 
+/*Delete button*/
+.remove-file {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
 /*Submit button*/
 .submit-bar {
     margin-top: 20px;
@@ -177,4 +193,20 @@ body.sidebar-collapsed .main-content {
 
 .submit-btn:hover {
     opacity: 0.9;
+}
+
+.submit-btn.submitted {
+    background: #aeacf5;
+    cursor: pointer;
+}
+
+.submit-btn.submitted:hover {
+    background: #6E6CDF;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+}
+
+.submit-timestamp {
+    font-size: 12px;
+    margin-top: 5px;
+
 }
