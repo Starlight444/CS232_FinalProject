@@ -127,3 +127,45 @@ body.sidebar-collapsed .main-content {
 .filter-btn:hover {
     background: rgba(0, 0, 0, 0.06);
 }
+
+/*Tabs*/
+.tabs-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e0e0ec;
+    border-bottom: none;
+    padding: 0;
+    gap: 0;
+}
+
+.tab-btn {
+    padding: 13px 8px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tab-btn[data-tab="due-today"] {
+    color: #CF2D2D;
+}
+
+.tab-btn[data-tab="complete"] {
+    color: #2C9536;
+}
+
+.tab-btn.active {
+    background: #6E6CDF;
+    color: #fff;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.03);
+}
