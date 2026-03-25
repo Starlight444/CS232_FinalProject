@@ -23,8 +23,10 @@ fetch('../components/student-navbar/student-navbar.html')
 // main content
 const fileInput = document.getElementById('file-input');
 const workFiles = document.getElementById('work-files');
+const submitBtn = document.getElementById('submit-btn');
 
 let uploadedFiles = [];
+let isSubmitted = false;
 
 // file selection
 fileInput.addEventListener('change', (e) => {
@@ -53,6 +55,16 @@ function addFileCard(file) {
         thumb.innerHTML = `<i class="fa-solid fa-file-lines" style="font-size: 40px; color: #aaa;"></i>`;
     }
 
+    // remove file button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-file';
+    removeBtn.innerHTML = '✕';
+    removeBtn.addEventListener('click', () => {
+        uploadedFiles = uploadedFiles.filter(f => f !== file);
+        item.remove();
+    });
+    thumb.appendChild(removeBtn);
+
     // show file name
     const nameRow = document.createElement('div');
     nameRow.className = 'file-name';
@@ -62,3 +74,65 @@ function addFileCard(file) {
     item.appendChild(nameRow);
     workFiles.appendChild(item);
 }
+// timestamp
+function formatTimestamp(date) {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${days[date.getDay()]} ${String(date.getDate()).padStart(2, '0')} ${months[date.getMonth()]} ${String(date.getFullYear()).slice(-2)}, ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+// lock/unlock upload
+function lockWorkBox(locked) {
+    const addBtn = document.querySelector('.add-file-btn');
+    const removeButtons = workFiles.querySelectorAll('.remove-file');
+    if (locked) {
+        addBtn.style.pointerEvents = 'none';
+        addBtn.style.opacity = '0.5';
+        removeButtons.forEach(b => b.style.display = 'none');
+    } else {
+        addBtn.style.pointerEvents = '';
+        addBtn.style.opacity = '';
+        removeButtons.forEach(b => b.style.display = 'flex');
+    }
+}
+
+// submit button
+submitBtn.addEventListener('click', () => {
+    // Edit Submission
+    if (isSubmitted) {
+        if (confirm('Do you want to edit your submission? This will allow you to change files.')) {
+            isSubmitted = false;
+
+            submitBtn.textContent = 'Submit';
+            submitBtn.classList.remove('submitted');
+
+            lockWorkBox(false);
+
+            //Timestamp
+            const stamp = document.querySelector('.submit-timestamp');
+            if (stamp) stamp.remove();
+        }
+        return;
+    }
+
+    // Submit ครั้งแรก
+    if (uploadedFiles.length === 0) {
+        alert('Please upload at least one file before submitting.');
+        return;
+    }
+
+    isSubmitted = true;
+    submitBtn.textContent = 'Edit Submission';
+    submitBtn.classList.add('submitted');
+
+    lockWorkBox(true);
+
+    // Timestamp 
+    const bar = submitBtn.parentElement;
+    if (!document.querySelector('.submit-timestamp')) {
+        const stamp = document.createElement('p');
+        stamp.className = 'submit-timestamp';
+        stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
+        bar.appendChild(stamp);
+    }
+});
