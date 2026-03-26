@@ -62,6 +62,27 @@ const assignList = document.getElementById('assignment-list');
 const emptyMsg = document.getElementById('empty-msg');
 const searchInput = document.getElementById('search-input');
 
+//update assignment container radius
+function updateContainerRadius() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const container = document.querySelector('.assignment-container');
+    if (!container) return;
+    const total = tabs.length;
+
+    tabs.forEach((tab, i) => {
+        if (tab.classList.contains('active')) {
+            const isFirst = i === 0;
+            const isLast = i === total - 1;
+            container.style.borderRadius = [
+                isFirst ? '0' : '12px',   // top-left
+                isLast ? '0' : '12px',   // top-right
+                '12px',                      // bottom-right
+                '12px'                       // bottom-left
+            ].join(' ');
+        }
+    });
+}
+
 function formatDueLabel(a) {
     if (a.status === 'due-today') {
         const mins = a.minutesLeft;
@@ -144,6 +165,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.add('active');
         activeTab = btn.dataset.tab;
         render();
+        updateContainerRadius();
     });
 });
 
@@ -165,3 +187,4 @@ searchInput.addEventListener('input', (e) => {
 
 
 render();
+updateContainerRadius();
