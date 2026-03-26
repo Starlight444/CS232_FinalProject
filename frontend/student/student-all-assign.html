@@ -35,11 +35,19 @@
                         <iconify-icon icon="grommet-icons:link-down" width="15" height="15"></iconify-icon>
                     </button>
                 </div>
-                <button class="filter-btn" id="filter-btn">
-                    <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon> Filter
-                    <iconify-icon icon="icon-park-outline:down" width="15" height="15"></iconify-icon>
-
-                </button>
+                <div class="filter-wrap">
+                    <button class="filter-btn" id="filter-btn">
+                        <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon> Filter
+                        <iconify-icon icon="icon-park-outline:down" width="15" height="15"></iconify-icon>
+                    </button>
+                    <div class="filter-dropdown" id="filter-dropdown">
+                        <button class="filter-option active" data-class="all">All</button>
+                        <button class="filter-option" data-class="CS222">CS222</button>
+                        <button class="filter-option" data-class="CS232">CS232</button>
+                        <button class="filter-option" data-class="CS242">CS242</button>
+                        <button class="filter-option" data-class="CS252">CS252</button>
+                    </div>
+                </div>
             </div>
         </header>
 

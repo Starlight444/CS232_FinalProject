@@ -107,6 +107,10 @@ body.sidebar-collapsed .main-content {
 }
 
 /* Filter button */
+.filter-wrap {
+    position: relative;
+}
+
 .filter-btn {
     display: flex;
     align-items: center;
@@ -121,10 +125,64 @@ body.sidebar-collapsed .main-content {
     border-radius: 8px;
     transition: background 0.2s;
     margin-left: auto;
+    white-space: nowrap;
 }
 
 .filter-btn:hover {
     background: rgba(0, 0, 0, 0.06);
+}
+
+#filter-chevron {
+    transition: transform 0.2s;
+}
+
+.filter-wrap.open #filter-chevron {
+    transform: rotate(180deg);
+    /* ลูกศรกลับทิศเมื่อเปิด */
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+    min-width: 140px;
+    display: none;
+    /* ซ่อนไว้ก่อน */
+    flex-direction: column;
+    gap: 4px;
+    z-index: 100;
+}
+
+.filter-wrap.open .filter-dropdown {
+    display: flex;
+    /* แสดงเมื่อ open */
+}
+
+.filter-option {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.filter-option:hover:not(.active) {
+    background: #f0f0f7;
+}
+
+.filter-option.active {
+    background: #6E6CDF;
+    color: #fff;
 }
 
 /*Tabs*/

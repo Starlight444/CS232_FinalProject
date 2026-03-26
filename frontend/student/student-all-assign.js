@@ -118,6 +118,10 @@ function rightContent(a) {
 // Render 
 function render() {
     let list = ASSIGNMENTS.filter(a => a.status === activeTab);
+    // Filter by class
+    if (activeFilter !== 'all') {
+        list = list.filter(a => a.className === activeFilter);
+    }
     // Search
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
@@ -185,6 +189,35 @@ searchInput.addEventListener('input', (e) => {
     render();
 });
 
+// Filter 
+let activeFilter = 'all';
+
+const filterBtn = document.getElementById('filter-btn');
+const filterDropdown = document.getElementById('filter-dropdown');
+const filterWrap = filterBtn.closest('.filter-wrap');
+
+// dropdown
+filterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    filterWrap.classList.toggle('open');
+});
+
+// ปิดdropdown
+document.addEventListener('click', () => {
+    filterWrap.classList.remove('open');
+});
+
+filterDropdown.addEventListener('click', e => e.stopPropagation());
+
+document.querySelectorAll('.filter-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.class;
+        filterWrap.classList.remove('open');
+        render();
+    });
+});
 
 render();
 updateContainerRadius();
