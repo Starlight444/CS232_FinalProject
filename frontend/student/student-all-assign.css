@@ -180,3 +180,116 @@ body.sidebar-collapsed .main-content {
     border-radius: 8px;
     border: 1px solid #6E6CDF;
 }
+
+.assignment-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.assignment-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f5;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.assignment-item:last-child {
+    border-bottom: none;
+}
+
+.assignment-item:hover {
+    background: #f8f8fd;
+    border-radius: 10px;
+}
+
+.assign-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #bbb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.assign-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.assign-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.assign-due-label {
+    font-size: 12px;
+    font-weight: 400;
+    margin-bottom: 2px;
+}
+
+/* due today / overdue */
+.due-urgent {
+    color: #e53935;
+}
+
+/* upcoming */
+.due-normal {
+    color: #544646;
+}
+
+/* complete */
+.due-done {
+    color: #888;
+}
+
+.assign-class {
+    font-size: 12px;
+    font-weight: 400;
+    color: #888;
+}
+
+/* Points / icons right */
+.assign-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.assign-points-label {
+    font-size: 10px;
+    font-weight: 400;
+    color: #888;
+}
+
+
+
+/* Ban icon (not submitted in complete) */
+.ban-icon {
+    color: #bbb;
+}
+
+/* ===== Empty ===== */
+.empty-msg {
+    text-align: center;
+    padding: 48px 20px;
+    color: #aaa;
+    font-size: 0.9rem;
+}
