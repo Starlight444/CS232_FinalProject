@@ -68,7 +68,7 @@ body.sidebar-collapsed .sidebar {
     transition: opacity 0.3s ease;
 }
 
-.sidebar.collapsed .brand {
+body.sidebar-collapsed .brand {
     opacity: 0;
 }
 
