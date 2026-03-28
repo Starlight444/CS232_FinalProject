@@ -68,7 +68,7 @@ body.sidebar-collapsed .sidebar {
     transition: opacity 0.3s ease;
 }
 
-.sidebar.collapsed .brand {
+body.sidebar-collapsed .brand {
     opacity: 0;
 }
 
@@ -129,7 +129,7 @@ body.sidebar-collapsed .nav-item {
     width: 50px;
 }
 
-.sidebar.collapsed .nav-list {
+body.sidebar-collapsed .nav-list {
     margin-top: 20px;
 }
 
