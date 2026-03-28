@@ -40,13 +40,20 @@ const BASE_URL = 'http://localhost:3000';
 //const TOKEN = userData ? userData.token : '';
 const TOKEN = 'test-token'; // เป็นแบบนี้ชั่วคราวเพื่อเช็คว่า API เชื่อมติดไหม
 
-const assignmentId = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
+const urlParams = new URLSearchParams(window.location.search);
+const assignment_Id = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
+
+// ตรวจสอบ ID ก่อนเริ่มทำงาน
+if (!assignment_Id) {
+    console.error("No assignment ID found"); // ตรงกับ Error ในภาพ
+    alert("ไม่พบรหัสการบ้าน กรุณากลับไปเลือกการบ้านใหม่อีกครั้ง");
+}
 
 // ฟังก์ชันดึงข้อมูลการบ้านมาโชว์ 
 async function fetchAssignmentDetail() {
-    if (!assignmentId) return console.error("No assignment ID found");
+    if (!assignment_Id) return console.error("No assignment ID found");
     try {
-        const response = await fetch(`${BASE_URL}/assignments/${assignmentId}`, {
+        const response = await fetch(`${BASE_URL}/assignments/${assignment_Id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${TOKEN}`,
@@ -62,13 +69,66 @@ async function fetchAssignmentDetail() {
             document.querySelector('.section-body').textContent = data.description;
             document.querySelector('.assign-points').textContent = `${data.max_score} Points`;
 
-
+            // ตรวจสอบว่าเคยส่งงานนี้ไปหรือยัง (ถ้ามี API Get Submission)
+            checkCurrentSubmission();
         }
     } catch (err) {
         console.error("Fetch Assignment Error:", err);
     }
 }
 
+// api : submission
+async function handleSubmission() {
+    if (uploadedFiles.length === 0) {
+        alert('Please upload at least one file before submitting.');
+        return;
+    }
+
+    try {
+        // เปลี่ยนสถานะปุ่มเป็น Loading
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Uploading...';
+
+        // Upload File 
+        const formData = new FormData();
+        if (uploadedFiles.length > 0) {
+            formData.append('file', uploadedFiles[0]);
+            formData.append('assignment_id', assignmentId);
+        }
+
+        const uploadRes = await fetch(`${BASE_URL}/attachments`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${TOKEN}` },
+            body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (!uploadData.success) throw new Error("Upload Failed");
+
+        const fileUrl = uploadData.data.file_url;
+
+        // api : submit assihnment 
+        const submitRes = await fetch(`${BASE_URL}/assignments/${assignmentId}/submit`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ file_url: fileUrl })
+        });
+        const submitData = await submitRes.json();
+
+        if (submitData.success) {
+            isSubmitted = true;
+            updateUISubmitted();
+            alert("ส่งงานสำเร็จเรียบร้อย!");
+        }
+    } catch (err) {
+        console.error("Submit Error:", err);
+        alert("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
+    } finally {
+        submitBtn.disabled = false;
+    }
+}
 // เรียกทำงานทันทีที่โหลดหน้า
 fetchAssignmentDetail();
 
@@ -156,20 +216,16 @@ submitBtn.addEventListener('click', () => {
             const stamp = document.querySelector('.submit-timestamp');
             if (stamp) stamp.remove();
         }
-        return;
+    } else {
+        handleSubmission();
     }
 
-    // Submit ครั้งแรก
-    if (uploadedFiles.length === 0) {
-        alert('Please upload at least one file before submitting.');
-        return;
-    }
 
-    isSubmitted = true;
+    /*isSubmitted = true;
     submitBtn.textContent = 'Edit Submission';
     submitBtn.classList.add('submitted');
 
-    lockWorkBox(true);
+    lockWorkBox(true);*/
 
     // Timestamp 
     const bar = submitBtn.parentElement;
