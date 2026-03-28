@@ -1,0 +1,197 @@
+/* =========================================
+   ระบบปุ่มของ CS232 (Button System)
+   * คำเตือน: ต้อง Link ไฟล์ card-swap-component.css ก่อนเรียกใช้ไฟล์นี้นะคะ
+========================================= */
+
+/* 1. โครงสร้างพื้นฐานของปุ่ม (Base Button) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* ระยะห่างระหว่าง Icon กับตัวหนังสือ */
+    padding: 10px 24px;
+    border-radius: 200px; /* ความโค้งมนตามแบบ Figma */
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+/* 2. Primary Button (ปุ่มหลักสีม่วง เช่น Save Grades) */
+.btn-primary {
+    background-color: var(--primary-light);
+    color: var(--white);
+    box-shadow:  2px 4px 5px rgba(110, 108, 223, 0.2);
+}
+.btn-primary:hover {
+    background-color: var(--primary);
+    box-shadow: 4px 4px 8px rgba(110, 108, 223, 0.4);
+    transform: translateY(-1px); /* ลูกเล่นขยับขึ้นนิดนึงเวลากด */
+}
+
+/* 3. Secondary Button (ปุ่มรองสีม่วงอ่อน เช่น Download All) */
+.btn-secondary {
+    border-color: var(--primary-light); 
+    color: var(--primary); 
+    background-color: var(--white);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-light);
+    color: var(--white); 
+}
+
+/* ทำให้ไอคอนเปลี่ยนสีตามตัวอักษรเวลากด Hover */
+.btn-secondary iconify-icon,
+.btn-secondary:hover iconify-icon {
+    transition: color 0.2s ease;
+}
+
+/* 4. Outline Button (ปุ่มขอบใส เช่น Edit) */
+.btn-outline {
+    background-color: var(--white);
+    border-color: var(--border-color, #E0E0E0);
+    color: var(--text-main);
+}
+.btn-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background-color: #F4F3FF; /* ม่วงอ่อนมากๆ สำหรับโฮเวอร์ */
+}
+
+/* 5. Danger Button (ปุ่มอันตรายขอบแดง เช่น Delete) */
+.btn-outline-danger {
+    background-color: var(--white);
+    border-color: var(--border-color, #E0E0E0);
+    color: var(--text-muted);
+}
+.btn-outline-danger:hover {
+    border-color: var(--red-negative);
+    color: var(--red-negative);
+    background-color: var(--red-bg);
+}
+
+/* 6. Disabled Button (ปุ่มที่ถูกล็อค กดไม่ได้) */
+.btn:disabled, .btn.disabled {
+    background-color: var(--bg-body);
+    color: var(--text-muted);
+    border-color: var(--border-color, #E0E0E0);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* 7. Action Icon Button (ปุ่มที่มีแต่ Icon ล้วนๆ ไม่มีข้อความ) */
+.btn-icon-only {
+    padding: 8px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-icon-only:hover {
+    background-color: var(--bg-body);
+    color: var(--primary);
+}
+
+/* ปุ่มแนบไฟล์ในตาราง */
+/* =========================================
+   File Attachment Component (ส่วนแสดงไฟล์แนบ)
+========================================= */
+.file-preview-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 8px;
+}
+
+/* กล่องพรีวิวไฟล์ (รูปภาพจำลองเอกสาร) */
+.file-preview-rect {
+    width: 160px;
+    height: 100px;
+    background-color: var(--bg-body);
+    border: 1px dashed var(--border-color, #E0E0E0); /* ใช้ขอบประให้ดูเป็นพื้นที่ไฟล์ */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+/* ปุ่มชื่อไฟล์ (โค้ดที่คนสวยเขียน พี่ปรับให้เนียนเข้ากับระบบสีค่ะ) */
+.file-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--white);
+    border: 1px solid var(--border-color, #E0E0E0); /* เปลี่ยนมาใช้สีขอบมาตรฐาน */
+    padding: 6px 12px;
+    border-radius: 8px; /* ปรับความมนให้เข้ากับกล่องพรีวิว */
+    cursor: pointer;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* เอฟเฟกต์ตอนเอาเมาส์วาง (Hover) ให้ขอบและตัวหนังสือเป็นสีม่วง */
+.file-btn:hover {
+    background-color: var(--bg-body);
+    border-color: var(--primary); 
+    color: var(--primary);
+}
+
+/* ปุ่ม Feedback */
+.feedback-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted); /* เปลี่ยนจาก var(--icon-muted) */
+    font-size: 1.25rem;
+    transition: color 0.2s;
+}
+
+.feedback-btn:hover {
+    color: var(--primary);
+}
+
+/* ช่อง Search */
+/* กล่องห่อหุ้ม ให้เป็นจุดอ้างอิงตำแหน่ง (Relative) */
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* จัดตำแหน่งไอคอนให้ลอยอยู่ข้างใน (Absolute) */
+.search-icon {
+    position: absolute;
+    left: 12px; /* ขยับจากขอบซ้ายเข้ามา 12px */
+    color: var(--text-muted); /* ให้ไอคอนเป็นสีเทากลืนๆ ไปกับช่อง */
+    pointer-events: none; /* 💡 ทริคสำคัญ: ป้องกันไม่ให้คลิกโดนไอคอน เพื่อให้คลิกแล้วพิมพ์ได้เสมอ */
+}
+
+/* ปรับช่อง Input ให้หลบไอคอน */
+.search-bar-group input[type="search"] {
+    /* บน ขวา ล่าง ซ้าย(เพิ่มช่องว่างฝั่งซ้ายเป็น 36px ให้หลบไอคอน) */
+    padding: 10px 16px 10px 36px; 
+    border: 1px solid var(--border-color, #E0E0E0);
+    border-radius: 20px;
+    width: 250px;
+    outline: none;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.search-bar-group input[type="search"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light); /* เพิ่มเงาสีม่วงอ่อนตอนคลิกพิมพ์ */
+}
