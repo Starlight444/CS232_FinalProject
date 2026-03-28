@@ -1,0 +1,235 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; /* แก้ responsive ด้วยเด้อ*/
+}
+
+.page-bg {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.main-card {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  background: #fff;
+  overflow: hidden;
+}
+
+.left-panel {
+  flex: 0 0 50%;
+  height: 100vh;
+  background: linear-gradient(160deg, #e8eaf6 0%, #c5cae9 50%, #9fa8da 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative; /* glass-box อ้างอิง position จาก left-panel */
+}
+
+.glass-box {
+  position: absolute;
+  inset: 35% 20%;  /* ยืด/หดตาม panel */
+  background: rgba(110, 108, 223, 0.1);
+  backdrop-filter: blur(10px);         
+  -webkit-backdrop-filter: blur(10px);  
+  border-radius: 28px;
+  border: 2px solid #6E6CDF;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding-right: 5%;
+  overflow: hidden;
+}
+
+.tu-logo {
+  width: clamp(60px, 15vw, 200px); /* ยืดหดตาม glass-box */
+  height: auto;                    /* รักษา aspect ratio */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.cstu-logo {
+  font-size: clamp(1rem, 3vw, 3rem);
+}
+
+.right-panel {
+  flex: 0 0 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.dept-title {
+  width: max-content;
+  font-size: clamp(1rem, 2vw, 2rem);
+  color: #1a1a2e;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+.login-box {
+  background: #6c5ce7;
+  border-radius: 28px;
+  padding: 36px 40px;
+  width: 100%;
+  color: white;
+  box-shadow: 0 8px 40px rgba(108, 92, 231, 0.25);
+}
+
+.login-box h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 26px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 7px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+}
+
+.input-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap input {
+  padding-right: 40px !important;
+}
+
+.toggle-check {
+  display: none;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #adb5bd;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+/* eye icon */
+.mdi-light--eye {
+  display: none; /* ซ่อนไว้ก่อน */
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23C7D2D6' d='M11.5 18c4 0 7.46-2.22 9.24-5.5C18.96 9.22 15.5 7 11.5 7s-7.46 2.22-9.24 5.5C4.04 15.78 7.5 18 11.5 18m0-12c4.56 0 8.5 2.65 10.36 6.5C20 16.35 16.06 19 11.5 19S3 16.35 1.14 12.5C3 8.65 6.94 6 11.5 6m0 2C14 8 16 10 16 12.5S14 17 11.5 17S7 15 7 12.5S9 8 11.5 8m0 1A3.5 3.5 0 0 0 8 12.5a3.5 3.5 0 0 0 3.5 3.5a3.5 3.5 0 0 0 3.5-3.5A3.5 3.5 0 0 0 11.5 9'/%3E%3C/svg%3E");
+}
+
+.mdi-light--eye-off {
+  display: inline-block; /* แสดงตอนแรก */
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23C7D2D6' d='M2.54 4.71L3.25 4L20 20.75l-.71.71l-3.34-3.35c-1.37.57-2.87.89-4.45.89c-4.56 0-8.5-2.65-10.36-6.5c.97-2 2.49-3.67 4.36-4.82zM11.5 18c1.29 0 2.53-.23 3.67-.66l-1.12-1.13c-.73.5-1.6.79-2.55.79C9 17 7 15 7 12.5c0-.95.29-1.82.79-2.55L6.24 8.41a10.64 10.64 0 0 0-3.98 4.09C4.04 15.78 7.5 18 11.5 18m9.24-5.5C18.96 9.22 15.5 7 11.5 7c-1.15 0-2.27.19-3.31.53l-.78-.78C8.68 6.26 10.06 6 11.5 6c4.56 0 8.5 2.65 10.36 6.5a11.47 11.47 0 0 1-4.07 4.63l-.72-.73c1.53-.96 2.8-2.3 3.67-3.9M11.5 8C14 8 16 10 16 12.5c0 .82-.22 1.58-.6 2.24l-.74-.74c.22-.46.34-.96.34-1.5A3.5 3.5 0 0 0 11.5 9c-.54 0-1.04.12-1.5.34l-.74-.74c.66-.38 1.42-.6 2.24-.6M8 12.5a3.5 3.5 0 0 0 3.5 3.5c.67 0 1.29-.19 1.82-.5L8.5 10.68c-.31.53-.5 1.15-.5 1.82'/%3E%3C/svg%3E");
+}
+
+.material-symbols-outlined {
+  font-size: 20px;
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.forgot-link {
+  font-size: 16px;
+  color: white;
+  text-decoration: underline;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 13px;
+  background: #3d1f8e;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-btn:hover {
+  background: #2d1470;
+}
+
+.error-text {
+  color: #ffaaaa   ;
+  font-size: 16px;
+  margin-top: 10px;
+  text-align: center;
+  visibility: hidden; /* ซ่อนแต่ยังจองพื้นที่ไว้ */
+}
