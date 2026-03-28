@@ -33,7 +33,7 @@ async function handleLogin() {
         // data = { token, user_id, email, first_name, last_name, role }
 
         if (data.role === "teacher") {
-            window.location.href = "../teacher/dashboard.html";
+            window.location.href = "../teacher/teacher-dashboard.html";
         } else if (data.role === "student") {
             window.location.href = "../student/home.html";
         }

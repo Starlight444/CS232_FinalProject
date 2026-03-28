@@ -83,7 +83,7 @@ function changeWeek(days) {
 renderCalendar();
 
 // ── API ──
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:8000';
 // --- [MOCK FIELD] ---
 // /courses total_submitted_student
 // /courses total_std
