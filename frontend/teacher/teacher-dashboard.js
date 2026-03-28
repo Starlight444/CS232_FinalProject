@@ -1,9 +1,48 @@
-// ── Sidebar toggle ──
-document.getElementById('sidebarToggle').addEventListener('click', () => {
-  const sidebar = document.querySelector('.sidebar');
-  sidebar.classList.toggle('collapsed');
-  setTimeout(setBottomColumns, 320);
+document.addEventListener("DOMContentLoaded", function () {
+    loadTeacherSidebarNavbar();
 });
+
+function loadTeacherSidebarNavbar() {
+    fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+        .then(r => r.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const container = document.getElementById('teacher-sidebar-navbar-container');
+
+            const sidebar = doc.querySelector('#sidebar');
+            const navbar  = doc.querySelector('.navbar');
+            if (sidebar) container.appendChild(sidebar);
+            if (navbar)  container.appendChild(navbar);
+
+            // Load sidebar JS (toggle / collapse logic)
+            const sidebarScript = document.createElement('script');
+            sidebarScript.src = '../components/student-sidebar/sidebar.js';
+            document.body.appendChild(sidebarScript);
+
+            // Load navbar JS (profile dropdown)
+            const navbarScript = document.createElement('script');
+            navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
+            document.body.appendChild(navbarScript);
+
+            // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
+            // listens to `body.sidebar-collapsed` — sync them here
+            sidebarScript.onload = () => {
+                const sidebarEl = document.getElementById('sidebar');
+                if (sidebarEl) {
+                    new MutationObserver(() => {
+                        const collapsed = sidebarEl.classList.contains('collapsed');
+                        document.body.classList.toggle('sidebar-collapsed', collapsed);
+                        setBottomColumns();
+                    }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+                }
+            };
+        })
+        .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+}
+
+// Re-calculate on window resize too
+window.addEventListener('resize', setBottomColumns);
 
 // ── Calendar ──
 let currentViewDate = new Date();
@@ -51,6 +90,7 @@ const API_BASE_URL = 'http://localhost:3000';
 // total_assign
 // /courses/:course_id/assignments "submitted_count"
 
+
 // --- [DASHBOARD SUMMARY CARD: Courses, To Grade, and Missing] ---
 async function updateDashboardSummary() {
   try {
@@ -67,49 +107,53 @@ async function updateDashboardSummary() {
       // 2. เตรียมตัวแปรเพื่อคำนวณค่ารวม
       let grandTotalSubmitted = 0; 
       let grandTotalStudents = 0;
+      let totalMissing = 0;          
+      let coursesWithMissingCount = 0; 
 
       courses.forEach(course => {
         /** ⚠️ NOTE: ตรวจสอบชื่อฟิลด์จาก Backend อีกครั้งเมื่อของจริงมา
-         * เพื่อนบอกจะส่ง: total_submitted_student, total_std
          */
+        const stdInCourse = course.total_std || 0;
+        const submittedInCourse = course.total_submitted_student || 0;
+        const missingInCourse = Math.max(0, stdInCourse - submittedInCourse);
+
         grandTotalSubmitted += (course.total_submitted_student || 0);
         grandTotalStudents  += (course.total_std || 0);
-      });
 
-      // --- [Logic การคำนวณ] ---
-      const toGradeValue = grandTotalSubmitted; // ตามที่ตกลง: งานที่ส่งคือหน้างานที่ต้องตรวจ
-      const missingValue = Math.max(0, grandTotalStudents - grandTotalSubmitted); // ใครไม่ส่งคือ Missing
+        // ถ้าวิชานี้มีคนค้างส่ง (Missing > 0)
+        if (missingInCourse > 0) {
+          totalMissing += missingInCourse;
+          coursesWithMissingCount++;
+        }
+      });
       
       // --- [Update UI] ---
       
       // Card: To Grade
-      const toGradePct = grandTotalStudents > 0 ? Math.round((toGradeValue / grandTotalStudents) * 100) : 0;
-      document.getElementById('to-grade-count').innerText = toGradeValue;
+      const toGradePct = grandTotalStudents > 0 ? Math.round((grandTotalSubmitted / grandTotalStudents) * 100) : 0;
+      document.getElementById('to-grade-count').innerText = grandTotalSubmitted;
       document.getElementById('grading-progress-bar').style.width = `${toGradePct}%`;
       document.getElementById('grading-percentage').innerText = `${toGradePct}%`;
+      document.getElementById('course-count-label').innerText = `From ${courses.length} courses`;
 
       // Card: Missing
       const missingCountEl = document.getElementById('missing-count');
-      if (missingCountEl) missingCountEl.innerText = missingValue;
+      if (missingCountEl) missingCountEl.innerText = totalMissing;
 
-      const missingPct = grandTotalStudents > 0 ? Math.round((missingValue / grandTotalStudents) * 100) : 0;
+      const missingPct = grandTotalStudents > 0 ? Math.round((totalMissing / grandTotalStudents) * 100) : 0;
       const missingBar = document.getElementById('missing-progress-bar');
       if (missingBar) missingBar.style.width = `${missingPct}%`;
 
       const missingPctText = document.getElementById('missing-percentage');
       if (missingPctText) missingPctText.innerText = `${missingPct}%`;
 
-      // ข้อความระบุกจำนวนวิชาใต้เลข To Grade
-      document.getElementById('course-count-label').innerText = `From ${courses.length} courses`;
-
       const missingLabel = document.getElementById('missing-courses-label');
       if (missingLabel) {
-        missingLabel.innerText = `From ${grandTotalStudents} courses`;
+        missingLabel.innerText = `From ${coursesWithMissingCount} courses`; 
       }
     }
   } catch (error) {
     console.error('Could not load dashboard summary:', error);
-    // กรณี Error ให้ล้างค่าเป็น 0 หรือข้อความแจ้งเตือน
     if(document.getElementById('course-count-label')) 
       document.getElementById('course-count-label').innerText = 'Data unavailable';
   }
@@ -153,117 +197,121 @@ async function loadCourses() {
         `;
       });
 
-      // Set grid columns based on card count
       setBottomColumns();
     }
   } catch (error) {
     console.error('Error loading courses:', error);
-    // Fallback: still measure live width
     setBottomColumns();
   }
 }
 
+// ── Needs Grading — state ──
+let _gradingRows = [];   
+let _sortAsc     = true; 
+
 async function loadNeedsGrading() {
     try {
-        const courseRes = await fetch(`${API_BASE_URL}/courses`);
+        const courseRes    = await fetch(`${API_BASE_URL}/courses`);
         const courseResult = await courseRes.json();
-
         if (!courseResult.success) return;
 
-        const tableBody = document.getElementById('grading-table-body');
-        const badgeNum = document.getElementById('badge-num'); // ใช้ ID ให้ตรงกับ HTML
-
-        // เช็คว่ามี Element ไหมก่อนสั่งล้างค่า
-        if (tableBody) tableBody.innerHTML = ''; 
-        
-        let totalItems = 0;
         const now = new Date();
+        _gradingRows = [];
 
-        // --- เริ่มวนลูป ---
         for (const course of courseResult.data) {
-            if (course.role === 'teacher' || course.role === 'ta') {
-                const assignRes = await fetch(`${API_BASE_URL}/courses/${course.course_id}/assignments`);
-                const assignResult = await assignRes.json();
+            if (course.role !== 'teacher' && course.role !== 'ta') continue;
 
-                if (assignResult.success) {
-                    assignResult.data.forEach(assign => {
-                        const dueDate = new Date(assign.due_date);
+            const assignRes    = await fetch(`${API_BASE_URL}/courses/${course.course_id}/assignments`);
+            const assignResult = await assignRes.json();
+            if (!assignResult.success) continue;
 
-                        // เงื่อนไข: ถ้าเลยกำหนดส่งแล้ว
-                        if (dueDate < now) {
-                            totalItems++;
-                            const submitted = assign.submitted_count || 0;
-                            const total = course.total_std || 0;
-                            const missing = total - submitted;
-
-                            if (tableBody) {
-                                tableBody.innerHTML += `
-                                    <div class="grade-row-card">
-                                        <div class="gcol-class">${course.course_code}</div>
-                                        <div class="gcol-name">${assign.title}</div>
-                                        <div class="gcol-submitted">${submitted}/${total}</div>
-                                        <div class="gcol-missing">${missing < 0 ? 0 : missing}</div>
-                                        <div class="gcol-tograde">${submitted}</div>
-                                        <div class="gcol-action">
-                                            <button class="grade-btn" onclick="window.location.href='/grading?id=${assign.assignment_id}'">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
-                                                    <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                                                    <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>
-                                                    <path d="M13.375 10.375L16 13.0187" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        }
+            assignResult.data.forEach(assign => {
+                if (new Date(assign.due_date) < now) {
+                    _gradingRows.push({
+                        course_code:   course.course_code,
+                        assignment_id: assign.assignment_id,
+                        title:         assign.title,
+                        due_date:      assign.due_date,
+                        submitted:     assign.submitted_count || 0,
+                        total:         course.total_std || 0,
                     });
                 }
-            }
+            });
         }
 
-        // อัปเดตเลข Badge หลังจากวนลูปเสร็จ (ย้ายมาไว้ข้างนอก loop)
-        if (badgeNum) {
-            badgeNum.innerText = totalItems;
-        }
+        const badgeNum = document.getElementById('badge-num');
+        if (badgeNum) badgeNum.innerText = _gradingRows.length;
 
-    } catch (error) {
-        console.error("Error loading grading table:", error);
+        renderGradingTable();
+
+    } catch (err) {
+        console.error('Error loading grading table:', err);
     }
 }
 
-/*
-  setBottomColumns — called after courses render AND after sidebar toggle.
+function renderGradingTable() {
+    const tableBody = document.getElementById('grading-table-body');
+    if (!tableBody) return;
 
-  Uses live dashboard offsetWidth so it works for any sidebar state:
-    sidebar open   → dashboard ≈ 1110px  (1440 - 270 - 60 padding)
-    sidebar closed → dashboard ≈ 1310px  (1440 -  70 - 60 padding)
+    const sorted = [..._gradingRows].sort((a, b) => {
+        const diff = new Date(a.due_date) - new Date(b.due_date);
+        return _sortAsc ? diff : -diff;
+    });
 
-  Constants (px):
-    CARD_W    = 220
-    GAP       = 20    gap between cards
-    PAD       = 40    20px each side inside left col
-    MAX_ROW   = 3     cards per row; 4+ wrap inside left col
-    RIGHT_MAX = 570
+    tableBody.innerHTML = sorted.map(item => {
+        const missing = Math.max(0, item.total - item.submitted);
+        return `
+            <div class="grade-row-card">
+                <div class="gcol-class">${item.course_code}</div>
+                <div class="gcol-name">${item.title}</div>
+                <div class="gcol-submitted">${item.submitted}/${item.total}</div>
+                <div class="gcol-missing">${missing}</div>
+                <div class="gcol-tograde">${item.submitted}</div>
+                <div class="gcol-action">
+                    <button class="grade-btn"
+                        onclick="window.location.href='/grading?id=${item.assignment_id}'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+                            <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>
+                            <path d="M13.375 10.375L16 13.0187" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>`;
+    }).join('');
+}
 
-  naturalLeft = PAD + n * CARD_W + (n-1) * GAP
-  rightW      = min(dashW - naturalLeft, RIGHT_MAX)
-  leftW       = dashW - rightW   (absorbs any remainder when right is capped)
-*/
+function toggleGradingSort() {
+    _sortAsc = !_sortAsc;
+
+    const group = document.querySelector('.panel-sort-group');
+    const label = document.querySelector('.panel-sort-label');
+
+    if (label) label.textContent = _sortAsc ? 'Oldest' : 'Newest';
+    if (group) group.classList.toggle('sort-desc', !_sortAsc);
+
+    renderGradingTable();
+}
+
 function setBottomColumns() {
-  const dash    = document.querySelector('.dashboard-content');
   const section = document.querySelector('.bottom-section');
-  if (!dash || !section) return;
+  if (!section) return;
 
   const CARD_W    = 220;
   const GAP       = 20;
   const PAD       = 40;
   const MAX_ROW   = 3;
   const RIGHT_MAX = 570;
+  const CONTENT_PAD = 60; 
 
-  const dashW = dash.offsetWidth;
+  // Calculate from sidebar state — no need to wait for DOM to settle
+  const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+  const sidebarW = isCollapsed
+      ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-width') || '75')
+      : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '250');
 
-  // Count cards actually in the DOM (capped at MAX_ROW for column sizing)
+  const dashW = window.innerWidth - sidebarW - CONTENT_PAD;
+
   const totalCards = document.querySelectorAll('#course-container .course-card').length;
   const n          = Math.min(totalCards || 1, MAX_ROW);
 

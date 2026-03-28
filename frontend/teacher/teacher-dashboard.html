@@ -5,25 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ClassHub – Teacher Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiko:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
+<link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
 <link rel="stylesheet" href="teacher-dashboard.css">
 </head>
 <body>
-<aside class="sidebar">
-</aside>
+
+<div id="teacher-sidebar-navbar-container"></div>
 
 <div class="main">
-  <header class="topbar">
-      <button class="menu-toggle" id="sidebarToggle">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
-
-    <div class="topbar-right">
-    </div>
-  </header>
 
   <div class="content">
     <!-- Page Header -->
@@ -119,11 +110,11 @@
           <!-- Header: title | sort controls | badge -->
           <div class="panel-header">
             Needs Grading
-            <div class="panel-sort-group">
+            <div class="panel-sort-group" onclick="toggleGradingSort()" title="Toggle sort order">
               <span class="panel-sort-label">Oldest</span>
               <span class="panel-sort-arrow">↑</span>
             </div>
-            <span class="badge-num" id="badge-num">3</span>
+            <span class="badge-num" id="badge-num">--</span>
           </div>
 
           <!-- Table: sticky header + scrollable card list -->
