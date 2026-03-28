@@ -129,7 +129,7 @@ body.sidebar-collapsed .nav-item {
     width: 50px;
 }
 
-.sidebar.collapsed .nav-list {
+body.sidebar-collapsed .nav-list {
     margin-top: 20px;
 }
 
