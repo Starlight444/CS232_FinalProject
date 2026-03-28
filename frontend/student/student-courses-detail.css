@@ -1,0 +1,461 @@
+:root {
+    --primary-purple: #8c85d8;
+    --hover-purple: #f0effb;
+    --bg-light: #f8f9fe;
+    --border-color: #dcdcdc;
+    --text-main: #4b3f92;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 75px;
+    --navbar-height: 70px;
+}
+
+body {
+    height: 100%;
+    overflow: hidden; 
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+}
+
+
+/* ============================================
+   Main Content — fix navbar overlap
+   ============================================ */
+.main{
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    width: calc(100% - var(--sidebar-width));
+    height: 100vh;          /* เพิ่ม */
+    overflow: hidden;       /* เพิ่ม */
+    box-sizing: border-box;
+}
+
+.content {
+    padding: 30px;
+    flex: 1;                /* เพิ่ม */
+    overflow: hidden;       /* เพิ่ม */
+    display: flex;          /* เพิ่ม */
+    flex-direction: column; /* เพิ่ม */
+    background-color: #ffffff;
+}
+
+/* Sidebar collapsed */
+#sidebar.collapsed ~ .main-content,
+#sidebar.collapsed + .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+    width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+/* ============================================
+   1. Content Header
+   ============================================ */
+.content-header {
+    margin-bottom: 15px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.back-icon {
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.current-path {
+    font-weight: bold;
+    color: #333;
+}
+
+.page-title {
+    font-family: 'Amiko', sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%;
+    background: linear-gradient(90deg, #3B3392 0%, #CF2D2D 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+/* ============================================
+   2. Tab Table Container
+   ============================================ */
+.tab-table-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;       /* เพิ่ม */
+    min-height: 0;  
+    
+}
+
+/* Tab Navigation */
+.tab-navigation {
+    display: flex;
+    width: 100%;
+    height: 52px;
+    position: relative;
+    overflow: visible;
+}
+
+/* Sliding active indicator (purple block) */
+.tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    height: calc(100% + 1px);
+    background: linear-gradient(0deg, rgba(110, 108, 223, 0.80) 0%, rgba(110, 108, 223, 0.80) 100%), #FFF;
+    border-radius: 8px 8px 0 0;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0 10px;
+    border: none;
+    background: #FFF;
+    cursor: pointer;
+    font-size: 15px;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, color 0.2s;
+    border-radius: 8px 8px 0 0;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+    height: 100%;
+}
+
+.tab-btn:hover:not(.active) {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%), #FFF;
+    color: var(--primary-purple);
+}
+
+.tab-btn.active {
+    background: transparent;
+    color: white;
+}
+
+/* SVG icons inside tab buttons */
+.tab-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    fill: currentColor;
+    transition: fill 0.2s;
+}
+
+.tab-btn.active svg {
+    fill: white;
+}
+
+/* Content Body — fixed padding 30px */
+.tab-content-body {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    gap: 20px;
+    border-radius: 8px;
+    border: 1px solid #8B89E5;        /* กำหนดความสูงคงที่ (หรือใช้ max-height ก็ได้) */
+    overflow-y: auto;        /* ถ้าเนื้อหาเกิน ให้เลื่อนขึ้นลงได้ข้างใน */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; 
+}
+
+.tab-panel {
+display: none;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+}
+
+.tab-panel.active {
+display: flex; /* เปลี่ยนเป็น flex เพื่อให้สอดคล้องกับโครงสร้างข้างใน */
+    flex-direction: column;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ============================================
+   3. Assignment Cards
+   ============================================ */
+.time-group {
+    display: flex;
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.time-group-header {
+    display: flex;
+    height: 44px;
+    padding: 10px 20px;
+    align-items: center;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 1px solid #808080;
+}
+
+.time-group-header svg {
+    display: block;
+    flex-shrink: 0;
+    margin: 0; 
+}
+
+.group-label {
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    color: #888;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+}
+
+.assignment-list {
+    gap: 20px;
+    padding: 10px;
+}
+
+.assignment-cards {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    width: 100%;
+}
+
+.assignment-card {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    align-items: center;
+    padding: 15px 20px;
+    border: 1px solid #efefef;
+    border-radius: 12px;
+    transition: 0.2s;
+    gap: 16px;
+}
+
+.assignment-card:hover {
+    border-color: var(--primary-purple);
+    transform: translateY(-2px);
+}
+
+.task-icon {
+    width: 45px;
+    height: 45px;
+    background: #777;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.task-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.task-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.task-status {
+    margin: 3px 0;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.task-deadline-full{
+    margin: 3px 0;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.class-name {
+    font-size: 12px;
+    color: #999;
+}
+
+.status-red {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.status-orange {
+    color: #f39c12;
+    font-weight: 500;
+}
+
+.task-points {
+    font-weight: 500;
+    color: #666;
+    font-size: 14px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+    font-style: italic;
+}
+
+/* ============================================
+   4. Responsive Breakpoints
+   ============================================ */
+@media (max-width: 1024px) {
+    .tab-btn {
+        font-size: 13px;
+        padding: 0 8px;
+        gap: 6px;
+    }
+
+    .tab-content-body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+        width: calc(100% - var(--sidebar-collapsed-width));
+    }
+
+    .content {
+        padding: 20px 16px;
+    }
+
+    #sidebar.collapsed ~ .main-content,
+    #sidebar.collapsed + .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+        width: calc(100% - var(--sidebar-collapsed-width));
+    }
+
+    .page-title {
+        font-size: 20px;
+    }
+
+    .tab-btn {
+        font-size: 12px;
+        padding: 0 6px;
+    }
+
+    .tab-btn svg {
+        display: none;
+    }
+
+    .tab-content-body {
+        padding: 16px 12px;
+    }
+
+    .assignment-card {
+        padding: 12px 14px;
+    }
+
+    .task-points {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .content {
+        padding: 16px 12px;
+    }
+
+    #sidebar.collapsed ~ .main-content,
+    #sidebar.collapsed + .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .breadcrumb {
+        font-size: 13px;
+        gap: 8px;
+    }
+
+    .page-title {
+        font-size: 18px;
+    }
+
+    .tab-navigation {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .tab-navigation::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-btn {
+        flex: none;
+        font-size: 12px;
+        padding: 0 14px;
+        min-width: auto;
+    }
+
+    .assignment-card {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .task-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 11px;
+    }
+
+    .task-name {
+        font-size: 14px;
+    }
+
+    .task-status {
+        font-size: 12px;
+    }
+}
