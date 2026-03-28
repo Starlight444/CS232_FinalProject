@@ -74,3 +74,36 @@ toggleBtn.addEventListener("click", () => {
     sidebar.classList.toggle("collapsed");
     document.body.classList.toggle("sidebar-collapsed");
 });
+
+// ฟังก์ชันวิชาใน Sidebar จากข้อมูลจริง
+function renderSidebarCourses(courses) {
+    const sidebarList = document.getElementById('submenu');
+    if (!sidebarList) return;
+
+    // ล้างวิชาเก่า ออกให้หมด
+    sidebarList.innerHTML = '';
+
+    // วนลูปสร้างวิชาใหม่
+    courses.forEach(course => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+
+        link.href = "#";
+        link.className = 'sub-link';
+        link.textContent = course.course_code;
+
+        // เมื่อคลิกวิชา ให้ไปหน้า courses detail
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const courseId = course.course_id;
+            window.location.href = `../student/student-courses-detail.html?id=${courseId}`;
+        });
+
+        li.appendChild(link);
+        sidebarList.appendChild(li);
+    });
+}
+
+// ทำให้ฟังก์ชันนี้เรียกใช้ได้จากไฟล์อื่น (Global Scope)
+window.renderSidebarCourses = renderSidebarCourses;
