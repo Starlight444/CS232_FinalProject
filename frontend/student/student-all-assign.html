@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Detail Submit</title>
+    <link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
+    <link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
+    <link rel="stylesheet" href="student-all-assign.css">
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1 class="page-title">All Assignments</h1>
+            <div class="header-controls">
+                <div class="search-wrap">
+                    <iconify-icon icon="jam:search" width="24" height="24"></iconify-icon>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search" />
+                </div>
+
+                <div class="sort-group">
+                    <button class="sort-btn" data-sort="further">
+                        Newest
+                        <iconify-icon icon="grommet-icons:link-down" width="15" height="15"></iconify-icon>
+                    </button>
+                    <button class="sort-btn active" data-sort="closest">
+                        Closest
+                        <iconify-icon icon="grommet-icons:link-down" width="15" height="15"></iconify-icon>
+                    </button>
+                </div>
+                <div class="filter-wrap">
+                    <button class="filter-btn" id="filter-btn">
+                        <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon> Filter
+                        <iconify-icon icon="icon-park-outline:down" width="15" height="15"></iconify-icon>
+                    </button>
+                    <div class="filter-dropdown" id="filter-dropdown">
+                        <button class="filter-option active" data-class="all">All</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs-container">
+            <button class="tab-btn" data-tab="due-today">Due Today</button>
+            <button class="tab-btn active" data-tab="upcoming">Upcoming</button>
+            <button class="tab-btn" data-tab="overdue">Overdue</button>
+            <button class="tab-btn" data-tab="complete">Complete</button>
+        </nav>
+
+        <div class="assignment-container">
+            <ul id="assignment-list" class="assignment-list">
+
+            </ul>
+            <p class="empty-msg" id="empty-msg" style="display:none">There are no assignment in this category</p>
+        </div>
+    </main>
+
+    <script src="student-all-assign.js"></script>
+</body>
+
+</html>

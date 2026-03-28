@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sidebar</title>
+    <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-wrap">
+                <img src="../components/image/tulogo.png" alt="Logo" class="logo-img">
+                <span class="brand">CourseHub</span>
+            </div>
+            <i class="fa-solid fa-bars" id="toggleBtn"></i>
+        </div>
+
+        <nav class="nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-page="home">
+                        <i class="fa-solid fa-house nav-icon"></i>
+                        <span class="nav-label">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="assignments">
+                        <i class="fa-solid fa-clipboard nav-icon"></i>
+                        <span class="nav-label">Assignments</span>
+                    </a>
+                </li>
+
+                <li class="nav-item" id="courses-item">
+                    <a href="#" class="nav-link" id="courseBtn">
+                        <i class="fa-solid fa-graduation-cap nav-icon"></i>
+                        <span class="nav-label">My courses</span>
+                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    </a>
+                    <ul class="sub-list" id="submenu">
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="announcements">
+                        <i class="fa-solid fa-bullhorn nav-icon"></i>
+                        <span class="nav-label">Announcements</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-link logout-link">
+                <i class="fa-solid fa-right-from-bracket nav-icon"></i>
+                <span class="nav-label">Log out</span>
+            </a>
+        </div>
+    </aside>
+
+    <script src="sidebar.js"></script>
+</body>
+
+</html>
