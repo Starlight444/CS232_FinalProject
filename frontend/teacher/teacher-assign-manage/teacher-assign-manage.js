@@ -1,5 +1,57 @@
-const API_BASE_URL = 'http://localhost:3000/api'; 
-const ASSIGNMENT_ID = '123-uuid';
+const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default'; 
+//const urlParams = new URLSearchParams(window.location.search);
+//const ASSIGNMENT_ID = urlParams.get('id');
+const ASSIGNMENT_ID = '123';
+
+// 🚨 ดัก Error กรณีที่ไม่มี ID ส่งมา (เช่น เข้าหน้านี้ตรงๆ)
+if (!ASSIGNMENT_ID) {
+    alert("ไม่พบ ID ของงาน รบกวนกลับไปเลือกงานจาก Dashboard ใหม่");
+    window.location.href = '../dashboard.html'; // เด้งกลับหน้า Dashboard
+}
+
+// navbar
+document.addEventListener("DOMContentLoaded", function () {
+    loadTeacherSidebarNavbar();
+});
+
+function loadTeacherSidebarNavbar() {
+    fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+        .then(r => r.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const container = document.getElementById('teacher-sidebar-navbar-container');
+
+            const sidebar = doc.querySelector('#sidebar');
+            const navbar  = doc.querySelector('.navbar');
+            if (sidebar) container.appendChild(sidebar);
+            if (navbar)  container.appendChild(navbar);
+
+            // Load sidebar JS (toggle / collapse logic)
+            const sidebarScript = document.createElement('script');
+            sidebarScript.src = '../../components/student-sidebar/sidebar.js';
+            document.body.appendChild(sidebarScript);
+
+            // Load navbar JS (profile dropdown)
+            const navbarScript = document.createElement('script');
+            navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
+            document.body.appendChild(navbarScript);
+
+            // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
+            // listens to `body.sidebar-collapsed` — sync them here
+            sidebarScript.onload = () => {
+                const sidebarEl = document.getElementById('sidebar');
+                if (sidebarEl) {
+                    new MutationObserver(() => {
+                        const collapsed = sidebarEl.classList.contains('collapsed');
+                        document.body.classList.toggle('sidebar-collapsed', collapsed);
+                        setBottomColumns();
+                    }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+                }
+            };
+        })
+        .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+}
 
 // 1. ดึงข้อมูลรายละเอียดงานด้านบน (เหมือนเดิม)
 async function loadAssignmentDetails() {
@@ -119,5 +171,6 @@ function renderTable(studentsData, filterStr) {
 }
 
 // สั่งรันครั้งแรก
+loadTeacherSidebarNavbar();
 loadAssignmentDetails();
 loadStudentsByStatus('Submitted');
