@@ -65,7 +65,12 @@ async function fetchAssignments() {
 
         const courseJson = await courseRes.json();
         const courses = courseJson.data || [];
+        //อัปเดตปุ่ม Filter วิชา
         updateFilterUI(courses);
+        //เรียกฟังก์ชันแสดงวิชาใน sidebar.js
+        if (window.renderSidebarCourses) {
+            window.renderSidebarCourses(courses);
+        }
 
         let allAssignments = [];
         //ดึงงานของแต่ละคอร์ส
