@@ -15,9 +15,13 @@ class UserService:
         if not user:
             raise Exception("Email not found")
         
+        password = password[:72]
+        
         # 2. เช็ค password
         if not pwd_context.verify(password, user.password_hash):
             raise Exception("Invalid password")
+        
+        role = self.repo.get_role(user.user_id)  # ดึง role เพิ่ม
         
         # generate JWT token
         payload = {
@@ -25,4 +29,4 @@ class UserService:
             "exp": datetime.utcnow() + timedelta(hours=24)
         }
         token = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
-        return user, token
+        return user, role, token

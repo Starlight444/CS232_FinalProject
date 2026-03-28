@@ -1,39 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role_enum') THEN
-        CREATE TYPE role_enum AS ENUM ('teacher', 'ta', 'student');
-    END IF;
-END
-$$;
-
-CREATE TABLE IF NOT EXISTS users (
-    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS courses (
-    course_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    course_code VARCHAR(20) UNIQUE NOT NULL,
-    course_name VARCHAR(255) NOT NULL,
-    description TEXT
-);
-
-CREATE TABLE IF NOT EXISTS course_members (
-    member_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    role role_enum NOT NULL,
-    user_id UUID NOT NULL,
-    course_id UUID NOT NULL,
-    CONSTRAINT fk_course_members_user
-        FOREIGN KEY (user_id) REFERENCES users(user_id),
-    CONSTRAINT fk_course_members_course
-        FOREIGN KEY (course_id) REFERENCES courses(course_id)
-);
-
 INSERT INTO users (email, password_hash, first_name, last_name)
 VALUES
 ('alice@example.com', 'hashed_pw1', 'Alice', 'Tan'),

@@ -17,14 +17,14 @@ function togglePw() {
 
 // call login API
 async function handleLogin() {
-  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
   const password = document.getElementById("pw").value;
 
   try {
-     const res = await fetch("/users/login", {
+     const res = await fetch("http://localhost:8000/users/login", {
        method: "POST",
        headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ username, password }),
+       body: JSON.stringify({ email, password }),
      });
 
     if (res.ok) {
