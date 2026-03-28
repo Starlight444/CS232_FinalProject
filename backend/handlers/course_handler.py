@@ -7,12 +7,11 @@ from services.course_service import CourseService
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
-course_service = CourseService()
-
 
 @router.get("/", response_model=list[CourseResponse])
 def get_all_courses(db: Session = Depends(get_db)):
-    return course_service.list_courses(db)
+    course_service = CourseService(db)
+    return course_service.list_courses()
 
 
 @router.get("/my/{user_id}", response_model=list[CourseResponse])
@@ -21,4 +20,5 @@ def get_my_courses(
     role: str = Query(default=None, description="student, teacher, ta"),
     db: Session = Depends(get_db)
 ):
-    return course_service.list_courses_by_user(db, user_id, role)
+    course_service = CourseService(db)
+    return course_service.list_courses_by_user(user_id, role)
