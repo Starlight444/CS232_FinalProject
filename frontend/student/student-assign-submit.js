@@ -28,6 +28,50 @@ const submitBtn = document.getElementById('submit-btn');
 let uploadedFiles = [];
 let isSubmitted = false;
 
+// api
+const BASE_URL = 'http://localhost:3000';
+
+// ดึงข้อมูล User และ Token จาก localStorage
+//const userData = JSON.parse(localStorage.getItem("user"));
+//if (!userData || !userData.token) {
+//console.warn("No token found, redirecting to login...");
+// window.location.href = "../auth/login.html"; // เปิดใช้เมื่อพร้อม
+//}
+//const TOKEN = userData ? userData.token : '';
+const TOKEN = 'test-token'; // เป็นแบบนี้ชั่วคราวเพื่อเช็คว่า API เชื่อมติดไหม
+
+const assignmentId = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
+
+// ฟังก์ชันดึงข้อมูลการบ้านมาโชว์ 
+async function fetchAssignmentDetail() {
+    if (!assignmentId) return console.error("No assignment ID found");
+    try {
+        const response = await fetch(`${BASE_URL}/assignments/${assignmentId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const json = await response.json();
+
+        if (json.success) {
+            const data = json.data;
+            document.querySelector('.assign-header .assign-title').textContent = data.title;
+            document.querySelector('.assign-due').textContent = `Due date on ${formatTimestamp(new Date(data.due_date))}`;
+            document.querySelector('.section-body').textContent = data.description;
+            document.querySelector('.assign-points').textContent = `${data.max_score} Points`;
+
+
+        }
+    } catch (err) {
+        console.error("Fetch Assignment Error:", err);
+    }
+}
+
+// เรียกทำงานทันทีที่โหลดหน้า
+fetchAssignmentDetail();
+
 // file selection
 fileInput.addEventListener('change', (e) => {
     const files = Array.from(e.target.files);
