@@ -21,7 +21,86 @@ fetch('../components/student-navbar/student-navbar.html')
     });
 
 
-// Mock Data
+
+// api
+const BASE_URL = 'http://localhost:3000'; //ยังไม่ใช่urlจริง เดี๋ยวมาแก้
+
+// ดึงข้อมูล User และ Token จาก localStorage
+//const userData = JSON.parse(localStorage.getItem("user"));
+//if (!userData || !userData.token) {
+//console.warn("No token found, redirecting to login...");
+// window.location.href = "../auth/login.html"; // เปิดใช้เมื่อพร้อม
+//}
+//const TOKEN = userData ? userData.token : '';
+
+const TOKEN = 'test-token'; // เป็นแบบนี้ชั่วคราวเพื่อเช็คว่า API เชื่อมติดไหม
+
+let ASSIGNMENTS = [];
+
+function mapStatus(a) {
+    const now = new Date();
+    const dueDate = new Date(a.due_date);
+
+    // ถ้าส่งแล้ว 
+    if (a.status === 'submitted' || a.status === 'graded') {
+        return 'complete';
+    }
+    // ถ้ายังไม่ส่งและเลยกำหนด
+    if (dueDate < now) {
+        return 'overdue';
+    }
+    // ถ้ายังไม่ส่งและยังไม่ถึงกำหนด
+    return 'upcoming';
+}
+
+async function fetchAssignments() {
+    try {
+        //ดึงคอร์สทั้งหมด
+        const courseRes = await fetch(`${BASE_URL}/courses`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`
+            }
+        });
+
+        const courseJson = await courseRes.json();
+        const courses = courseJson.data || [];
+
+        let allAssignments = [];
+        //ดึงงานของแต่ละคอร์ส
+        for (let course of courses) {
+            const res = await fetch(`${BASE_URL}/courses/${course.course_id}/assignments`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`
+                }
+            });
+
+            const data = await res.json();
+
+            if (data.success && Array.isArray(data.data)) {
+                const mapped = data.data.map(a => ({
+                    id: a.assignment_id,
+                    name: a.title,
+                    className: course.course_code,
+                    points: a.max_score || 0,
+                    due: new Date(a.due_date),
+                    status: mapStatus(a)
+                }));
+
+                allAssignments.push(...mapped);
+            }
+        }
+        ASSIGNMENTS = allAssignments;
+        render();
+
+    } catch (err) {
+        console.error("Error fetching assignments:", err);
+        assignList.innerHTML = `<li class="empty-msg" style="color: red;">Failed to connect to server.</li>`;
+    }
+}
+
+
 const now = new Date();
 
 function daysFromNow(d, h = 23, m = 59) {
@@ -30,28 +109,6 @@ function daysFromNow(d, h = 23, m = 59) {
     t.setHours(h, m, 0, 0);
     return t;
 }
-
-const ASSIGNMENTS = [
-    // Due Today
-    { id: 1, name: 'Lab 1', className: 'CS222', points: 10, due: daysFromNow(0, now.getHours(), now.getMinutes() + 24), status: 'due-today', minutesLeft: 24 },
-    { id: 2, name: 'Quiz 1', className: 'CS232', points: 20, due: daysFromNow(0, now.getHours() + 5, now.getMinutes()), status: 'due-today', minutesLeft: 300 },
-
-    // Upcoming
-    { id: 3, name: 'Assignment 2', className: 'CS222', points: 10, due: daysFromNow(2), status: 'upcoming' },
-    { id: 4, name: 'Assignment Name', className: 'CS232', points: 30, due: daysFromNow(5), status: 'upcoming' },
-    { id: 5, name: 'Assignment 3', className: 'CS242', points: 10, due: daysFromNow(7), status: 'upcoming' },
-
-    // Overdue
-    { id: 6, name: 'Lab 4', className: 'CS222', points: 5, due: daysFromNow(-3), status: 'overdue' },
-    { id: 7, name: 'Lab 5', className: 'CS232', points: 5, due: daysFromNow(-7), status: 'overdue' },
-    { id: 8, name: 'Lab 6', className: 'CS242', points: 10, due: daysFromNow(-20), status: 'overdue', submitted: false },
-
-    // Complete
-    { id: 9, name: 'Assignment 1', className: 'CS222', points: 10, due: daysFromNow(-10), status: 'complete', submitted: true },
-    { id: 10, name: 'Lab 1', className: 'CS232', points: 10, due: daysFromNow(-14), status: 'complete', submitted: true },
-    { id: 11, name: 'Assignment Name', className: 'CS252', points: 20, due: daysFromNow(-25), status: 'complete', submitted: true },
-    { id: 12, name: 'Assignment Name', className: 'CS232', points: 10, due: daysFromNow(-30), status: 'complete', submitted: true },
-];
 
 //State 
 let activeTab = 'upcoming';
@@ -219,5 +276,5 @@ document.querySelectorAll('.filter-option').forEach(btn => {
     });
 });
 
-render();
 updateContainerRadius();
+fetchAssignments();
