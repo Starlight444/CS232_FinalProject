@@ -173,6 +173,29 @@ function rightContent(a) {
     return `<span class="assign-points-label">${a.points} Point</span>`;
 }
 
+function updateFilterUI(courses) {
+    const filterDropdown = document.getElementById('filter-dropdown');
+
+    // วนลูปสร้างตัวเลือกจากวิชาที่ดึงมาจาก API
+    courses.forEach(course => {
+        const option = document.createElement('div');
+        option.className = 'filter-option';
+        option.dataset.class = course.course_code;
+        option.textContent = course.course_code;
+
+        // ใส่ Event Listener ให้ปุ่มที่สร้างขึ้นใหม่
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('active'));
+            option.classList.add('active');
+            activeFilter = option.dataset.class;
+            filterWrap.classList.remove('open');
+            render();
+        });
+
+        filterDropdown.appendChild(option);
+    });
+}
+
 // Render 
 function render() {
     let list = ASSIGNMENTS.filter(a => a.status === activeTab);
@@ -253,31 +276,8 @@ let activeFilter = 'all';
 const filterBtn = document.getElementById('filter-btn');
 const filterDropdown = document.getElementById('filter-dropdown');
 const filterWrap = filterBtn.closest('.filter-wrap');
-function updateFilterUI(courses) {
-    const filterDropdown = document.getElementById('filter-dropdown');
 
-    // เก็บปุ่ม "All" ไว้ และลบวิชาเดิมที่เป็น dummy ออก
-    filterDropdown.innerHTML = '<div class="filter-option active" data-class="all">All</div>';
 
-    // วนลูปสร้างตัวเลือกจากวิชาที่ดึงมาจาก API
-    courses.forEach(course => {
-        const option = document.createElement('div');
-        option.className = 'filter-option';
-        option.dataset.class = course.course_code; // ใช้ "CS101" เป็นต้น
-        option.textContent = course.course_code;
-
-        // ใส่ Event Listener ให้ปุ่มที่สร้างขึ้นใหม่
-        option.addEventListener('click', () => {
-            document.querySelectorAll('.filter-option').forEach(b => b.classList.remove('active'));
-            option.classList.add('active');
-            activeFilter = option.dataset.class;
-            filterWrap.classList.remove('open');
-            render();
-        });
-
-        filterDropdown.appendChild(option);
-    });
-}
 
 // dropdown
 filterBtn.addEventListener('click', (e) => {
