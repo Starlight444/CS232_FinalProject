@@ -39,13 +39,32 @@ function initTabIndicator() {
     const indicator = document.getElementById('tab-indicator');
     if (!nav || !indicator) return;
 
+    const allButtons = Array.from(nav.querySelectorAll('.tab-btn'));
     const activeBtn = nav.querySelector('.tab-btn.active');
-    if (activeBtn) moveIndicator(activeBtn, false);
+    if (activeBtn) {
+        moveIndicator(activeBtn, false);
+        const contentBody = document.querySelector('.tab-content-body');
+        const idx = allButtons.indexOf(activeBtn);
+        if (contentBody) {
+            contentBody.classList.toggle('first-tab-active', idx === 0);
+            contentBody.classList.toggle('last-tab-active', idx === allButtons.length - 1);
+        }
+    }
 
     window.addEventListener('resize', () => {
         const current = nav.querySelector('.tab-btn.active');
         if (current) moveIndicator(current, false);
     });
+
+    const main = document.querySelector('.main');
+    if (main) {
+        main.addEventListener('transitionend', (e) => {
+            if (e.propertyName === 'width' || e.propertyName === 'margin-left') {
+                const current = nav.querySelector('.tab-btn.active');
+                if (current) moveIndicator(current, false);
+            }
+        });
+    }
 }
 
 function moveIndicator(btn, animate = true) {
@@ -74,9 +93,10 @@ function moveIndicator(btn, animate = true) {
    Switch Tab
    ============================================================ */
 function switchTab(element, tabId) {
-    const allButtons = document.querySelectorAll('.tab-btn');
+    const allButtons = Array.from(document.querySelectorAll('.tab-btn'));
     const allPanels = document.querySelectorAll('.tab-panel');
     const targetPanel = document.getElementById(tabId);
+    const contentBody = document.querySelector('.tab-content-body');
 
     allButtons.forEach(tab => tab.classList.remove('active'));
     element.classList.add('active');
@@ -88,7 +108,12 @@ function switchTab(element, tabId) {
         panel.classList.remove('active');
     });
 
-    targetPanel.style.display = 'flex'; 
+    // Flush corners for first/last tab
+    const idx = allButtons.indexOf(element);
+    contentBody.classList.toggle('first-tab-active', idx === 0);
+    contentBody.classList.toggle('last-tab-active', idx === allButtons.length - 1);
+
+    targetPanel.style.display = 'flex';
     setTimeout(() => {
         targetPanel.classList.add('active');
     }, 10);
@@ -134,6 +159,8 @@ async function fetchAssignments(courseId) {
         }));
 
         console.log("Final tasks to render:", tasksWithStatus);
+        const countEl = document.getElementById('assignment-count');
+        if (countEl) countEl.textContent = tasksWithStatus.length;
         renderAssignments(tasksWithStatus);
     } catch (error) {
         console.error('Error:', error);
