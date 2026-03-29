@@ -1,0 +1,208 @@
+/* =========================================
+   Layout หลักของหน้า Create Assignment
+========================================= */
+
+.create-page-container {
+    width: 100%;
+}
+
+.create-card {
+    background-color: var(--white, #FFFFFF);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    padding: 32px;
+}
+
+/* --- ส่วน Header --- */
+.card-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main, #333);
+    margin: 0;
+}
+.spacer {
+    width: 32px; /* ใช้บาลานซ์ให้ตัวหนังสืออยู่ตรงกลาง */
+}
+.close-btn {
+    background-color: #F1F3F5;
+    color: var(--text-muted);
+}
+.close-btn:hover {
+    background-color: #E9ECEF;
+    color: var(--red-negative, #EF4444);
+}
+
+/* --- Grid ซ้าย-ขวา --- */
+.card-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+.col-left, .col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- Form Elements --- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    color: var(--text-main);
+    border: 1px solid var(--border-color, #E0E0E0);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background-color: var(--bg-body, #F8F9FA);
+    outline: none;
+    transition: all 0.2s;
+    box-sizing: border-box; /* ป้องกันกล่องทะลุ */
+}
+.form-input:focus {
+    border-color: var(--primary, #6E6CDF);
+    background-color: var(--white);
+    box-shadow: 0 0 0 3px var(--primary-light, rgba(110, 108, 223, 0.1));
+}
+.textarea-tall {
+    resize: none;
+    height: 100%; /* ดึงให้สูงเต็มพื้นที่คอลัมน์ซ้าย */
+    min-height: 150px;
+}
+.flex-grow {
+    flex-grow: 1;
+}
+
+/* --- Select Dropdown ลูกเล่น --- */
+.select-wrapper {
+    position: relative;
+}
+.select-wrapper select {
+    appearance: none; /* ซ่อนลูกศรเดิมของ Browser */
+    cursor: pointer;
+}
+.select-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    pointer-events: none;
+    font-size: 1.2rem;
+}
+
+/* --- โซนอัปโหลดไฟล์ --- */
+.upload-zone {
+    border: 2px dashed var(--primary-light, #8886E2);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    background-color: #F4F3FF;
+    transition: all 0.2s;
+}
+.upload-zone.dragover {
+    background-color: #EBEAFA;
+    border-color: var(--primary);
+}
+.upload-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.upload-zone p {
+    margin: 0 0 4px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.browse-link {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: underline;
+}
+.upload-zone small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* --- วันที่และคะแนน --- */
+.date-points-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* --- กล่องเลือกประเภทไฟล์ --- */
+.format-selection-box {
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color, #E0E0E0);
+    border-radius: 12px;
+    overflow: hidden; /* ให้ขอบมนตัดขอบลูกๆ */
+}
+.checkbox-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.checkbox-row:hover {
+    background-color: var(--white);
+}
+.border-bottom {
+    border-bottom: 1px dashed var(--border-color, #E0E0E0);
+}
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+/* สไตล์ Checkbox ให้ใหญ่ขึ้นนิดนึง */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* --- ปุ่ม Post --- */
+.card-footer {
+    margin-top: 32px;
+}
+.btn-post {
+    width: 100%; /* ปุ่มกว้างเต็มพื้นที่ */
+    padding: 14px;
+    font-size: 1rem;
+    border-radius: 8px;
+}
+
+/* =========================================
+   Responsive Design
+========================================= */
+@media (max-width: 700px) {
+    .card-body-grid {
+        grid-template-columns: 1fr; /* เปลี่ยนตรงนี้ค่ะ */
+    }
+    
+    /* 💡 พี่แนะนำให้เพิ่มกล่องวันที่กับคะแนนให้เป็น 1 คอลัมน์ด้วยค่ะ 
+       ไม่งั้นในมือถือมันจะบีบจนช่องเล็กจิ๋วเลย */
+    .date-points-row {
+        grid-template-columns: 1fr;
+    }
+}
