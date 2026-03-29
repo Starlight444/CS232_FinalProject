@@ -18,6 +18,29 @@ body.sidebar-collapsed .main-content {
     margin-left: var(--sidebar-collapsed-width);
 }
 
+<<<<<<< HEAD
+/*Back buttun*/
+.back-btn {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.back-text {
+    color: #999898;
+    text-align: right;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+=======
+>>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 /*Assignment card*/
 .assignment-card {
     background: #fff;
