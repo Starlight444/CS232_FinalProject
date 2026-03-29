@@ -10,6 +10,13 @@ from handlers.course_member_handler import router as course_member_router
 from handlers.announcement_handler import router as announcement_router
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
