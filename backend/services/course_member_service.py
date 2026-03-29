@@ -1,22 +1,15 @@
-from sqlalchemy.orm import Session
-import uuid
 from repositories.course_member_repository import CourseMemberRepository
 
 
 class CourseMemberService:
     def __init__(self, db):
-        self.repo = CourseMemberRepository(db)
+        self.course_member_repository = CourseMemberRepository(db)
 
-    def get_members(self, course_id):
-        return self.repo.get_members_only(course_id)
+    def get_members_by_course(self, course_id: str):
+        return self.course_member_repository.get_members_by_course(course_id)
 
-    def get_students(self, course_id):
-        users = self.repo.get_students_by_course(course_id)
-        
-        return [
-            {
-                "user_id": u.user_id,
-                "name": f"{u.first_name} {u.last_name}"
-            }
-            for u in users
-        ]
+    def get_role(self, user_id: str, course_id: str):
+        return self.course_member_repository.get_role(user_id, course_id)
+
+    def get_memberships_by_user(self, user_id: str, role: str = None):
+        return self.course_member_repository.get_memberships_by_user(user_id, role)

@@ -15,6 +15,24 @@ from services.submission_service import SubmissionService
 
 router = APIRouter(prefix="/submissions")
 
+@router.get("/assignment/{assignment_id}")
+def get_submissions_by_assignment(
+    assignment_id: UUID,
+    db: Session = Depends(get_db)
+):
+    repo = SubmissionRepository(db)
+    result = repo.get_by_assignment(assignment_id)
+    return {"success": True, "data": result}
+
+@router.get("/assignment/{assignment_id}/student/{student_id}")
+def get_submission_by_student(
+    assignment_id: UUID,
+    student_id: UUID,
+    db: Session = Depends(get_db)
+):
+    repo = SubmissionRepository(db)
+    result = repo.get_by_assignment_and_student(assignment_id, student_id)  # ต้องเพิ่มใน repo
+    return {"success": True, "data": result}
 
 @router.post("/")
 async def submit_assignment(
