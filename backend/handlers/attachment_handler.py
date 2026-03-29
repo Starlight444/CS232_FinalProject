@@ -9,7 +9,7 @@ from services.attachment_service import AttachmentService
 #from storage.s3_storage import S3Storage
 
 
-router = APIRouter(prefix="/attachments")
+router = APIRouter(prefix="/attachments", tags=["attachments"])
 
 
 @router.post("/assignment/{assignment_id}")

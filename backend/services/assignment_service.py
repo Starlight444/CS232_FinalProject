@@ -35,7 +35,15 @@ class AssignmentService:
         )
 
         return self.repo.create(assignment)
-
+    
     def get_assignments(self, course_id):
+        rows = self.repo.get_assignments_with_count(course_id)
 
-        return self.repo.get_by_course(course_id)
+        return [
+            {
+                "assignment_id": str(a.assignment_id),
+                "title": a.title,
+                "submit_count": count
+            }
+            for a, count in rows
+        ]

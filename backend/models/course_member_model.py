@@ -18,3 +18,10 @@ class MemberResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class StudentResponse(BaseModel):
+    user_id: uuid.UUID
+    name: str
+
+    class Config:
+        from_attributes = True
+

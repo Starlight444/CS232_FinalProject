@@ -5,7 +5,7 @@ from database import get_db
 from repositories.user_repository import UserRepository
 from services.user_service import UserService
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["users"])
 
 class LoginRequest(BaseModel):
     email: str

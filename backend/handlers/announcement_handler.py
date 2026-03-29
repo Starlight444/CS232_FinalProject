@@ -6,7 +6,7 @@ from repositories.announcement_repository import AnnouncementRepository
 from services.announcement_service import AnnouncementService
 from dependencies import get_current_user_id
 
-router = APIRouter(prefix="/announcements")
+router = APIRouter(prefix="/announcements", tags=["announcements"])
 
 class CreateAnnouncementRequest(BaseModel):
     title:     str

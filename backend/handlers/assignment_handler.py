@@ -11,7 +11,7 @@ from repositories.course_member_repository import CourseMemberRepository
 
 from services.assignment_service import AssignmentService
 
-router = APIRouter(prefix="/assignments")
+router = APIRouter(prefix="/assignments", tags=["assignments"])
 
 class CreateAssignmentRequest(BaseModel):
     title: str
