@@ -30,3 +30,7 @@ FROM users u, courses c
 WHERE u.email = 'charlie@example.com'
   AND c.course_code = 'CS101'
 ON CONFLICT (user_id, course_id) DO NOTHING;
+
+SELECT * FROM users;
+SELECT * FROM courses;
+SELECT * FROM course_members;

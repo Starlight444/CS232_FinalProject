@@ -21,7 +21,7 @@ async function handleLogin() {
   const password = document.getElementById("pw").value;
 
   try {
-       const res = await fetch("/users/login", {
+       const res = await fetch("http://localhost:8000/users/login", {
        method: "POST",
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({ email, password }),
