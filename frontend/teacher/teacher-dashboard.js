@@ -1,3 +1,11 @@
+
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData || !userData.token) {
+    window.location.href = "../auth/login.html";
+}
+const TOKEN   = userData ? userData.token   : '';
+const USER_ID = userData ? userData.user_id : '';
+
 document.addEventListener("DOMContentLoaded", function () {
     loadTeacherSidebarNavbar();
 });
@@ -15,18 +23,15 @@ function loadTeacherSidebarNavbar() {
             if (sidebar) container.appendChild(sidebar);
             if (navbar)  container.appendChild(navbar);
 
-            // Load sidebar JS (toggle / collapse logic)
             const sidebarScript = document.createElement('script');
             sidebarScript.src = '../components/student-sidebar/sidebar.js';
             document.body.appendChild(sidebarScript);
 
-            // Load navbar JS (profile dropdown)
             const navbarScript = document.createElement('script');
             navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
             document.body.appendChild(navbarScript);
 
-            // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
-            // listens to `body.sidebar-collapsed` — sync them here
+
             sidebarScript.onload = () => {
                 const sidebarEl = document.getElementById('sidebar');
                 if (sidebarEl) {
@@ -83,12 +88,9 @@ function changeWeek(days) {
 renderCalendar();
 
 // ── API ──
-const API_BASE_URL = 'http://localhost:3000';
-// --- [MOCK FIELD] ---
-// /courses total_submitted_student
-// /courses total_std
-// total_assign
-// /courses/:course_id/assignments "submitted_count"
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+// 
 
 
 // --- [DASHBOARD SUMMARY CARD: Courses, To Grade, and Missing] ---
@@ -111,8 +113,6 @@ async function updateDashboardSummary() {
       let coursesWithMissingCount = 0; 
 
       courses.forEach(course => {
-        /** ⚠️ NOTE: ตรวจสอบชื่อฟิลด์จาก Backend อีกครั้งเมื่อของจริงมา
-         */
         const stdInCourse = course.total_std || 0;
         const submittedInCourse = course.total_submitted_student || 0;
         const missingInCourse = Math.max(0, stdInCourse - submittedInCourse);
@@ -163,7 +163,7 @@ async function loadCourses() {
   const CARD_COLORS = ['course-orange', 'course-teal', 'course-blue'];
 
   try {
-    const response = await fetch(`${API_BASE_URL}/courses`);
+    const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
     const result   = await response.json();
 
     if (result.success) {
@@ -171,7 +171,11 @@ async function loadCourses() {
       if (!container) return;
 
       container.innerHTML = '';
-      const courses   = result.data;
+
+ 
+      const courses = result.data.filter(
+        course => course.role === 'teacher' || course.role === 'ta'
+      );
 
       courses.forEach((course, idx) => {
         const colorClass     = CARD_COLORS[idx % CARD_COLORS.length];
@@ -232,8 +236,8 @@ async function loadNeedsGrading() {
                         assignment_id: assign.assignment_id,
                         title:         assign.title,
                         due_date:      assign.due_date,
-                        submitted:     assign.submitted_count || 0,
-                        total:         course.total_std || 0,
+                        submitted:     assign.submitted_count || 0, 
+                        total:         course.total_std || 0,        
                     });
                 }
             });
