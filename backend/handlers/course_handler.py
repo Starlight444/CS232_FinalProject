@@ -22,7 +22,3 @@ def get_my_courses(
 ):
     course_service = CourseService(db)
     return course_service.list_courses_by_user(user_id, role)
-
-@router.get("/courses/{course_id}/with-assignments")
-def get_course_with_assignments(course_id: str, db=Depends(get_db)):
-    return CourseService(db).get_course_with_assignments(course_id)
