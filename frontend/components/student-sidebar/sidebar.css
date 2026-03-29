@@ -28,7 +28,7 @@ body {
     position: fixed;
 }
 
-body.sidebar-collapsed .sidebar {
+.sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
 }
 
@@ -68,7 +68,7 @@ body.sidebar-collapsed .sidebar {
     transition: opacity 0.3s ease;
 }
 
-body.sidebar-collapsed .brand {
+.sidebar.collapsed .brand {
     opacity: 0;
 }
 
@@ -117,11 +117,11 @@ body.sidebar-collapsed .brand {
     transition: opacity 0.3s ease;
 }
 
-body.sidebar-collapsed .nav-label {
+.sidebar.collapsed .nav-label {
     opacity: 0;
 }
 
-body.sidebar-collapsed .nav-item {
+.sidebar.collapsed .nav-item {
     position: flex;
     flex-direction: column;
     justify-content: center;
@@ -129,7 +129,7 @@ body.sidebar-collapsed .nav-item {
     width: 50px;
 }
 
-body.sidebar-collapsed .nav-list {
+.sidebar.collapsed .nav-list {
     margin-top: 20px;
 }
 
@@ -176,8 +176,8 @@ body.sidebar-collapsed .nav-list {
     transition: transform 0.3s ease;
 }
 
-body.sidebar-collapsed .logo-img,
-body.sidebar-collapsed .sidebar-header i {
+.sidebar.collapsed .logo-img,
+.sidebar.collapsed .sidebar-header i {
     position: relative;
     transition: opacity 0.3s ease;
     display: flex;
@@ -185,31 +185,31 @@ body.sidebar-collapsed .sidebar-header i {
     justify-content: center;
 }
 
-body.sidebar-collapsed .logo-img {
+.sidebar.collapsed .logo-img {
     opacity: 1;
 }
 
-body.sidebar-collapsed .sidebar-header i {
+.sidebar.collapsed .sidebar-header i {
     opacity: 0;
 }
 
-body.sidebar-collapsed .sidebar-header:hover .logo-img {
+.sidebar.collapsed .sidebar-header:hover .logo-img {
     opacity: 0;
 }
 
-body.sidebar-collapsed .sidebar-header:hover i {
+.sidebar.collapsed .sidebar-header:hover i {
     opacity: 1;
 }
 
-body.sidebar-collapsed .sidebar-header .brand {
+.sidebar.collapsed .sidebar-header .brand {
     display: none;
 }
 
-body.sidebar-collapsed .arrow-icon {
+.sidebar.collapsed .arrow-icon {
     display: none;
 }
 
-body.sidebar-collapsed .sidebar-header {
+.sidebar.collapsed .sidebar-header {
     display: flex;
     flex-direction: column;
     align-items: center;

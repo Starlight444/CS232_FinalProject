@@ -1,190 +1,176 @@
-// ==========================================
-// 0. Mock Data: จำลองข้อมูล Assignment
-// ==========================================
-const backendAssignmentData = {
-    title: "Assignment 2: Entity-Relationship (ER) Diagram Design",
-    dueDate: "WE 11 Mar 26, 11:59 PM",
-    instructions: "ให้นักศึกษาออกแบบ Entity-Relationship (ER) Diagram สำหรับระบบจัดการร้านหนังสือออนไลน์ (E-Commerce Book Store) โดยต้องประกอบด้วย Entity อย่างน้อย 5 ตัว พร้อมระบุ Primary Key, Foreign Key ให้ถูกต้อง",
-    points: 100,
-    // ✨ เพิ่มประเภทไฟล์ที่อาจารย์เลือกไว้ตรงนี้ (เป็น Array) ✨
-    allowedFormats: ['PDF', 'Image (.jpg, .png)', 'Zip (.zip)'], 
-    file: {
-        name: "CS232_Assign02_Instruction.pdf",
-        size: "1.2 MB"
-    }
-};
+const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default'; 
+//const urlParams = new URLSearchParams(window.location.search);
+//const ASSIGNMENT_ID = urlParams.get('id');
+const ASSIGNMENT_ID = '123';
 
-// ==========================================
-// 0.1 ฟังก์ชันเอาข้อมูล Backend ไปแสดงบนหน้าเว็บ
-// ==========================================
-function renderAssignmentDetails() {
-    // โยนข้อมูล Text ทั่วไป
-    document.getElementById('display-title').textContent = backendAssignmentData.title;
-    document.getElementById('display-due-date').textContent = `Due date on ${backendAssignmentData.dueDate}`;
-    document.getElementById('display-instructions').textContent = backendAssignmentData.instructions;
-    document.getElementById('display-points').textContent = `${backendAssignmentData.points} Points`;
-    document.getElementById('display-file-name').textContent = backendAssignmentData.file.name;
-    document.getElementById('display-file-size').textContent = backendAssignmentData.file.size;
-
-    // ✨ โยนข้อมูล Supported Formats (วนลูปสร้างป้าย Badge) ✨
-    const formatsContainer = document.getElementById('display-allowed-formats');
-    formatsContainer.innerHTML = ''; // เคลียร์ของเก่าก่อน
-    
-    backendAssignmentData.allowedFormats.forEach(format => {
-        // สร้างแท็ก <span> ขึ้นมาใหม่
-        const badge = document.createElement('span');
-        badge.className = 'format-badge';
-        
-        // ถ้าเป็นแบบโปรหน่อย สามารถดักจับชื่อเพื่อใส่ไอคอน Iconify ได้ด้วย!
-        let iconHtml = '';
-        if(format.includes('PDF')) iconHtml = '<iconify-icon icon="ph:file-pdf-duotone" style="color:#EF4444;"></iconify-icon>';
-        else if(format.includes('Word')) iconHtml = '<iconify-icon icon="ph:file-doc-duotone" style="color:#2563EB;"></iconify-icon>';
-        else if(format.includes('Image')) iconHtml = '<iconify-icon icon="ph:image-duotone" style="color:#10B981;"></iconify-icon>';
-        else if(format.includes('Zip')) iconHtml = '<iconify-icon icon="ph:file-archive-duotone" style="color:#333;"></iconify-icon>';
-        else iconHtml = '<iconify-icon icon="ph:file-duotone"></iconify-icon>'; // ค่าเริ่มต้นเผื่อเลือก Any
-
-        // ประกอบไอคอนเข้ากับชื่อประเภทไฟล์
-        badge.innerHTML = `${iconHtml} ${format}`;
-        formatsContainer.appendChild(badge);
-    });
+// 🚨 ดัก Error กรณีที่ไม่มี ID ส่งมา (เช่น เข้าหน้านี้ตรงๆ)
+if (!ASSIGNMENT_ID) {
+    alert("ไม่พบ ID ของงาน รบกวนกลับไปเลือกงานจาก Dashboard ใหม่");
+    window.location.href = '../dashboard.html'; // เด้งกลับหน้า Dashboard
 }
 
-// สั่งให้ฟังก์ชันทำงานทันทีที่โหลดหน้าเว็บ
-renderAssignmentDetails();
-// ==========================================
-// 1. Mock Data (ข้อมูลนักศึกษาจำลอง)
-// แบ่งตาม 3 สถานะ: Needs Grading, Fully Graded, Missing
-// ==========================================
-const mockStudents = [
-    // --- กลุ่ม Needs Grading ---
-    { id: "67091111111", name: "นางสาวขวัญใจ เมืองน่าน", date: "12 Feb 2026", status: "Submitted", file: "assign_01.pdf", grade: "", hasFeedback: false },
-    { id: "67091111112", name: "นายสมชาย ใจดี", date: "11 Feb 2026", status: "Submitted", file: "my_work.pdf", grade: "", hasFeedback: false },
+// navbar
+document.addEventListener("DOMContentLoaded", function () {
+    loadTeacherSidebarNavbar();
+});
+
+function loadTeacherSidebarNavbar() {
+    fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+        .then(r => r.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const container = document.getElementById('teacher-sidebar-navbar-container');
+
+            const sidebar = doc.querySelector('#sidebar');
+            const navbar  = doc.querySelector('.navbar');
+            if (sidebar) container.appendChild(sidebar);
+            if (navbar)  container.appendChild(navbar);
+
+            // Load sidebar JS (toggle / collapse logic)
+            const sidebarScript = document.createElement('script');
+            sidebarScript.src = '../../components/student-sidebar/sidebar.js';
+            document.body.appendChild(sidebarScript);
+
+            // Load navbar JS (profile dropdown)
+            const navbarScript = document.createElement('script');
+            navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
+            document.body.appendChild(navbarScript);
+
+            // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
+            // listens to `body.sidebar-collapsed` — sync them here
+            sidebarScript.onload = () => {
+                const sidebarEl = document.getElementById('sidebar');
+                if (sidebarEl) {
+                    new MutationObserver(() => {
+                        const collapsed = sidebarEl.classList.contains('collapsed');
+                        document.body.classList.toggle('sidebar-collapsed', collapsed);
+                        setBottomColumns();
+                    }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+                }
+            };
+        })
+        .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+}
+
+// 1. ดึงข้อมูลรายละเอียดงานด้านบน (เหมือนเดิม)
+async function loadAssignmentDetails() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/assignments/${ASSIGNMENT_ID}`);
+        if (!response.ok) throw new Error('ดึงข้อมูลงานไม่สำเร็จ');
+        const result = await response.json();
+        renderAssignmentDetails(result.data);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+function renderAssignmentDetails(data) {
+    document.getElementById('display-title').textContent = data.title;
+    document.getElementById('display-due-date').textContent = `Due date on ${data.due_date}`; 
+    document.getElementById('display-instructions').textContent = data.description; 
     
-    // --- กลุ่ม Fully Graded ---
-    { id: "67091111113", name: "นางสาวเรียนดี รักสงบ", date: "10 Feb 2026", status: "Graded", file: "hw_final.pdf", grade: "9", hasFeedback: true },
-    { id: "67091111114", name: "นายตั้งใจ ใฝ่รู้", date: "10 Feb 2026", status: "Graded", file: "cs232_assign1.pdf", grade: "10", hasFeedback: false },
+    // ตัดการแสดง Points ทิ้งไปเลยก็ได้ถ้าไม่มีการให้คะแนนแล้ว
+    const pointsEl = document.getElementById('display-points');
+    if(pointsEl) pointsEl.style.display = 'none';
 
-    // --- กลุ่ม Missing ---
-    { id: "67091111115", name: "นายสายเสมอ นอนดึก", date: "-", status: "Missing", file: null, grade: "0", hasFeedback: false },
-    { id: "67091111116", name: "นางสาวลืมส่ง งาน", date: "-", status: "Missing", file: null, grade: "0", hasFeedback: false }
-];
+    const formatsContainer = document.getElementById('display-allowed-formats');
+    if (formatsContainer && data.allowed_file_types) {
+        formatsContainer.innerHTML = ''; 
+        const formatsArray = data.allowed_file_types.split(','); 
+        formatsArray.forEach(format => {
+            const formatTrimmed = format.trim().toLowerCase();
+            const badge = document.createElement('span');
+            badge.className = 'format-badge';
+            
+            let iconHtml = '<iconify-icon icon="ph:file-duotone"></iconify-icon>'; 
+            if(formatTrimmed === 'pdf') iconHtml = '<iconify-icon icon="ph:file-pdf-duotone" style="color:#EF4444;"></iconify-icon>';
+            else if(formatTrimmed === 'zip') iconHtml = '<iconify-icon icon="ph:file-archive-duotone" style="color:#333;"></iconify-icon>';
 
-// ==========================================
-// 2. จัดการเรื่อง Tab Switching (คลิกสลับแท็บ)
-// ==========================================
-// ==========================================
-// 2. จัดการเรื่อง Tab Switching (คลิกสลับแท็บ)
-// ==========================================
+            badge.innerHTML = `${iconHtml} ${formatTrimmed.toUpperCase()}`;
+            formatsContainer.appendChild(badge);
+        });
+    }
+}
+
+// 2. ดึงข้อมูลรายชื่อนักศึกษา (อัปเดตใหม่)
+async function loadStudentsByStatus(statusFilter) {
+    const tbody = document.querySelector('.grading-table tbody');
+    tbody.innerHTML = '<tr><td colspan="5" align="center">กำลังโหลดข้อมูล... ⏳</td></tr>';
+
+    try {
+        // แปลงชื่อ Tab ให้เป็น query ส่งให้ Backend (submitted หรือ missing)
+        const apiStatus = statusFilter.toLowerCase();
+
+        const response = await fetch(`${API_BASE_URL}/assignments/${ASSIGNMENT_ID}/students?status=${apiStatus}`);
+        if (!response.ok) throw new Error('ดึงข้อมูลนักศึกษาไม่สำเร็จ');
+        
+        const realStudentsData = await response.json();
+        renderTable(realStudentsData.data, statusFilter); // สมมติว่า Backend ส่งมาใน .data
+    } catch (error) {
+        console.error("Error:", error);
+        tbody.innerHTML = '<tr><td colspan="5" align="center" style="color:red;">ไม่มีข้อมูลนักศึกษาในสถานะนี้</td></tr>';
+    }
+}
+
+// 3. จัดการ Tab Switching
 const tabItems = document.querySelectorAll('.tab-item');
-const editGradesBtn = document.getElementById('edit-grades-btn'); // ดึงปุ่ม Edit มารอไว้
-
-let currentFilter = 'Needs Grading'; 
-
 tabItems.forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', (e) => {
         tabItems.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentFilter = tab.textContent.trim();
+        e.currentTarget.classList.add('active');
         
-        // ✨ เพิ่มลอจิกซ่อน/แสดงปุ่ม Edit ตรงนี้ค่ะ ✨
-        if (currentFilter === 'Fully Graded') {
-            editGradesBtn.style.display = 'flex'; // แสดงปุ่ม (ใช้ flex เพราะ css ปุ่มเราเป็น flex)
-        } else {
-            editGradesBtn.style.display = 'none'; // ซ่อนปุ่มในหน้าอื่นๆ
-        }
-        
-        renderTable(currentFilter);
+        const currentFilter = e.currentTarget.textContent.trim(); // 'Submitted' หรือ 'Missing'
+        loadStudentsByStatus(currentFilter);
     });
 });
 
-// สำคัญ: ตอนโหลดหน้าเว็บครั้งแรก แท็บเป็น Needs Grading ต้องสั่งซ่อนปุ่ม Edit ไว้ก่อนด้วยค่ะ
-editGradesBtn.style.display = 'none';
-
-
-// ==========================================
-// 3. ฟังก์ชันอัปเดตตาราง (Render Table)
-// ==========================================
-function renderTable(filterStr) {
+// 4. ฟังก์ชันวาดตาราง (อัปเดตใหม่ ตัดคอลัมน์คะแนนทิ้ง)
+function renderTable(studentsData, filterStr) {
     const tbody = document.querySelector('.grading-table tbody');
-    tbody.innerHTML = ''; // ล้างข้อมูลเก่าทิ้งก่อนวาดใหม่
+    tbody.innerHTML = ''; 
 
-    // กรองข้อมูล: ถ้าแท็บคือ "Needs Grading" เอาเฉพาะคนที่ Submitted
-    let filteredStudents = mockStudents;
-    if (filterStr === 'Needs Grading') {
-        filteredStudents = mockStudents.filter(student => student.status === 'Submitted');
-    } else if (filterStr === 'Fully Graded') {
-        filteredStudents = mockStudents.filter(student => student.status === 'Graded');
-    } else if (filterStr === 'Missing') {
-        filteredStudents = mockStudents.filter(student => student.status === 'Missing');
+    if(!studentsData || studentsData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" align="center">ไม่มีนักศึกษาในกลุ่ม ${filterStr}</td></tr>`;
+        return;
     }
 
-    // เอาข้อมูลที่กรองแล้วมาวนลูปสร้าง <tr>
-    filteredStudents.forEach(student => {
+    studentsData.forEach(student => {
         const tr = document.createElement('tr');
         tr.className = 'table-row';
 
-        // --- จัดการหน้าตาของ Status ---
+        // จัดการ Status Badge
         let statusContent = '';
-        let statusClass = '';
-
-        if (student.status === 'Submitted') {
-            statusContent = `<span class="badge badge-submitted">Submitted</span>`; // ใช้ Badge จาก CSS ที่เราทำ
-        } else if (student.status === 'Graded') {
-            statusContent = `<span class="badge badge-graded">Graded</span>`;
-        } else if (student.status === 'Missing') {
+        if (filterStr === 'Submitted') {
+            statusContent = `<span class="badge badge-submitted">Submitted</span>`;
+        } else {
             statusContent = `<span class="badge badge-missing">Missing</span>`;
         }
 
-        // --- จัดการปุ่ม File ---
+        // จัดการปุ่มเปิดไฟล์
         let submissionContent = '';
-        if (student.file) {
-            submissionContent = `<button class="file-btn" type="button">
+        if (student.file_url) {
+            submissionContent = `<button class="file-btn" type="button" onclick="window.open('${student.file_url}', '_blank')">
                                     <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
-                                    ${student.file}
+                                    View File
                                  </button>`;
         } else {
             submissionContent = `<span style="color: var(--text-muted); font-size: 0.9rem;">No File</span>`;
         }
 
-        // --- จัดการไอคอน Feedback (3 สถานะ) ---
-        let feedbackIcon = '';
-        if (student.hasFeedback === true || student.status === 'Graded') {
-            feedbackIcon = `<iconify-icon icon="hugeicons:bubble-chat-done" width="24" height="24" style="color: var(--green-positive);"></iconify-icon>`;
-        } else if (student.status === 'Missing') {
-            feedbackIcon = `<iconify-icon icon="hugeicons:bubble-chat-lock" width="24" height="24" style="color: var(--text-muted); opacity: 0.5;"></iconify-icon>`;
-        } else {
-            feedbackIcon = `<iconify-icon icon="hugeicons:bubble-chat" width="24" height="24" style="color: var(--text-main);"></iconify-icon>`;
-        }
-
-        // --- จัดการช่อง Grade ---
-        let gradeInputHTML = '';
-        if (student.status === 'Missing') {
-             // หน้า Missing ให้โชว์เป็นเครื่องหมายขีด (-) สไตล์ตัวหนังสือสีเทา (ไม่มีกล่อง Input)
-             gradeInputHTML = `<span style="color: var(--text-muted); font-weight: 500;">-</span>`; 
-             // 💡 ทริค: ถ้าคนสวยอยากให้โชว์เลข 0 ก็เปลี่ยนเครื่องหมาย - เป็นเลข 0 ได้เลยค่ะ
-        } else {
-             // หน้าอื่นๆ (Needs Grading, Fully Graded) ให้โชว์กล่อง Input เหมือนเดิม
-             gradeInputHTML = `<input type="text" class="grade-input" size="3" value="${student.grade}">`;
-        }
-
-        // --- ประกอบร่าง HTML ---
+        // วาดแค่ 5 คอลัมน์
         tr.innerHTML = `
-            <td>${student.id}</td>
-            <td>${student.name}</td>
-            <td>${student.date}</td>
+            <td>${student.student_id || student.id}</td>
+            <td>${student.first_name} ${student.last_name || ''}</td>
+            <td>${student.submitted_date || '-'}</td>
             <td>${statusContent}</td>
             <td>${submissionContent}</td>
-            <td>${gradeInputHTML}</td>
-            <td align="center">
-                <button class="feedback-btn" type="button" style="background: none; border: none; cursor: pointer;">
-                    ${feedbackIcon}
-                </button>
-            </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-// 4. สั่งรันฟังก์ชันครั้งแรกตอนโหลดหน้าเว็บ
-// ให้โชว์แท็บ Needs Grading ก่อน
-renderTable('Needs Grading');
+// สั่งรันครั้งแรก
+loadTeacherSidebarNavbar();
+loadAssignmentDetails();
+loadStudentsByStatus('Submitted');
