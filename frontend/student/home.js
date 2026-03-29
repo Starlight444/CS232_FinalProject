@@ -20,6 +20,7 @@ fetch('../components/student-navbar/student-navbar.html')
     document.body.appendChild(script);
   });
 
+// ---------- main content ----------
 // Calendar fix: September 2021 starts on Wednesday (index 3)
 // Rebuild calendar correctly
 const calGrid = document.querySelector('.cal-grid');
@@ -57,149 +58,196 @@ document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.add('active');
   });
 });
+
+
+// รายการการบ้านแยกหมวดหมู่ due today, upcoming, overdue, complete
+// หมวดหมู่การบ้าน
+let categorizedAssignments = {
+  dueToday: [],
+  upcoming: [],
+  overdue: [],
+  complete: []
+};
+
+let currentTab = "dueToday";
+
 async function loadHomeData() {
-  // 1. ดึง user จาก localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user) return;
+  try {
+    // 1. ดึง user จาก localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
 
-  // แสดงชื่อ
-  document.querySelector('.welcome').textContent = `Welcome, ${user.first_name}`;
+    // แสดงชื่อ
+    document.querySelector('.welcome').textContent = `Welcome, ${user.first_name}`;
 
-  // 2. ดึง courses ของ user
-  const courseRes = await fetch(`${BASE_URL}/courses/my/${user.user_id}?role=${user.role}`);
-  const courseJson = await courseRes.json();
-  const courses = courseJson.data;
-  if (!courses || courses.length === 0) return;
+    // 2. ดึง courses ของ user
+    const courseRes = await fetch(`${BASE_URL}/courses/my/${user.user_id}?role=${user.role}`);
+    const courseJson = await courseRes.json();
+    const courses = courseJson;
 
-  // 3. ดึง assignments และ announcements จากทุก course
-  let allAssignments = [];
-  let allAnnouncements = [];
+    if (!courses || courses.length === 0) {
+    renderAssignmentList([]);
+    return;
+    }
 
-  for (const course of courses) {
-    const [asgRes, annRes] = await Promise.all([
-      fetch(`${BASE_URL}/assignments/${course.course_id}`),
-      fetch(`${BASE_URL}/announcements/course/${course.course_id}`)
-    ]);
-    const asgJson = await asgRes.json();
-    const annJson = await annRes.json();
+    let allAssignments = [];
 
-    if (asgJson.data) allAssignments.push(...asgJson.data);
-    if (annJson.data) allAnnouncements.push(...annJson.data);
+    // 3. get assignments from every course
+    for (const course of courses) {
+      const asgRes  = await fetch(`${BASE_URL}/assignments/${course.course_id}`);
+      const asgJson = await asgRes.json();
+
+      const assignments = asgJson.data || [];
+
+        // 4. check submission per assignment
+        for (const assignment of assignments) {
+          const subRes = await fetch(
+            `${BASE_URL}/submissions/assignment/${assignment.assignment_id}/student/${user.user_id}`
+          );
+
+          const subJson = await subRes.json();
+
+          assignment.submission = subJson.data;
+          assignment.course_name = course.course_name;
+          assignment.course_code = course.course_code;
+
+          allAssignments.push(assignment);
+        }
+    }
+
+    // 4) categorize
+    categorizedAssignments = categorizeAssignments(allAssignments);
+
+    // 5) render stat count
+    updateStatNumbers();
+
+    console.log("ALL ASSIGNMENTS", allAssignments);
+    console.log("CATEGORIZED", categorizedAssignments);
+
+    // 6) render default tab
+    renderAssignmentList(categorizedAssignments[currentTab]);
+
+    // 7) bind click event
+    setupStatTabs();
+  } catch (error) {
+    console.error("Load home data error:", error);
   }
-
-  // 4. แสดงผล
-  renderStats(allAssignments);
-  renderAssignments(allAssignments);
-  renderAnnouncements(allAnnouncements);
 }
 
-function renderStats(assignments) {
+// แยก assignment ตามหมวดหมู่
+function categorizeAssignments(assignments) {
   const now = new Date();
   const today = now.toDateString();
 
-  let dueToday = 0, upcoming = 0, overdue = 0, complete = 0;
+  const result = {
+    dueToday: [],
+    upcoming: [],
+    overdue: [],
+    complete: []
+  };
 
   assignments.forEach(a => {
     const due = new Date(a.due_date);
-    if (a.status === 'submitted') {
-      complete++;
+    const submitted = a.submission && a.submission.submission_id;
+
+    if (submitted) {
+      result.complete.push(a);
     } else if (due.toDateString() === today) {
-      dueToday++;
+      result.dueToday.push(a);
     } else if (due < now) {
-      overdue++;
+      result.overdue.push(a);
     } else {
-      upcoming++;
+      result.upcoming.push(a);
     }
   });
 
-  document.querySelector('.due-today .stat-num').textContent = dueToday;
-  document.querySelector('.active-stat .stat-num').textContent = upcoming;
-  document.querySelector('.overdue .stat-num').textContent = overdue;
-  document.querySelector('.complete .stat-num').textContent = complete;
+  return result;
 }
 
-function renderAssignments(assignments) {
-  const list = document.querySelector('.assign-list');
-  list.innerHTML = '';
-  const now = new Date();
+// แสดงตัวเลขใน Assignment
+function updateStatNumbers() {
+  document.querySelector(".due-today .stat-num").textContent =
+    categorizedAssignments.dueToday.length;
 
-  // เอาแค่ที่ยังไม่ submit และเรียงตาม due_date
-  const pending = assignments
-    .filter(a => a.status !== 'submitted')
-    .sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+  document.querySelector(".upcoming .stat-num").textContent =
+    categorizedAssignments.upcoming.length;
 
-  if (pending.length === 0) {
-    list.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">No upcoming assignments</p>';
+  document.querySelector(".overdue .stat-num").textContent =
+    categorizedAssignments.overdue.length;
+
+  document.querySelector(".complete .stat-num").textContent =
+    categorizedAssignments.complete.length;
+}
+
+// สลับปุ่ม active ใน Assignment
+function setupStatTabs() {
+  const mapping = [
+    { selector: ".due-today", key: "dueToday" },
+    { selector: ".upcoming", key: "upcoming" },
+    { selector: ".overdue", key: "overdue" },
+    { selector: ".complete", key: "complete" }
+  ];
+
+  mapping.forEach(item => {
+    const el = document.querySelector(item.selector);
+
+    el.onclick = () => {
+      document.querySelectorAll(".stat-item")
+        .forEach(i => i.classList.remove("active-stat"));
+
+      el.classList.add("active-stat");
+
+      currentTab = item.key;
+
+      renderAssignmentList(categorizedAssignments[currentTab]);
+    };
+  });
+}
+
+// สร้างรายการการบ้าน
+function renderAssignmentList(assignments) {
+  const list = document.querySelector(".assign-list");
+  list.innerHTML = "";
+
+  if (assignments.length === 0) {
+    list.innerHTML = `
+      <p style="color:#888;text-align:center;padding:20px;">
+        No assignments
+      </p>`;
     return;
   }
 
-  pending.forEach(a => {
-    const due = new Date(a.due_date);
-    const diff = due - now;
-    const hours = Math.floor(diff / 1000 / 60 / 60);
-    const mins = Math.floor(diff / 1000 / 60);
-
-    let dueText = '';
-    let dueClass = 'gray';
-
-    if (diff < 0) {
-      dueText = 'Overdue';
-      dueClass = 'red';
-    } else if (mins < 60) {
-      dueText = `Due in ${mins} minutes`;
-      dueClass = 'red';
-    } else if (hours < 24) {
-      dueText = `Due in ${hours} hours`;
-      dueClass = 'red';
-    } else {
-      dueText = `Due in ${Math.floor(hours / 24)} days`;
-      dueClass = 'gray';
-    }
+  assignments.forEach(a => {
+    const dueText = getDueText(a.due_date);
 
     list.innerHTML += `
       <div class="assign-item">
-        <div class="assign-avatar">Pic</div>
+        <div class="assign-avatar">${a.course_code}</div>
         <div class="assign-info">
           <div class="assign-name">${a.title}</div>
-          <div class="assign-due ${dueClass}">${dueText}</div>
-          <div class="assign-class">${a.course_id}</div>
+          <div class="assign-due">${dueText}</div>
+          <div class="assign-class">${a.course_name}</div>
         </div>
         <div class="assign-points">${a.max_score} Point</div>
-      </div>`;
+      </div>
+    `;
   });
 }
 
-function renderAnnouncements(announcements) {
-  const container = document.querySelector('.ann-card');
-  const title = container.querySelector('.ann-title');
-  container.innerHTML = '';
-  container.appendChild(title);
+// คำนวณ due text ที่การ์ดการบ้าน
+function getDueText(dueDate) {
+  const now = new Date();
+  const due = new Date(dueDate);
+  const diff = due - now;
 
-  if (announcements.length === 0) {
-    container.innerHTML += '<p style="color:#888;font-size:13px;">No announcements</p>';
-    return;
-  }
-
-  announcements.slice(0, 5).forEach(a => {
-    const timeAgo = getTimeAgo(new Date(a.created_at));
-    container.innerHTML += `
-      <div class="ann-item">
-        <div class="ann-item-title">${a.title}</div>
-        <div class="ann-item-body">${a.content}</div>
-        <div class="ann-item-time">${timeAgo}</div>
-      </div>`;
-  });
-}
-
-function getTimeAgo(date) {
-  const diff = new Date() - date;
-  const mins = Math.floor(diff / 60000);
+  const mins = Math.floor(diff / 1000 / 60);
   const hours = Math.floor(mins / 60);
   const days = Math.floor(hours / 24);
-  if (mins < 1) return 'Now';
-  if (mins < 60) return `${mins} minutes ago`;
-  if (hours < 24) return `${hours} hours ago`;
-  return `${days} days ago`;
+
+  if (diff < 0) return "Overdue";
+  if (mins < 60) return `Due in ${mins} minutes`;
+  if (hours < 24) return `Due in ${hours} hours`;
+  return `Due in ${days} days`;
 }
 
 // เรียกใช้ตอนหน้าโหลด

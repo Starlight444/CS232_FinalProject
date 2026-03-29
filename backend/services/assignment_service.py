@@ -43,6 +43,10 @@ class AssignmentService:
             {
                 "assignment_id": str(a.assignment_id),
                 "title": a.title,
+                "due_date": a.due_date,
+                "max_score": a.max_score,
+                "course_id": str(a.course_id),
+                "status": a.status,
                 "submit_count": count
             }
             for a, count in rows

@@ -197,17 +197,22 @@ body.sidebar-collapsed .layout {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.due-today .stat-num {
+.due-today .stat-num  {
   color: #e74c3c;
 }
 
-.overdue .stat-num {
-  color: #222;
+.due-today.active-stat .stat-num {
+  color: #ff6b6b;
 }
 
 .complete .stat-num {
   color: #27ae60;
 }
+
+.complete.active-stat .stat-num {
+  color: #2ecc71;
+}
+
 
 /* Assignment list */
 .assign-list {
