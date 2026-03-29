@@ -13,7 +13,7 @@ from services.submission_service import SubmissionService
 #from storage.s3_storage import S3Storage
 
 
-router = APIRouter(prefix="/submissions")
+router = APIRouter(prefix="/submissions", tags=["submission"])
 
 @router.get("/assignment/{assignment_id}")
 def get_submissions_by_assignment(
