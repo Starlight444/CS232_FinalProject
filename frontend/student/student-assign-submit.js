@@ -24,15 +24,13 @@ fetch('../components/student-navbar/student-navbar.html')
 const fileInput = document.getElementById('file-input');
 const workFiles = document.getElementById('work-files');
 const submitBtn = document.getElementById('submit-btn');
-<<<<<<< HEAD
 const backBtn = document.getElementById('back-btn');
 
 // back button
 backBtn.addEventListener('click', () => {
     window.location.href = 'student-all-assign.html';
 });
-=======
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
+
 
 let uploadedFiles = [];
 let isSubmitted = false;
@@ -50,33 +48,19 @@ const BASE_URL = 'http://localhost:3000';
 const TOKEN = 'test-token'; // เป็นแบบนี้ชั่วคราวเพื่อเช็คว่า API เชื่อมติดไหม
 
 const urlParams = new URLSearchParams(window.location.search);
-<<<<<<< HEAD
 const assignment_id = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
 
 // ตรวจสอบ ID ก่อนเริ่มทำงาน
 if (!assignment_id) {
     console.error("No assignment ID found");
-=======
-const assignment_Id = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
-
-// ตรวจสอบ ID ก่อนเริ่มทำงาน
-if (!assignment_Id) {
-    console.error("No assignment ID found"); // ตรงกับ Error ในภาพ
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
     alert("ไม่พบรหัสการบ้าน กรุณากลับไปเลือกการบ้านใหม่อีกครั้ง");
 }
 
 // ฟังก์ชันดึงข้อมูลการบ้านมาโชว์ 
 async function fetchAssignmentDetail() {
-<<<<<<< HEAD
 
     try {
         const response = await fetch(`${BASE_URL}/assignments/${assignment_id}`, {
-=======
-    if (!assignment_Id) return console.error("No assignment ID found");
-    try {
-        const response = await fetch(`${BASE_URL}/assignments/${assignment_Id}`, {
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${TOKEN}`,
@@ -100,7 +84,6 @@ async function fetchAssignmentDetail() {
     }
 }
 
-<<<<<<< HEAD
 function updateUISubmitted() {
     isSubmitted = true;
     submitBtn.textContent = 'Edit Submission';
@@ -124,8 +107,6 @@ async function checkCurrentSubmission() {
     // ตัวอย่าง: ถ้า API ยังไม่พร้อมให้ปล่อยว่างไว้ก่อน
 }
 
-=======
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 // api : submission
 async function handleSubmission() {
     if (uploadedFiles.length === 0) {
@@ -142,11 +123,7 @@ async function handleSubmission() {
         const formData = new FormData();
         if (uploadedFiles.length > 0) {
             formData.append('file', uploadedFiles[0]);
-<<<<<<< HEAD
             formData.append('assignment_id', assignment_id);
-=======
-            formData.append('assignment_id', assignmentId);
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
         }
 
         const uploadRes = await fetch(`${BASE_URL}/attachments`, {
@@ -160,11 +137,7 @@ async function handleSubmission() {
         const fileUrl = uploadData.data.file_url;
 
         // api : submit assihnment 
-<<<<<<< HEAD
         const submitRes = await fetch(`${BASE_URL}/assignments/${assignment_id}/submit`, {
-=======
-        const submitRes = await fetch(`${BASE_URL}/assignments/${assignmentId}/submit`, {
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${TOKEN}`,
@@ -178,7 +151,7 @@ async function handleSubmission() {
             isSubmitted = true;
             updateUISubmitted();
             alert("ส่งงานสำเร็จเรียบร้อย!");
-<<<<<<< HEAD
+
             // Timestamp 
             const bar = submitBtn.parentElement;
             if (!document.querySelector('.submit-timestamp')) {
@@ -187,8 +160,6 @@ async function handleSubmission() {
                 stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
                 bar.appendChild(stamp);
             }
-=======
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
         }
     } catch (err) {
         console.error("Submit Error:", err);
@@ -287,23 +258,4 @@ submitBtn.addEventListener('click', () => {
     } else {
         handleSubmission();
     }
-
-
-<<<<<<< HEAD
-=======
-    /*isSubmitted = true;
-    submitBtn.textContent = 'Edit Submission';
-    submitBtn.classList.add('submitted');
-
-    lockWorkBox(true);*/
-
-    // Timestamp 
-    const bar = submitBtn.parentElement;
-    if (!document.querySelector('.submit-timestamp')) {
-        const stamp = document.createElement('p');
-        stamp.className = 'submit-timestamp';
-        stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
-        bar.appendChild(stamp);
-    }
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 });
