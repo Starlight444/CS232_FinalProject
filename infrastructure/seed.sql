@@ -3,7 +3,7 @@ VALUES
 ('CS101', 'Introduction to Computer Science', 'Basic CS course')
 ON CONFLICT (course_code) DO NOTHING;
 
-INSERT INTO users (email, password_hash, first_name, last_name)
+INSERT INTO users (email, password_hash, first_name, last_name, student_id, teacher_id)
 VALUES
 ('alice@example.com', '$2b$12$v8G5hUD9RV/sfs9enVh27u.iP/KwlnlwOZOjk0W7ZdQ9TLCwtGAq.', 'Alice', 'Tan', NULL, '1005432001'),
 ('bob@example.com', '$2b$12$pJ7GK5cF8nbHqFZJxebdYezGD.RCfhlV5CqaEn3HPBToFOtKfveLm', 'Bob', 'Smith', '6709610101', NULL),
