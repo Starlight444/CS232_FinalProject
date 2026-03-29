@@ -15,6 +15,7 @@ function setActiveLink(target) {
 //การยุบ/ขยาย Sidebar
 toggleBtn.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
+    document.body.classList.toggle('sidebar-collapsed');
 
     // ถ้า Sidebar ยุบ ให้ปิดเมนูย่อย
     if (sidebar.classList.contains('collapsed')) {
@@ -38,6 +39,12 @@ courseBtn.addEventListener('click', (e) => {
     }
 });
 
+//แผนที่หน้าของแต่ละปุ่ม
+const pageRoutes = {
+    'home': 'home.html',
+    'assignments': 'student-all-assign.html',
+    'courses': 'student-courses-detail.html'
+};
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
     if (link.id === 'courseBtn') return;
@@ -52,6 +59,11 @@ document.querySelectorAll('.nav-link[data-page]').forEach(link => {
 
         // ล้างสถานะ Active ของเมนูย่อย
         document.querySelectorAll('.sub-link').forEach(s => s.classList.remove('active-sub'));
+        // นำทางไปยังหน้าที่กำหนด
+        const page = link.getAttribute('data-page');
+        if (pageRoutes[page]) {
+            window.location.href = pageRoutes[page];
+        }
     });
 });
 
@@ -70,10 +82,44 @@ document.querySelectorAll('.sub-link').forEach(link => {
         setActiveLink(courseBtn);
     });
 });
-toggleBtn.addEventListener("click", () => {
+/*toggleBtn.addEventListener("click", () => {
     sidebar.classList.toggle("collapsed");
     document.body.classList.toggle("sidebar-collapsed");
-});
+});*/
+
+// ปุ่ม Log out
+const logoutLink = document.querySelector('.logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('user');
+        window.location.href = '../auth/login.html';
+    });
+}
+
+// ตั้งค่า Active ตามหน้าปัจจุบัน
+function initActiveFromURL() {
+    const currentFile = window.location.pathname.split('/').pop();
+    const reverseRoutes = {
+        'home.html': 'home',
+        'student-all-assign.html': 'assignments',
+        'student-announcements.html': 'announcements',
+        'student-assign-submit.html': 'assignments',
+        'student-courses-detail.html': 'courses'
+    };
+
+    const activePage = reverseRoutes[currentFile];
+    if (!activePage) return;
+
+    if (activePage === 'courses') {
+        setActiveLink(courseBtn);
+        coursesItem.classList.add('open');
+    } else {
+        const activeLink = document.querySelector(`.nav-link[data-page="${activePage}"]`);
+        if (activeLink) setActiveLink(activeLink);
+    }
+}
+initActiveFromURL();
 
 // ฟังก์ชันวิชาใน Sidebar จากข้อมูลจริง
 function renderSidebarCourses(courses) {
@@ -99,10 +145,44 @@ function renderSidebarCourses(courses) {
             window.location.href = `../student/student-courses-detail.html?id=${courseId}`;
         });
 
+        // highlight วิชาที่ตรงกับ URL ปัจจุบัน
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentId = urlParams.get('id');
+        if (currentId && String(course.course_id) === String(currentId)) {
+            link.classList.add('active-sub');
+            setActiveLink(courseBtn);
+            coursesItem.classList.add('open');
+        }
+
         li.appendChild(link);
         sidebarList.appendChild(li);
     });
 }
+
+// ดึงรายวิชาจาก API แล้วแสดงใน sidebar
+async function fetchSidebarCourses() {
+    const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+    // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (!userData || !userData.token) {
+        window.location.href = "../auth/login.html";
+    }
+
+    const TOKEN = userData ? userData.token : '';
+    const USER_ID = userData ? userData.user_id : '';
+
+    try {
+        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}`, {
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        const data = await res.json();
+        const courses = data.data || data || [];
+        renderSidebarCourses(courses);
+    } catch (err) {
+        console.error('Error fetching sidebar courses:', err);
+    }
+}
+fetchSidebarCourses();
 
 // เรียกใช้ได้จากไฟล์อื่น 
 window.renderSidebarCourses = renderSidebarCourses;
