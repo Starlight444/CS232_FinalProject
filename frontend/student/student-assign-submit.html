@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Detail Submit</title>
+    <link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
+    <link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
+    <link rel="stylesheet" href="student-assign-submit.css">
+
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <main class="main-content">
+        <div class="assignment-card">
+            <div class="assign-header">
+                <div>
+                    <h1 class="assign-title">Assignment Title</h1>
+                    <p class="assign-due">Due date on WE 11 Mar 26, 11:59 PM</p>
+                </div>
+                <div class="assign-points">100 Points</div>
+            </div>
+
+            <section class="assign-section">
+                <h2 class="section-label">คำสั่ง</h2>
+                <p class="section-body">ยายมอยขายหมี ยายมีขายหอย หมียายมอยแหย่หอยยายมี หอยยายมีกัดหมียายมอย</p>
+            </section>
+
+            <!-- Attached file -->
+            <section class="assign-section">
+                <h2 class="section-label">File</h2>
+                <div class="file-item">
+                    <div class="file-name">
+                        <div class="pdf-icon">
+                            <img src="../assets/icons/pdf.svg">
+                        </div>
+                        assign_01.pdf
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student work submit -->
+            <section class="assign-section">
+                <h2 class="section-label">งานของฉัน</h2>
+                <div class="work-box">
+                    <div class="work-files" id="work-files">
+                        <!-- Uploaded files appear here -->
+                    </div>
+                    <!-- Add file button -->
+                    <label class="add-file-btn" for="file-input" title="Add file">
+                        <i class="fa-solid fa-plus"></i>
+                    </label>
+                    <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.zip" hidden />
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Submit bar -->
+        <div class="submit-bar">
+            <button class="submit-btn" id="submit-btn">Submit</button>
+        </div>
+    </main>
+
+    <script src="student-assign-submit.js"></script>
+</body>
+
+</html>
