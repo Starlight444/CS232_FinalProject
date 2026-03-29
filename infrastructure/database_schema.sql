@@ -1,23 +1,26 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL
+    last_name VARCHAR(100) NOT NULL,
+    student_id VARCHAR(10) UNIQUE,
+    teacher_id VARCHAR(10) UNIQUE
 );
 
-CREATE TABLE courses (
+CREATE TABLE IF NOT EXISTS courses (
     course_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     course_code VARCHAR(20) UNIQUE NOT NULL,
     course_name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL
 );
 
-CREATE TYPE course_role AS ENUM ('student', 'teacher', 'ta');
+-- CREATE TYPE course_role AS ENUM ('student', 'teacher', 'ta');
+DO $$ BEGIN CREATE TYPE course_role AS ENUM ('student','teacher','ta'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE course_members (
+CREATE TABLE IF NOT EXISTS course_members (
     member_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     course_id UUID NOT NULL,
@@ -35,10 +38,10 @@ CREATE TABLE course_members (
         UNIQUE (user_id, course_id)
 );
 
-CREATE INDEX idx_course_members_user
+CREATE INDEX IF NOT EXISTS idx_course_members_user
 ON course_members(user_id);
 
-CREATE TABLE announcements (
+CREATE TABLE IF NOT EXISTS announcements (
     announcement_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
@@ -56,12 +59,13 @@ CREATE TABLE announcements (
         REFERENCES courses(course_id)
 );
 
-CREATE INDEX idx_announcements_course
+CREATE INDEX IF NOT EXISTS idx_announcements_course
 ON announcements(course_id);
 
-CREATE TYPE assignment_status AS ENUM ('published', 'closed');
+-- CREATE TYPE assignment_status AS ENUM ('published', 'closed');
+DO $$ BEGIN CREATE TYPE assignment_status AS ENUM ('published', 'closed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE assignments (
+CREATE TABLE IF NOT EXISTS assignments (
     assignment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -83,12 +87,13 @@ CREATE TABLE assignments (
         REFERENCES users(user_id)
 );
 
-CREATE INDEX idx_assignment_course
+CREATE INDEX IF NOT EXISTS idx_assignment_course
 ON assignments(course_id);
 
-CREATE TYPE submission_status AS ENUM ('submitted', 'pending' , 'graded', 'missing');
+-- CREATE TYPE submission_status AS ENUM ('submitted', 'pending' , 'graded', 'missing');
+DO $$ BEGIN CREATE TYPE submission_status AS ENUM ('submitted', 'pending' , 'graded', 'missing'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE submissions (
+CREATE TABLE IF NOT EXISTS submissions (
     submission_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     assignment_id UUID NOT NULL,
     student_id UUID NOT NULL,
@@ -111,13 +116,13 @@ CREATE TABLE submissions (
         UNIQUE (assignment_id, student_id)
 );
 
-CREATE INDEX idx_submission_assignment
+CREATE INDEX IF NOT EXISTS idx_submission_assignment
 ON submissions(assignment_id);
 
-CREATE INDEX idx_submission_student
+CREATE INDEX IF NOT EXISTS idx_submission_student
 ON submissions(student_id);
 
-CREATE TABLE attachments (
+CREATE TABLE IF NOT EXISTS attachments (
     attachment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     assignment_id UUID,
     submission_id UUID,
@@ -142,8 +147,8 @@ CREATE TABLE attachments (
         )
 );
 
-CREATE INDEX idx_attachment_submission
+CREATE INDEX IF NOT EXISTS idx_attachment_submission
 ON attachments(submission_id);
 
-CREATE INDEX idx_attachment_assignment
+CREATE INDEX IF NOT EXISTS idx_attachment_assignment
 ON attachments(assignment_id);

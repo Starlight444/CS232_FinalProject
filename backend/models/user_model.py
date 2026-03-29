@@ -11,3 +11,5 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     first_name = Column(String(100))
     last_name = Column(String(100))
+    student_id = Column(String(10), unique=True, nullable=True)
+    teacher_id = Column(String(10), unique=True, nullable=True)
