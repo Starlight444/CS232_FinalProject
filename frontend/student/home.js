@@ -1,5 +1,5 @@
 const BASE_URL = "http://127.0.0.1:8000";
-fetch('../components/student-sidebar/sidebar.html')
+fetch('/frontend/components/student-sidebar/sidebar.html')
   .then(response => response.text())
   .then(data => {
     document.getElementById('sidebar-placeholder').innerHTML = data;
@@ -66,7 +66,7 @@ async function loadHomeData() {
   document.querySelector('.welcome').textContent = `Welcome, ${user.first_name}`;
 
   // 2. ดึง courses ของ user
-  const courseRes = await fetch(`${BASE_URL}/courses/my/${user.user_id}`);
+  const courseRes = await fetch(`${BASE_URL}/courses/my/${user.user_id}?role=${user.role}`);
   const courseJson = await courseRes.json();
   const courses = courseJson.data;
   if (!courses || courses.length === 0) return;
