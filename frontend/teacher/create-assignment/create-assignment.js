@@ -3,17 +3,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 🌟 ตั้งค่า API
     // ==========================================
     const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
-    
+
     // ดึงค่าโหมดและ ID จาก URL
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
-    const assignmentId = urlParams.get('id'); 
+    const assignmentId = urlParams.get('id');
+
+    function loadTeacherSidebarNavbar() {
+        fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+            .then(r => r.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const container = document.getElementById('teacher-sidebar-navbar-container');
+
+                const sidebar = doc.querySelector('#sidebar');
+                const navbar = doc.querySelector('.navbar');
+                if (sidebar) container.appendChild(sidebar);
+                if (navbar) container.appendChild(navbar);
+
+                // Load sidebar JS (toggle / collapse logic)
+                const sidebarScript = document.createElement('script');
+                sidebarScript.src = '../../components/student-sidebar/sidebar.js';
+                document.body.appendChild(sidebarScript);
+
+                // Load navbar JS (profile dropdown)
+                const navbarScript = document.createElement('script');
+                navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
+                document.body.appendChild(navbarScript);
+
+                // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
+                // listens to `body.sidebar-collapsed` — sync them here
+                sidebarScript.onload = () => {
+                    const sidebarEl = document.getElementById('sidebar');
+                    if (sidebarEl) {
+                        new MutationObserver(() => {
+                            const collapsed = sidebarEl.classList.contains('collapsed');
+                            document.body.classList.toggle('sidebar-collapsed', collapsed);
+                            setBottomColumns();
+                        }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+                    }
+                };
+            })
+            .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+    }
+
+    loadTeacherSidebarNavbar();
+    await loadTeacherCourses();
 
     // ==========================================
     // 1. โหลดข้อมูลรายวิชามาใส่ Dropdown
     // ==========================================
     async function loadTeacherCourses() {
-        const courseSelect = document.getElementById('assign-course'); 
+        const courseSelect = document.getElementById('assign-course');
         if (!courseSelect) return;
 
         try {
@@ -23,12 +65,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) throw new Error('ดึงข้อมูลวิชาไม่สำเร็จ');
 
             const result = await response.json();
-            const courses = result.data || []; 
+            const courses = result.data || [];
 
             courseSelect.innerHTML = '<option value="" disabled selected>Select Courses</option>';
             courses.forEach(course => {
                 const option = document.createElement('option');
-                option.value = course.course_id; 
+                option.value = course.course_id;
                 option.textContent = `${course.course_code} - ${course.course_name}`;
                 courseSelect.appendChild(option);
             });
@@ -52,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const anyCheckbox = document.getElementById('check-any');
     const formatCheckboxes = document.querySelectorAll('.format-check');
     const dropZone = document.getElementById('drop-zone');
-    let fileInput = document.getElementById('file-upload'); 
+    let fileInput = document.getElementById('file-upload');
 
     // --- จัดการ Checkbox ---
     if (anyCheckbox) {
@@ -96,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- ฟังก์ชันคืนค่าหน้าตากล่องอัปโหลดกลับเป็นเหมือนเดิม ---
     function resetFileUI() {
         if (!dropZone) return;
-        
+
         // วาด HTML ของเดิมกลับคืนมา
         dropZone.innerHTML = `
             <iconify-icon icon="ph:cloud-arrow-up-light" class="upload-icon"></iconify-icon>
@@ -122,11 +164,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             dropZone.classList.add('dragover');
         });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        
+
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            
+
             if (e.dataTransfer.files.length > 0) {
                 selectedTeacherFile = e.dataTransfer.files[0];
                 updateFileUI(selectedTeacherFile); // เรียกฟังก์ชันเปลี่ยนหน้าตา
@@ -147,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // 3. จัดการโหมด Edit (GET ข้อมูลเก่ามายัดใส่ฟอร์ม)
     // ==========================================
-    const submitBtn = document.getElementById('submit-btn'); 
+    const submitBtn = document.getElementById('submit-btn');
     const isEdit = mode === 'edit';
 
     if (isEdit && assignmentId) {
@@ -158,13 +200,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/assignments/${assignmentId}`);
             if (!response.ok) throw new Error('ดึงข้อมูลเดิมไม่สำเร็จ');
-            
+
             const result = await response.json();
             const editData = result.data;
 
             document.getElementById('assign-title').value = editData.title || '';
             document.getElementById('assign-desc').value = editData.description || '';
-            document.getElementById('assign-date').value = editData.due_date ? editData.due_date.slice(0, 16) : ''; 
+            document.getElementById('assign-date').value = editData.due_date ? editData.due_date.slice(0, 16) : '';
             document.getElementById('assign-points').value = editData.max_score || '';
 
             if (editData.allowed_file_types) {
@@ -201,18 +243,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // 🌟 ขั้นตอนที่ 1: อัปโหลดไฟล์ (ถ้ามีการเลือกไฟล์ไว้)
                 if (selectedTeacherFile) {
                     submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> Uploading file...`;
-                    
+
                     const fileFormData = new FormData();
                     fileFormData.append('file', selectedTeacherFile);
 
                     const uploadRes = await fetch(`${API_BASE_URL}/attachments`, {
                         method: 'POST',
-                        body: fileFormData 
+                        body: fileFormData
                     });
 
                     if (!uploadRes.ok) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ (Backend อาจจะยังไม่รองรับ)');
                     const uploadData = await uploadRes.json();
-                    attachmentUrlOrId = uploadData.data.attachment_id; 
+                    attachmentUrlOrId = uploadData.data.attachment_id;
                 }
 
                 // 🌟 ขั้นตอนที่ 2: รวบรวมข้อมูลสร้าง Assignment
@@ -261,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!response.ok) throw new Error('บันทึกข้อมูล Assignment ไม่สำเร็จ');
 
                 alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้วค่ะ! ✨' : 'สร้าง Assignment สำเร็จแล้วค่ะ! 🎉');
-                history.back(); 
+                history.back();
 
             } catch (error) {
                 console.error("Submit Error:", error);

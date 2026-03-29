@@ -1,20 +1,9 @@
 /* =========================================
    Layout หลักของหน้า Create Assignment
 ========================================= */
-body.bg-light {
-    background-color: var(--bg-body, #F8F9FA);
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    font-family: inherit;
-}
 
 .create-page-container {
     width: 100%;
-    max-width: 900px;
 }
 
 .create-card {
