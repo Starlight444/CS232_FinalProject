@@ -1,6 +1,8 @@
+from sqlalchemy import func
 from models.submission_model import Submission
 from models.user_model import User
 from models.attachment_model import Attachment
+from models.assignment_model import Assignment
 
 
 class SubmissionRepository:
@@ -64,3 +66,36 @@ class SubmissionRepository:
         self.db.refresh(submission)
 
         return submission
+    
+    def count_submitted_students(self, course_id):
+        return (
+            self.db.query(func.count(func.distinct(Submission.student_id)))
+            .join(Assignment, Submission.assignment_id == Assignment.assignment_id)
+            .filter(Assignment.course_id == course_id)
+            .scalar()
+        )
+    
+    def get_by_assignment_and_student(self, assignment_id, student_id):
+        submission = (
+            self.db.query(Submission)
+            .filter(
+                Submission.assignment_id == assignment_id,
+                Submission.student_id == student_id
+            )
+            .first()
+        )
+        if not submission:
+            return {"status": "missing"}
+
+        attachments = (
+            self.db.query(Attachment)
+            .filter(Attachment.submission_id == submission.submission_id)
+            .all()
+        )
+        return {
+            "submission_id": submission.submission_id,
+            "status": submission.status,
+            "submitted_at": submission.submitted_at,
+            "score": submission.score,
+            "attachments": [a.file_url for a in attachments]
+        }
