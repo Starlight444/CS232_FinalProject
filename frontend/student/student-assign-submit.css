@@ -18,6 +18,7 @@ body.sidebar-collapsed .main-content {
     margin-left: var(--sidebar-collapsed-width);
 }
 
+<<<<<<< HEAD
 /*Back buttun*/
 .back-btn {
     margin-top: -10px;
@@ -38,6 +39,8 @@ body.sidebar-collapsed .main-content {
     line-height: normal;
 }
 
+=======
+>>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 /*Assignment card*/
 .assignment-card {
     background: #fff;
