@@ -10,10 +10,15 @@ class UserService:
         self.repo = repo
     
     def login(self, email, password):
+        email = email.strip().lower()
+        
         # 1. เช็คว่ามี user นี้ไหม
         user = self.repo.get_by_email(email)
         if not user:
             raise Exception("Email not found")
+        
+        # prevent bug bcrypt
+        password = password[:72]
         
         # 2. เช็ค password
         if not pwd_context.verify(password, user.password_hash):
