@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
-    // 🌟 ตั้งค่า API
+    //  ตั้งค่า API
     // ==========================================
-    const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+    //const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';ฃ
+    const API_BASE_URL = 'http://127.0.0.1:5501:3000/';
 
     // ดึงค่าโหมดและ ID จาก URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -246,7 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 let attachmentUrlOrId = null;
 
-                // 🌟 ขั้นตอนที่ 1: อัปโหลดไฟล์ (ถ้ามีการเลือกไฟล์ไว้)
+                //  ขั้นตอนที่ 1: อัปโหลดไฟล์ (ถ้ามีการเลือกไฟล์ไว้)
                 if (selectedTeacherFile) {
                     submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> Uploading file...`;
 
@@ -263,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     attachmentUrlOrId = uploadData.data.attachment_id;
                 }
 
-                // 🌟 ขั้นตอนที่ 2: รวบรวมข้อมูลสร้าง Assignment
+                //  ขั้นตอนที่ 2: รวบรวมข้อมูลสร้าง Assignment
                 submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> ${isEdit ? 'Saving...' : 'Posting...'}`;
 
                 let allowedTypesStr = 'any';
@@ -299,8 +300,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     fetchMethod = 'POST';
                 }
 
-                // 🌟 ขั้นตอนที่ 3: ยิง API สร้าง/แก้ไข Assignment
-                const response = await fetch(fetchUrl, {
+                //  ขั้นตอนที่ 3: ยิง API สร้าง/แก้ไข Assignment
+                // ==========================================
+
+                // ส่วน API ของจริงปิดไว้ก่อน รอ Backend ทำเสร็จค่อยเปิดใช้ 
+                /*const response = await fetch(fetchUrl, {
                     method: fetchMethod,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -308,8 +312,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (!response.ok) throw new Error('บันทึกข้อมูล Assignment ไม่สำเร็จ');
 
-                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้วค่ะ! ✨' : 'สร้าง Assignment สำเร็จแล้วค่ะ! 🎉');
-                history.back();
+                // 1. แกะกล่องของขวัญที่ Backend ส่งกลับมา เพื่อเอา ID ของงานใหม่
+                const responseData = await response.json();
+                
+                // 2. หาค่า ID ของงาน (ถ้าเป็นโหมด Edit ใช้ ID เดิม, ถ้าโหมด Create ให้ดึงจากที่ Backend ตอบกลับมา)
+                const savedAssignmentId = isEdit ? assignmentId : responseData.data.assignment_id;
+
+                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้ว!' : 'สร้าง Assignment สำเร็จแล้ว!');
+                
+                // 3. เปลี่ยนจาก history.back() เป็นการพาไปหน้า Manage พร้อมแนบ ID ไปใน URL
+                window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${savedAssignmentId}`;
+                */
+
+                // ==========================================
+                // โค้ดจำลอง (Mock) สำหรับรันเทสฝั่ง Frontend ไปก่อน
+                // ==========================================
+                console.log("ข้อมูลที่เตรียมจะส่งให้ Backend:", payload);
+                
+                // แกล้งทำเป็นรอโหลด API 1 วินาที ให้เห็นแอนิเมชันปุ่มหมุนๆ
+                setTimeout(() => {
+                    alert(isEdit ? '[จำลอง] บันทึกการแก้ไขเรียบร้อยแล้ว! ' : '[จำลอง] สร้าง Assignment สำเร็จแล้ว!');
+                    
+                    // สมมติ ID ปลอมขึ้นมาเพื่อใช้เปลี่ยนหน้า
+                    const mockSavedId = isEdit ? assignmentId : 'mock-new-uuid-9999';
+                    window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${mockSavedId}`;
+                }, 1000);
 
             } catch (error) {
                 console.error("Submit Error:", error);
