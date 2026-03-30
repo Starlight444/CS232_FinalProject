@@ -5,3 +5,4 @@ SELECT * FROM announcements;
 SELECT * FROM assignments;
 SELECT * FROM submissions;
 SELECT * FROM attachments;
+SELECT * FROM announcements;

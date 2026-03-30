@@ -20,36 +20,6 @@ fetch('../components/student-navbar/student-navbar.html')
     document.body.appendChild(script);
   });
 
-// ---------- main content ----------
-// Calendar fix: September 2021 starts on Wednesday (index 3)
-// Rebuild calendar correctly
-const calGrid = document.querySelector('.cal-grid');
-const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-calGrid.innerHTML = '';
-
-// Day name headers
-dayNames.forEach(d => {
-  const el = document.createElement('div');
-  el.className = 'cal-day-name';
-  el.textContent = d;
-  calGrid.appendChild(el);
-});
-
-// Sep 2021 starts on Wednesday = index 3
-for (let i = 0; i < 3; i++) {
-  const el = document.createElement('div');
-  el.className = 'cal-day empty';
-  calGrid.appendChild(el);
-}
-
-for (let d = 1; d <= 30; d++) {
-  const el = document.createElement('div');
-  el.className = 'cal-day';
-  if (d === 19) el.classList.add('today');
-  el.textContent = d;
-  calGrid.appendChild(el);
-}
-
 // Nav highlight
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', e => {
@@ -59,9 +29,84 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
+// ---------- main content ----------
+
+// calendar render
+function renderCalendar(assignments) {
+  const calGrid = document.querySelector('.cal-grid');
+  const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+  calGrid.innerHTML = '';
+
+  const now = new Date();
+
+  document.querySelector('.cal-month').textContent =
+  now.toLocaleString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const year = now.getFullYear();
+  const month = now.getMonth(); // เดือนปัจจุบัน
+
+  const firstDay = new Date(year, month, 1).getDay();
+  console.log(firstDay);
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  // map deadline count by date
+  const deadlineMap = {};
+
+  assignments.forEach(a => {
+    const due = new Date(a.due_date);
+
+    // เอาเฉพาะเดือนปัจจุบัน
+    if (
+      due.getMonth() === month &&
+      due.getFullYear() === year
+    ) {
+      const day = due.getDate();
+      deadlineMap[day] = (deadlineMap[day] || 0) + 1;
+    }
+  });
+
+  // day names
+  dayNames.forEach(day => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = day;
+    calGrid.appendChild(el);
+  });
+
+  // empty cells
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    calGrid.appendChild(el);
+  }
+
+  // dates
+  for (let d = 1; d <= totalDays; d++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+
+    if (deadlineMap[d]) {
+      el.classList.add('has-deadline');
+    }
+
+    if (d === now.getDate()) {
+      el.classList.add('today');
+    }
+
+    el.innerHTML = `
+      <div>${d}</div>
+      ${deadlineMap[d] ? `<span class="deadline-count">${deadlineMap[d]}</span>` : ''}
+    `;
+
+    calGrid.appendChild(el);
+  }
+}
 
 // รายการการบ้านแยกหมวดหมู่ due today, upcoming, overdue, complete
-// หมวดหมู่การบ้าน
 let categorizedAssignments = {
   dueToday: [],
   upcoming: [],
@@ -71,6 +116,7 @@ let categorizedAssignments = {
 
 let currentTab = "dueToday";
 
+// function หลัก
 async function loadHomeData() {
   try {
     // 1. ดึง user จาก localStorage
@@ -91,13 +137,27 @@ async function loadHomeData() {
     }
 
     let allAssignments = [];
+    let allAnnouncements = [];
 
     // 3. get assignments from every course
     for (const course of courses) {
-      const asgRes  = await fetch(`${BASE_URL}/assignments/${course.course_id}`);
+      const [asgRes, annRes] = await Promise.all([
+        fetch(`${BASE_URL}/assignments/${course.course_id}`),
+        fetch(`${BASE_URL}/announcements/course/${course.course_id}`)
+      ]);
+
       const asgJson = await asgRes.json();
+      const annJson = await annRes.json();
 
       const assignments = asgJson.data || [];
+      const announcements = annJson.data || [];
+
+      // เก็บชื่อวิชาไว้ใช้ render
+      announcements.forEach(a => {
+        a.course_name = course.course_name;
+      });
+
+      allAnnouncements.push(...announcements);
 
         // 4. check submission per assignment
         for (const assignment of assignments) {
@@ -121,14 +181,19 @@ async function loadHomeData() {
     // 5) render stat count
     updateStatNumbers();
 
-    console.log("ALL ASSIGNMENTS", allAssignments);
-    console.log("CATEGORIZED", categorizedAssignments);
-
     // 6) render default tab
     renderAssignmentList(categorizedAssignments[currentTab]);
 
-    // 7) bind click event
+    // 7) render announcement
+    renderAnnouncements(allAnnouncements);
+
+    // 8) bind click event
     setupStatTabs();
+
+    // 9) render calendar
+    renderCalendar(allAssignments);
+
+
   } catch (error) {
     console.error("Load home data error:", error);
   }
@@ -150,15 +215,15 @@ function categorizeAssignments(assignments) {
     const due = new Date(a.due_date);
     const submitted = a.submission && a.submission.submission_id;
 
-    if (submitted) {
-      result.complete.push(a);
-    } else if (due.toDateString() === today) {
-      result.dueToday.push(a);
-    } else if (due < now) {
-      result.overdue.push(a);
-    } else {
-      result.upcoming.push(a);
-    }
+  if (submitted) {
+    result.complete.push(a);
+  } else if (due < now) {
+    result.overdue.push(a);
+  } else if (due.toDateString() === today) {
+    result.dueToday.push(a);
+  } else {
+    result.upcoming.push(a);
+  }
   });
 
   return result;
@@ -248,6 +313,52 @@ function getDueText(dueDate) {
   if (mins < 60) return `Due in ${mins} minutes`;
   if (hours < 24) return `Due in ${hours} hours`;
   return `Due in ${days} days`;
+}
+
+// render announcement
+function renderAnnouncements(announcements) {
+  const container = document.querySelector(".ann-card");
+
+  if (!announcements || announcements.length === 0) {
+    container.innerHTML += `
+      <p style="color:#888;font-size:13px;">No announcements</p>
+    `;
+    return;
+  }
+
+  // เรียงใหม่ล่าสุดก่อน
+  const sorted = announcements.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  );
+
+  // เอาแค่ 5 อันล่าสุด
+  sorted.slice(0, 5).forEach(a => {
+    container.innerHTML += `
+      <div class="ann-item">
+        <div class="ann-item-title">${a.course_name}</div>
+        <div class="ann-item-body">${a.title}</div>
+        <div class="ann-item-time">${getTimeAgo(a.created_at)}</div>
+      </div>
+    `;
+  });
+}
+
+// function เวลา
+function getTimeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+
+  const diff = now - date;
+
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+
+  if (mins < 1) return "Now";
+  if (mins < 60) return `${mins} min ago`;
+  if (hours < 24) return `${hours} hours ago`;
+
+  return `${days} days ago`;
 }
 
 // เรียกใช้ตอนหน้าโหลด

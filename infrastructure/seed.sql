@@ -1,3 +1,4 @@
+-- mock up course
 INSERT INTO courses (course_code, course_name, description)
 VALUES
   ('CS101', 'Introduction to Computer Science', 'Basic CS course'),
@@ -5,6 +6,7 @@ VALUES
   ('CS251', 'Database Systems 1', 'Relational database design and SQL fundamentals')
 ON CONFLICT (course_code) DO NOTHING;
 
+-- mock up user
 INSERT INTO users (email, password_hash, first_name, last_name, student_id, teacher_id)
 VALUES
 ('alice@example.com', '$2b$12$v8G5hUD9RV/sfs9enVh27u.iP/KwlnlwOZOjk0W7ZdQ9TLCwtGAq.', 'Alice', 'Tan', NULL, '1005432001'),
@@ -12,7 +14,7 @@ VALUES
 ('charlie@example.com', '$2b$12$8.SJ69MQ3Ysq1r6rL5LSE.b/R3waH1nKeCFJAA7pCM7.yTfq8y0l6', 'Charlie', 'Lee', '6709610202', NULL)
 ON CONFLICT (email) DO NOTHING;
 
--- add everyone to every course
+-- mock up course member: add everyone to every course
 INSERT INTO course_members (user_id, course_id, role)
 SELECT u.user_id, c.course_id,
        CASE
@@ -103,6 +105,7 @@ WHERE NOT EXISTS (
       AND course_id = '229265aa-b184-4ef6-bec2-8151b95b9f39'
 );
 
+-- mock up submission
 INSERT INTO submissions (assignment_id,student_id,status)
 SELECT
     (SELECT assignment_id
@@ -127,4 +130,39 @@ WHERE NOT EXISTS (
         FROM users
         WHERE email = 'bob@example.com'
     )
+);
+
+-- mock up announcement
+INSERT INTO announcements (title,content,created_by,course_id)
+SELECT
+    'Lab Deadline Reminder',
+    'Reminder: Week 10 Lab must be submitted before tonight 11:59 PM.',
+    (SELECT user_id FROM users WHERE email = 'alice@example.com'),
+    (SELECT course_id FROM courses WHERE course_code = 'CS242')
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM announcements
+    WHERE title = 'Lab Deadline Reminder'
+      AND course_id = (
+          SELECT course_id
+          FROM courses
+          WHERE course_code = 'CS242'
+      )
+);
+
+INSERT INTO announcements (title,content,created_by,course_id)
+SELECT
+    'Project Presentation Schedule',
+    'Database project presentation will be held next Monday in Room SC3-303.',
+    (SELECT user_id FROM users WHERE email = 'alice@example.com'),
+    (SELECT course_id FROM courses WHERE course_code = 'CS251')
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM announcements
+    WHERE title = 'Project Presentation Schedule'
+      AND course_id = (
+          SELECT course_id
+          FROM courses
+          WHERE course_code = 'CS251'
+      )
 );
