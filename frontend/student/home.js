@@ -283,36 +283,62 @@ function renderAssignmentList(assignments) {
   }
 
   assignments.forEach(a => {
-    const dueText = getDueText(a.due_date);
+    const dueText = getDueText(a);
 
-    list.innerHTML += `
-      <div class="assign-item">
-        <div class="assign-avatar">${a.course_code}</div>
-        <div class="assign-info">
-          <div class="assign-name">${a.title}</div>
-          <div class="assign-due">${dueText}</div>
-          <div class="assign-class">${a.course_name}</div>
-        </div>
-        <div class="assign-points">${a.max_score} Point</div>
+    const item = document.createElement('div');
+    item.className = 'assign-item';
+
+    item.innerHTML = `
+      <div class="assign-avatar">${a.course_code}</div>
+      <div class="assign-info">
+        <div class="assign-name">${a.title}</div>
+        <div class="assign-due">${dueText}</div>
+        <div class="assign-class">${a.course_name}</div>
       </div>
+      <div class="assign-points">${a.max_score} Point</div>
     `;
+
+    // click card event
+    item.addEventListener('click', () => {
+      window.location.href = `/frontend/student/student-assign-submit.html?id=${a.assignment_id}&course_id=${a.course_id}`;
+    });
+
+    list.appendChild(item);
   });
 }
 
 // คำนวณ due text ที่การ์ดการบ้าน
-function getDueText(dueDate) {
+function getDueText(a) {
   const now = new Date();
-  const due = new Date(dueDate);
-  const diff = due - now;
+  const due = new Date(a.due_date);
 
+  const diff = due - now;
   const mins = Math.floor(diff / 1000 / 60);
   const hours = Math.floor(mins / 60);
-  const days = Math.floor(hours / 24);
+  const days = Math.floor(diff / 1000 / 60 / 60 / 24);
 
-  if (diff < 0) return "Overdue";
-  if (mins < 60) return `Due in ${mins} minutes`;
-  if (hours < 24) return `Due in ${hours} hours`;
-  return `Due in ${days} days`;
+  const isSubmitted = a.submission && a.submission.submission_id;
+
+  if (isSubmitted) {
+    return due.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  if (diff < 0) {
+    const overdueDays = Math.abs(Math.floor(diff / 86400000));
+    return `Overdue by ${overdueDays} day${overdueDays !== 1 ? 's' : ''}`;
+  }
+
+  const isToday = due.toDateString() === now.toDateString();
+  if (isToday) {
+    if (mins < 60) return `Due in ${mins} minutes`;
+    return `Due in ${hours} hours`;
+  }
+
+  return `Due in ${days} day${days !== 1 ? 's' : ''}`;
 }
 
 // render announcement

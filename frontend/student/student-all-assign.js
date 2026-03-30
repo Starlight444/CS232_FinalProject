@@ -23,11 +23,12 @@ fetch('../components/student-navbar/student-navbar.html')
 
 
 // api
-const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+//const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+const BASE_URL = 'http://127.0.0.1:8000';
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
-    window.location.href = "../auth/login.html";
+    window.location.href = "/frontend/auth/login.html";
 }
 
 const TOKEN = userData ? userData.token : '';
@@ -62,7 +63,7 @@ async function fetchAssignments() {
         });
 
         const courseJson = await courseRes.json();
-        const courses = courseJson.data || [];
+        const courses = courseJson || [];
         //อัปเดตปุ่ม Filter วิชา
         updateFilterUI(courses);
         //เรียกฟังก์ชันแสดงวิชาใน sidebar.js
@@ -249,7 +250,7 @@ function render() {
         const li = document.createElement('li');
         li.className = 'assignment-item';
         li.innerHTML = `
-            <div class="assign-avatar">Pic</div>
+            <div class="assign-avatar">${a.className}</div>
             <div class="assign-info">
                 <p class="assign-name">${a.name}</p>
                 <p class="assign-due-label ${due.cls}">${due.text}</p>

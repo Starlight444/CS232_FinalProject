@@ -171,6 +171,7 @@ body.sidebar-collapsed .layout {
   padding: 16px 8px;
   border-right: 1px solid #e5e7eb;
   gap: 6px;
+  cursor: pointer;
 }
 
 .stat-item:last-child {
@@ -230,6 +231,7 @@ body.sidebar-collapsed .layout {
   border-radius: 8px;
   background: #fafafa;
   margin-bottom: 8px;
+  cursor: pointer;
 }
 
 .assign-avatar {

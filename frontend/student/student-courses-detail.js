@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadSidebar();
     loadNavbar();
     initTabIndicator();
+    fetchMembers(courseId);
 });
 
 function loadSidebar() {
@@ -130,7 +131,7 @@ const TOKEN   = userData ? userData.token   : '';
 const USER_ID = userData ? userData.user_id : '';
 
 const urlParams = new URLSearchParams(window.location.search);
-const courseId = urlParams.get('course_id');
+const courseId = urlParams.get('course_id') || urlParams.get('id');
 
 document.addEventListener('DOMContentLoaded', () => {
     if (courseId) {
@@ -149,6 +150,24 @@ async function fetchAssignments(courseId) {
             }
         });
         const dataAssignments = await resAssignments.json();
+
+        // fetch for course code
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) return;
+
+        const resCourse = await fetch(`${API_BASE_URL}/courses/my/${user.user_id}?role=${user.role}`, {
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`
+            }
+        });
+        const courseData = await resCourse.json();
+        
+        const courses = courseData;
+        const course = courses.find(c => String(c.course_id) === String(courseId));
+        const courseCode = course?.course_code || "N/A";
+
+        console.log("courseCode:", courseCode);
+
         const allTasks = dataAssignments.data || [];
 
         const tasksWithStatus = await Promise.all(allTasks.map(async (task) => {
@@ -166,10 +185,11 @@ async function fetchAssignments(courseId) {
 
                 return {
                     ...task,
+                    course_code: courseCode,
                     status: (dataSub.data && dataSub.data.status) ? dataSub.data.status : (dataSub.status || null)
                 };
             } catch (err) {
-                return { ...task, status: null };
+                return { ...task, course_code: courseCode, status: null };
             }
         }));
 
@@ -215,6 +235,51 @@ function renderAssignments(tasks) {
     });
 
     checkEmptyStates();
+}
+
+// fetch course members
+async function fetchMembers(courseId) {
+    const container = document.getElementById('people'); // 🔥 ต้องมี div นี้ใน HTML
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/members/${courseId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await res.json();
+        const members = data.data || data; // กันได้ทั้งแบบมี data / ไม่มี
+
+        if (!members || members.length === 0) {
+            container.innerHTML = `<div class="empty-state">No members</div>`;
+            return;
+        }
+
+        renderMembers(members);
+
+    } catch (err) {
+        console.error("Error fetching members:", err);
+        container.innerHTML = `<div class="empty-state">Failed to load members</div>`;
+    }
+}
+
+function renderMembers(members) {
+    const container = document.getElementById('member-list');
+
+    container.innerHTML = members.map(m => {
+        const name = m.full_name || m.name || "Unknown";
+        const initial = name.charAt(0).toUpperCase();
+
+        return `
+            <div class="member-item">
+                <div class="member-avatar">${initial}</div>
+                <div class="member-name">${name}</div>
+            </div>
+        `;
+    }).join('');
 }
 
 function checkEmptyStates() {
@@ -338,7 +403,7 @@ function createCardHTML(task) {
 
     return `
         <div class="assignment-card" onclick="window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}&course_id=${courseId}'">
-            <div class="task-icon">Pic</div>
+            <div class="task-icon">${task.course_code}</div>
             <div class="task-details">
                 <span class="task-name">${task.title}</span> 
                 <span class="task-status ${isPast ? 'status-past' : ''} ${isSubmitted ? 'status-complete' : ''}">
