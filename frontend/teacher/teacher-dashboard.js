@@ -1,3 +1,10 @@
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData || !userData.token) {
+    window.location.href = "../auth/login.html";
+}
+const TOKEN   = userData ? userData.token   : '';
+const USER_ID = userData ? userData.user_id : '';
+
 document.addEventListener("DOMContentLoaded", function () {
     loadTeacherSidebarNavbar();
 });
@@ -15,18 +22,15 @@ function loadTeacherSidebarNavbar() {
             if (sidebar) container.appendChild(sidebar);
             if (navbar)  container.appendChild(navbar);
 
-            // Load sidebar JS (toggle / collapse logic)
             const sidebarScript = document.createElement('script');
             sidebarScript.src = '../components/student-sidebar/sidebar.js';
             document.body.appendChild(sidebarScript);
 
-            // Load navbar JS (profile dropdown)
             const navbarScript = document.createElement('script');
             navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
             document.body.appendChild(navbarScript);
 
-            // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
-            // listens to `body.sidebar-collapsed` — sync them here
+
             sidebarScript.onload = () => {
                 const sidebarEl = document.getElementById('sidebar');
                 if (sidebarEl) {
@@ -83,18 +87,15 @@ function changeWeek(days) {
 renderCalendar();
 
 // ── API ──
-const API_BASE_URL = 'http://localhost:8000';
-// --- [MOCK FIELD] ---
-// /courses total_submitted_student
-// /courses total_std
-// total_assign
-// /courses/:course_id/assignments "submitted_count"
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+// 
 
 
 // --- [DASHBOARD SUMMARY CARD: Courses, To Grade, and Missing] ---
 async function updateDashboardSummary() {
   try {
-    const response = await fetch(`${API_BASE_URL}/courses`);
+    const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
     const result   = await response.json();
 
     if (result.success) {
@@ -111,8 +112,6 @@ async function updateDashboardSummary() {
       let coursesWithMissingCount = 0; 
 
       courses.forEach(course => {
-        /** ⚠️ NOTE: ตรวจสอบชื่อฟิลด์จาก Backend อีกครั้งเมื่อของจริงมา
-         */
         const stdInCourse = course.total_std || 0;
         const submittedInCourse = course.total_submitted_student || 0;
         const missingInCourse = Math.max(0, stdInCourse - submittedInCourse);
@@ -163,7 +162,7 @@ async function loadCourses() {
   const CARD_COLORS = ['course-orange', 'course-teal', 'course-blue'];
 
   try {
-    const response = await fetch(`${API_BASE_URL}/courses`);
+    const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
     const result   = await response.json();
 
     if (result.success) {
@@ -171,7 +170,11 @@ async function loadCourses() {
       if (!container) return;
 
       container.innerHTML = '';
-      const courses   = result.data;
+
+ 
+      const courses = result.data.filter(
+        course => course.role === 'teacher' || course.role === 'ta'
+      );
 
       courses.forEach((course, idx) => {
         const colorClass     = CARD_COLORS[idx % CARD_COLORS.length];
@@ -211,20 +214,24 @@ let _sortAsc     = true;
 
 async function loadNeedsGrading() {
     try {
-        const courseRes    = await fetch(`${API_BASE_URL}/courses`);
+        // 1. ดึง courses ทั้งหมดของ user
+        const courseRes    = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
         const courseResult = await courseRes.json();
         if (!courseResult.success) return;
 
         const now = new Date();
         _gradingRows = [];
 
+        // 2. วน loop เฉพาะ course ที่เป็น teacher หรือ ta
         for (const course of courseResult.data) {
             if (course.role !== 'teacher' && course.role !== 'ta') continue;
 
-            const assignRes    = await fetch(`${API_BASE_URL}/courses/${course.course_id}/assignments`);
+            // 3. ดึง assignments ของแต่ละ course
+            const assignRes    = await fetch(`${API_BASE_URL}/assignments/${course.course_id}`);
             const assignResult = await assignRes.json();
             if (!assignResult.success) continue;
 
+            // 4. เก็บเฉพาะ assignment ที่เลยกำหนดส่งแล้ว (overdue)
             assignResult.data.forEach(assign => {
                 if (new Date(assign.due_date) < now) {
                     _gradingRows.push({
@@ -232,8 +239,8 @@ async function loadNeedsGrading() {
                         assignment_id: assign.assignment_id,
                         title:         assign.title,
                         due_date:      assign.due_date,
-                        submitted:     assign.submitted_count || 0,
-                        total:         course.total_std || 0,
+                        submitted:     assign.submitted_count || 0, 
+                        total:         course.total_std || 0,        
                     });
                 }
             });
@@ -269,7 +276,7 @@ function renderGradingTable() {
                 <div class="gcol-tograde">${item.submitted}</div>
                 <div class="gcol-action">
                     <button class="grade-btn"
-                        onclick="window.location.href='/grading?id=${item.assignment_id}'">
+                        onclick="window.location.href='/teacher-assign-manage.html?id=${item.assignment_id}'">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
                             <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
                             <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>

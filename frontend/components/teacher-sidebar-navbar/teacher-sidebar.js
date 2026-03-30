@@ -39,11 +39,11 @@ courseBtn.addEventListener('click', (e) => {
     }
 });
 
-//แผนที่หน้าของแต่ละปุ่ม
+//แผนที่หน้าของแต่ละปุ่ม (teacher)
 const pageRoutes = {
-    'home': 'home.html',
-    'assignments': 'student-all-assign.html',
-    'courses': 'student-courses-detail.html'
+    'dashboard': 'teacher-dashboard.html',
+    'courses': 'teacher-assign-manage.html',
+    //'dashboard': 'teacher-assign-create.html',
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -82,10 +82,6 @@ document.querySelectorAll('.sub-link').forEach(link => {
         setActiveLink(courseBtn);
     });
 });
-/*toggleBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("collapsed");
-    document.body.classList.toggle("sidebar-collapsed");
-});*/
 
 // ปุ่ม Log out
 const logoutLink = document.querySelector('.logout-link');
@@ -97,15 +93,42 @@ if (logoutLink) {
     });
 }
 
+// ฟังก์ชันวิชาใน Sidebar จากข้อมูลจริง
+function renderSidebarCourses(courses) {
+    const sidebarList = document.getElementById('submenu');
+    if (!sidebarList) return;
+
+    sidebarList.innerHTML = '';
+
+    courses.forEach(course => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+
+        link.href = '#';
+        link.className = 'sub-link';
+        link.textContent = course.course_code;
+
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const courseId = course.course_id;
+            window.location.href = `../teacher/teacher-course-detail.html?id=${courseId}`;
+        });
+
+        li.appendChild(link);
+        sidebarList.appendChild(li);
+    });
+}
+
 // ตั้งค่า Active ตามหน้าปัจจุบัน
 function initActiveFromURL() {
     const currentFile = window.location.pathname.split('/').pop();
     const reverseRoutes = {
-        'home.html': 'home',
-        'student-all-assign.html': 'assignments',
-        'student-announcements.html': 'announcements',
-        'student-assign-submit.html': 'assignments',
-        'student-courses-detail.html': 'courses'
+        'teacher-dashboard.html': 'dashboard',
+        'teacher-assign-manage.html': 'courses',
+        'teacher-assign-create.html': 'dashboard',
+        //'teacher-announcements.html': 'announcements',
+        //'teacher-course-detail.html': 'courses'
     };
 
     const activePage = reverseRoutes[currentFile];
@@ -121,68 +144,24 @@ function initActiveFromURL() {
 }
 initActiveFromURL();
 
-// ฟังก์ชันวิชาใน Sidebar จากข้อมูลจริง
-function renderSidebarCourses(courses) {
-    const sidebarList = document.getElementById('submenu');
-    if (!sidebarList) return;
-
-    sidebarList.innerHTML = '';
-
-    // วนลูปสร้างวิชาใหม่
-    courses.forEach(course => {
-        const li = document.createElement('li');
-        const link = document.createElement('a');
-
-        link.href = "#";
-        link.className = 'sub-link';
-        link.textContent = course.course_code;
-
-        // เมื่อคลิกวิชา ให้ไปหน้า courses detail
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            const courseId = course.course_id;
-            window.location.href = `../student/student-courses-detail.html?id=${courseId}`;
-        });
-
-        // highlight วิชาที่ตรงกับ URL ปัจจุบัน
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentId = urlParams.get('id');
-        if (currentId && String(course.course_id) === String(currentId)) {
-            link.classList.add('active-sub');
-            setActiveLink(courseBtn);
-            coursesItem.classList.add('open');
-        }
-
-        li.appendChild(link);
-        sidebarList.appendChild(li);
-    });
-}
-
-// ดึงรายวิชาจาก API แล้วแสดงใน sidebar
 async function fetchSidebarCourses() {
     const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
-    // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (!userData || !userData.token) {
-        window.location.href = "../auth/login.html";
-    }
-
+    const userData = JSON.parse(localStorage.getItem('user'));
     const TOKEN = userData ? userData.token : '';
     const USER_ID = userData ? userData.user_id : '';
 
     try {
-        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}`, {
+        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}?role=teacher`, {
             headers: { 'Authorization': `Bearer ${TOKEN}` }
         });
         const data = await res.json();
-        const courses = data.data || data || [];
-        renderSidebarCourses(courses);
+        renderSidebarCourses(data.data || data || []);
     } catch (err) {
         console.error('Error fetching sidebar courses:', err);
     }
 }
 fetchSidebarCourses();
 
-// เรียกใช้ได้จากไฟล์อื่น 
+
+// เรียกใช้ได้จากไฟล์อื่น
 window.renderSidebarCourses = renderSidebarCourses;

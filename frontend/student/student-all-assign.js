@@ -23,17 +23,15 @@ fetch('../components/student-navbar/student-navbar.html')
 
 
 // api
-const BASE_URL = 'http://localhost:3000'; //ยังไม่ใช่urlจริง เดี๋ยวมาแก้
+const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+// [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData || !userData.token) {
+    window.location.href = "../auth/login.html";
+}
 
-// ดึงข้อมูล User และ Token จาก localStorage
-//const userData = JSON.parse(localStorage.getItem("user"));
-//if (!userData || !userData.token) {
-//console.warn("No token found, redirecting to login...");
-// window.location.href = "../auth/login.html"; // เปิดใช้เมื่อพร้อม
-//}
-//const TOKEN = userData ? userData.token : '';
-
-const TOKEN = 'test-token'; // เป็นแบบนี้ชั่วคราวเพื่อเช็คว่า API เชื่อมติดไหม
+const TOKEN = userData ? userData.token : '';
+const USER_ID = userData ? userData.user_id : '';
 
 let ASSIGNMENTS = [];
 
@@ -56,7 +54,7 @@ function mapStatus(a) {
 async function fetchAssignments() {
     try {
         //ดึงคอร์สทั้งหมด
-        const courseRes = await fetch(`${BASE_URL}/courses`, {
+        const courseRes = await fetch(`${BASE_URL}/courses/my/${USER_ID}?role=student`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${TOKEN}`
@@ -73,29 +71,47 @@ async function fetchAssignments() {
         }
 
         let allAssignments = [];
-        //ดึงงานของแต่ละคอร์ส
+
+        // ดึงงานของแต่ละคอร์ส
         for (let course of courses) {
-            const res = await fetch(`${BASE_URL}/courses/${course.course_id}/assignments`, {
+
+            // Step 2 — ดึง assignments ของ course นี้
+            const assignRes = await fetch(`${BASE_URL}/assignments/${course.course_id}`, {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`
-                }
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
             });
+            const assignJson = await assignRes.json();
+            if (!assignJson.success || !Array.isArray(assignJson.data)) continue;
 
-            const data = await res.json();
+            // Step 3 — ดึง submission status ของแต่ละ assignment พร้อมกัน
+            const assignmentsWithStatus = await Promise.all(
+                assignJson.data.map(async (a) => {
+                    try {
+                        const subRes = await fetch(
+                            `${BASE_URL}/submissions/assignment/${a.assignment_id}/student/${USER_ID}`,
+                            { headers: { 'Authorization': `Bearer ${TOKEN}` } }
+                        );
+                        const subJson = await subRes.json();
+                        // ใช้ status จาก submission แทน assignment
+                        const submissionStatus = subJson.data?.status || null;
+                        return { ...a, status: submissionStatus };
+                    } catch {
+                        return { ...a, status: null };
+                    }
+                })
+            );
 
-            if (data.success && Array.isArray(data.data)) {
-                const mapped = data.data.map(a => ({
-                    id: a.assignment_id,
-                    name: a.title,
-                    className: course.course_code,
-                    points: a.max_score || 0,
-                    due: new Date(a.due_date),
-                    status: mapStatus(a)
-                }));
+            const mapped = assignmentsWithStatus.map(a => ({
+                id: a.assignment_id,
+                course_id: course.course_id,
+                name: a.title,
+                className: course.course_code,
+                points: a.max_score || 0,
+                due: new Date(a.due_date),
+                status: mapStatus(a) // mapStatus ใช้ status จาก submission แล้ว
+            }));
 
-                allAssignments.push(...mapped);
-            }
+            allAssignments.push(...mapped);
         }
         ASSIGNMENTS = allAssignments;
         render();
@@ -242,7 +258,7 @@ function render() {
             <div class="assign-right">${rightContent(a)}</div>
         `;
         li.addEventListener('click', () => {
-            window.location.href = `student-assign-submit.html?id=${a.id}`;
+            window.location.href = `student-assign-submit.html?id=${a.id}&course_id=${a.course_id}`;
         });
         assignList.appendChild(li);
     });
