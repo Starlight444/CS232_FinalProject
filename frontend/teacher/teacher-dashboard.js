@@ -23,7 +23,7 @@ function loadTeacherSidebarNavbar() {
             if (navbar)  container.appendChild(navbar);
 
             const sidebarScript = document.createElement('script');
-            sidebarScript.src = '../components/student-sidebar/sidebar.js';
+            sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
             document.body.appendChild(sidebarScript);
 
             const navbarScript = document.createElement('script');
