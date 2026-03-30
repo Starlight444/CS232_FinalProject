@@ -13,7 +13,7 @@ let currentNotifications = [];
 
 const user = JSON.parse(localStorage.getItem("user")); //ดึงข้อมูล user จาก local storage
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 //เปิด Notification Dropdown
 bellBtn.addEventListener('click', (e) => {
@@ -87,7 +87,7 @@ async function loadNotifications() {
 
         // 1) ดึงรายวิชาของ user
         const courseRes = await fetch(
-            `${BASE_URL}/courses/my/${user.user_id}?role=${user.role}`
+            `${API_BASE_URL}/courses/my/${user.user_id}?role=${user.role}`
         );
         const courseJson = await courseRes.json();
         const courses = Array.isArray(courseJson) ? courseJson : (courseJson.data || []);
@@ -97,7 +97,7 @@ async function loadNotifications() {
         // 2) ดึง announcement ของทุกวิชา
         for (const course of courses) {
             const annRes = await fetch(
-                `${BASE_URL}/announcements/course/${course.course_id}`
+                `${API_BASE_URL}/announcements/course/${course.course_id}`
             );
 
             const annJson = await annRes.json();
