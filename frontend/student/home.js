@@ -1,4 +1,5 @@
 const BASE_URL = "http://127.0.0.1:8000";
+
 fetch('/frontend/components/student-sidebar/sidebar.html')
   .then(response => response.text())
   .then(data => {
@@ -50,7 +51,6 @@ function renderCalendar(assignments) {
   const month = now.getMonth(); // เดือนปัจจุบัน
 
   const firstDay = new Date(year, month, 1).getDay();
-  console.log(firstDay);
   const totalDays = new Date(year, month + 1, 0).getDate();
 
   // map deadline count by date
