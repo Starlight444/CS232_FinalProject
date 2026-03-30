@@ -217,7 +217,8 @@ async function loadNeedsGrading() {
     const now = new Date();
     _gradingRows = [];
 
-    for (const course of safeCourses) {
+    // สร้าง array ของ promise สำหรับทุก course
+    const coursePromises = safeCourses.map(async (course) => {
       const assignRes = await fetch(`${API_BASE_URL}/assignments/${course.course_id}`);
       const assignResult = await assignRes.json();
 
@@ -225,23 +226,40 @@ async function loadNeedsGrading() {
         ? assignResult
         : (assignResult.data || []);
 
-      assignments.forEach(assign => {
-        if (new Date(assign.due_date) < now) {
+      // สำหรับแต่ละ assignment ที่ due date ผ่านแล้ว
+      const assignPromises = assignments
+        .filter(assign => new Date(assign.due_date) < now)
+        .map(async (assign) => {
+          // เรียก API submissions แบบ parallel
+          const subRes = await fetch(`${API_BASE_URL}/submissions/assignment/${assign.assignment_id}`);
+          const subData = await subRes.json();
+          const submissions = Array.isArray(subData.data) ? subData.data : [];
+
+          const submittedCount = submissions.filter(s => s.status === 'submitted').length;
+          const totalStudents = course.total_std || 0; // หรือ assign.total_students ถ้ามี
+
           _gradingRows.push({
             course_code: course.course_code,
             assignment_id: assign.assignment_id,
             title: assign.title,
             due_date: assign.due_date,
-            submitted: assign.submitted_count || 0,
-            total: course.total_std || 0,
+            submitted: submittedCount,
+            total: totalStudents,
           });
-        }
-      });
-    }
+        });
 
+      // รอให้ทุก assignment ของ course เสร็จ
+      await Promise.all(assignPromises);
+    });
+
+    // รอให้ทุก course เสร็จ
+    await Promise.all(coursePromises);
+
+    // Update badge
     const badgeNum = document.getElementById('badge-num');
     if (badgeNum) badgeNum.innerText = _gradingRows.length;
 
+    console.log("GRADING ROWS", _gradingRows);
     renderGradingTable();
   } catch (err) {
     console.error('Error loading grading table:', err);
