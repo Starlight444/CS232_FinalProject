@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!courseSelect) return;
 
         try {
-            courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา... ⏳</option>';
+            courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา... </option>';
 
             const response = await fetch(`${API_BASE_URL}/courses`, { method: 'GET' });
             if (!response.ok) throw new Error('ดึงข้อมูลวิชาไม่สำเร็จ');
@@ -311,8 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (!uploadRes.ok) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ');
                 }
 
-                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้วค่ะ! ✨' : 'สร้าง Assignment สำเร็จแล้วค่ะ! 🎉');
-                history.back();
+                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้วค่ะ! ' : 'สร้าง Assignment สำเร็จแล้วค่ะ! ');
+                window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${newAssignmentId}`;
 
             } catch (error) {
                 console.error("Submit Error:", error);
