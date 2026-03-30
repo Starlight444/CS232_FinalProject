@@ -4,6 +4,8 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
+const BASE_URL = 'http://127.0.0.1:8000';
+
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
     const path = window.location.pathname;
@@ -52,9 +54,9 @@ courseBtn.addEventListener('click', (e) => {
 //แผนที่หน้าของแต่ละปุ่ม (teacher)
 const pageRoutes = {
     'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
-    'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html',
-    'dashboard': 'teacher-assign-create.html',
-    'announcements': TEACHER_BASE + 'teacher-announcements.html'
+    'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html'
+    //'dashboard': 'teacher-assign-create.html',
+    //'announcements': TEACHER_BASE + 'teacher-announcements.html'
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -130,7 +132,7 @@ function renderSidebarCourses(courses) {
             e.preventDefault();
 
             const courseId = course.course_id;
-            window.location.href = `${TEACHER_BASE}teacher-course-detail.html?id=${courseId}`;
+            window.location.href = `${TEACHER_BASE}/teacher-assign-manage/teacher-assign-manage.html?id=${courseId}`;
         });
 
         li.appendChild(link);
@@ -144,8 +146,8 @@ function initActiveFromURL() {
     const reverseRoutes = {
         'teacher-dashboard.html': 'dashboard',
         'teacher-assign-manage.html': 'courses',
-        'teacher-assign-create.html': 'dashboard',
-        'teacher-announcements.html': 'announcements',
+        'teacher-assign-create.html': 'dashboard'
+        //'teacher-announcements.html': 'announcements',
         //'teacher-course-detail.html': 'courses'
     };
 
@@ -163,7 +165,6 @@ function initActiveFromURL() {
 initActiveFromURL();
 
 async function fetchSidebarCourses() {
-    BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
     const userData = JSON.parse(localStorage.getItem('user'));
     const TOKEN = userData ? userData.token : '';
     const USER_ID = userData ? userData.user_id : '';
