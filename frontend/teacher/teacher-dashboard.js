@@ -1,4 +1,3 @@
-
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
     window.location.href = "../auth/login.html";
@@ -277,7 +276,7 @@ function renderGradingTable() {
                 <div class="gcol-tograde">${item.submitted}</div>
                 <div class="gcol-action">
                     <button class="grade-btn"
-                        onclick="window.location.href='/grading?id=${item.assignment_id}'">
+                        onclick="window.location.href='/teacher-assign-manage.html?id=${item.assignment_id}'">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
                             <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
                             <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>
