@@ -120,15 +120,17 @@ function switchTab(element, tabId) {
 }
 
 // API
-// เปลี่ยน BASE_URL
-const API_BASE_URL = 'http://localhost:3000';
-// --- [MOCK] ---
-// ไม่เรียก Token
-// URL ยังไม่มี course_id 
+const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData || !userData.token) {
+    window.location.href = "../auth/login.html";
+}
+const TOKEN   = userData ? userData.token   : '';
+const USER_ID = userData ? userData.user_id : '';
 
 const urlParams = new URLSearchParams(window.location.search);
-//MOCK urlParam
-const courseId = urlParams.get('course_id')|| 'uuid-001';
+const courseId = urlParams.get('course_id');
 
 document.addEventListener('DOMContentLoaded', () => {
     if (courseId) {
@@ -138,13 +140,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchAssignments(courseId) {
     try {
-        const resAssignments = await fetch(`${API_BASE_URL}/courses/${courseId}/assignments`);
+        const resAssignments = await fetch(`${API_BASE_URL}/assignments/${courseId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const dataAssignments = await resAssignments.json();
         const allTasks = dataAssignments.data || [];
 
         const tasksWithStatus = await Promise.all(allTasks.map(async (task) => {
             try {
-                const resSub = await fetch(`${API_BASE_URL}/assignments/${task.assignment_id}/submission`);
+                const resSub = await fetch(`${API_BASE_URL}/submissions/assignment/${task.assignment_id}/student/${USER_ID}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const dataSub = await resSub.json();
 
                 console.log(`Task: ${task.title}, Status from API:`, dataSub);
@@ -264,7 +278,7 @@ function createCardHTML(task) {
     });
 
     return `
-        <div class="assignment-card" onclick="window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}'">
+        <div class="assignment-card" onclick="window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}&course_id=${courseId}'">
             <div class="task-icon">Pic</div>
             <div class="task-details">
                 <span class="task-name">${task.title}</span> 

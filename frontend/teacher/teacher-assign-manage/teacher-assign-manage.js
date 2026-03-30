@@ -1,12 +1,13 @@
 const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default'; 
 //const urlParams = new URLSearchParams(window.location.search);
 //const ASSIGNMENT_ID = urlParams.get('id');
-const ASSIGNMENT_ID = '123';
+const urlParams = new URLSearchParams(window.location.search);
+const ASSIGNMENT_ID = urlParams.get('id');
 
 // 🚨 ดัก Error กรณีที่ไม่มี ID ส่งมา (เช่น เข้าหน้านี้ตรงๆ)
 if (!ASSIGNMENT_ID) {
     alert("ไม่พบ ID ของงาน รบกวนกลับไปเลือกงานจาก Dashboard ใหม่");
-    window.location.href = '../dashboard.html'; // เด้งกลับหน้า Dashboard
+    window.location.href = '../teacher-dashboard.html'; // เด้งกลับหน้า Dashboard
 }
 
 // navbar

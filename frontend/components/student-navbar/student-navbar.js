@@ -30,13 +30,13 @@ bellBtn.addEventListener('click', (e) => {
 profileBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     // ปิด Notification 
-    notifDropdown.classList.remove('open');
+    //notifDropdown.classList.remove('open');
     profileDropdown.classList.toggle('open');
 });
 
 //ปิด Dropdown
 document.addEventListener('click', () => {
-    notifDropdown.classList.remove('open');
+    //notifDropdown.classList.remove('open');
     profileDropdown.classList.remove('open');
 });
 

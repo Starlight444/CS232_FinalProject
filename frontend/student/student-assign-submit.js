@@ -24,59 +24,55 @@ fetch('../components/student-navbar/student-navbar.html')
 const fileInput = document.getElementById('file-input');
 const workFiles = document.getElementById('work-files');
 const submitBtn = document.getElementById('submit-btn');
-<<<<<<< HEAD
-const backBtn = document.getElementById('back-btn');
-
-// back button
-backBtn.addEventListener('click', () => {
-    window.location.href = 'student-all-assign.html';
-});
-=======
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 
 let uploadedFiles = [];
 let isSubmitted = false;
 
 // api
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://127.0.0.1:8000';
 
-// ดึงข้อมูล User และ Token จาก localStorage
-//const userData = JSON.parse(localStorage.getItem("user"));
-//if (!userData || !userData.token) {
-//console.warn("No token found, redirecting to login...");
-// window.location.href = "../auth/login.html"; // เปิดใช้เมื่อพร้อม
-//}
-//const TOKEN = userData ? userData.token : '';
-const TOKEN = 'test-token'; // เป็นแบบนี้ชั่วคราวเพื่อเช็คว่า API เชื่อมติดไหม
+// [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData || !userData.token) {
+    window.location.href = "../auth/login.html";
+}
+const TOKEN   = userData ? userData.token   : '';
+const USER_ID = userData ? userData.user_id : '';
 
 const urlParams = new URLSearchParams(window.location.search);
-<<<<<<< HEAD
-const assignment_id = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
-
-// ตรวจสอบ ID ก่อนเริ่มทำงาน
-if (!assignment_id) {
-    console.error("No assignment ID found");
-=======
-const assignment_Id = new URLSearchParams(window.location.search).get('id'); // ดึง ID จาก URL (?id=uuid)
+const assignment_Id = urlParams.get('id');       
+const courseId      = urlParams.get('course_id'); 
 
 // ตรวจสอบ ID ก่อนเริ่มทำงาน
 if (!assignment_Id) {
-    console.error("No assignment ID found"); // ตรงกับ Error ในภาพ
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
+    console.error("No assignment ID found"); 
     alert("ไม่พบรหัสการบ้าน กรุณากลับไปเลือกการบ้านใหม่อีกครั้ง");
+}
+
+async function checkCurrentSubmission(){
+    try {
+        const response = await fetch(`${BASE_URL}/submissions/assignment/${assignment_Id}/student/${USER_ID}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const json = await response.json()
+        if (json.data && json.data.status !== 'not_submitted') {
+            isSubmitted = true;
+            updateUISubmitted();
+        }
+    } catch (err) {
+        console.error("Check submission error:", err);
+    }
 }
 
 // ฟังก์ชันดึงข้อมูลการบ้านมาโชว์ 
 async function fetchAssignmentDetail() {
-<<<<<<< HEAD
-
+    if (!assignment_Id || !courseId) return console.error("No assignment/course ID found");
     try {
-        const response = await fetch(`${BASE_URL}/assignments/${assignment_id}`, {
-=======
-    if (!assignment_Id) return console.error("No assignment ID found");
-    try {
-        const response = await fetch(`${BASE_URL}/assignments/${assignment_Id}`, {
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
+        const response = await fetch(`${BASE_URL}/assignments/${courseId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${TOKEN}`,
@@ -86,7 +82,8 @@ async function fetchAssignmentDetail() {
         const json = await response.json();
 
         if (json.success) {
-            const data = json.data;
+            const data = json.data.find(a => a.assignment_id === assignment_Id);
+            if (!data) return console.error("Assignment not found in course");
             document.querySelector('.assign-header .assign-title').textContent = data.title;
             document.querySelector('.assign-due').textContent = `Due date on ${formatTimestamp(new Date(data.due_date))}`;
             document.querySelector('.section-body').textContent = data.description;
@@ -100,14 +97,12 @@ async function fetchAssignmentDetail() {
     }
 }
 
-<<<<<<< HEAD
 function updateUISubmitted() {
-    isSubmitted = true;
     submitBtn.textContent = 'Edit Submission';
     submitBtn.classList.add('submitted');
     lockWorkBox(true);
 
-    // Timestamp 
+    // แสดง timestamp
     const bar = submitBtn.parentElement;
     if (!document.querySelector('.submit-timestamp')) {
         const stamp = document.createElement('p');
@@ -115,17 +110,8 @@ function updateUISubmitted() {
         stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
         bar.appendChild(stamp);
     }
-
-
-}
-// เพิ่มฟังก์ชันนี้
-async function checkCurrentSubmission() {
-    // ดึงข้อมูลการส่งงานเดิม (ถ้ามี API)
-    // ตัวอย่าง: ถ้า API ยังไม่พร้อมให้ปล่อยว่างไว้ก่อน
 }
 
-=======
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 // api : submission
 async function handleSubmission() {
     if (uploadedFiles.length === 0) {
@@ -138,39 +124,20 @@ async function handleSubmission() {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Uploading...';
 
-        // Upload File 
-        const formData = new FormData();
-        if (uploadedFiles.length > 0) {
-            formData.append('file', uploadedFiles[0]);
-<<<<<<< HEAD
-            formData.append('assignment_id', assignment_id);
-=======
-            formData.append('assignment_id', assignmentId);
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
-        }
+        // POST /submissions/ — ส่ง FormData (assignment_id, course_id, student_id, file) ครั้งเดียว
+        const userData = JSON.parse(localStorage.getItem("user") || '{}');
+        const studentId = userData.user_id || '';
 
-        const uploadRes = await fetch(`${BASE_URL}/attachments`, {
+        const formData = new FormData();
+        formData.append('file', uploadedFiles[0]);
+        formData.append('assignment_id', assignment_Id);
+        formData.append('course_id', courseId);
+        formData.append('student_id', studentId);
+
+        const submitRes = await fetch(`${BASE_URL}/submissions/`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${TOKEN}` },
             body: formData
-        });
-        const uploadData = await uploadRes.json();
-        if (!uploadData.success) throw new Error("Upload Failed");
-
-        const fileUrl = uploadData.data.file_url;
-
-        // api : submit assihnment 
-<<<<<<< HEAD
-        const submitRes = await fetch(`${BASE_URL}/assignments/${assignment_id}/submit`, {
-=======
-        const submitRes = await fetch(`${BASE_URL}/assignments/${assignmentId}/submit`, {
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ file_url: fileUrl })
         });
         const submitData = await submitRes.json();
 
@@ -178,17 +145,6 @@ async function handleSubmission() {
             isSubmitted = true;
             updateUISubmitted();
             alert("ส่งงานสำเร็จเรียบร้อย!");
-<<<<<<< HEAD
-            // Timestamp 
-            const bar = submitBtn.parentElement;
-            if (!document.querySelector('.submit-timestamp')) {
-                const stamp = document.createElement('p');
-                stamp.className = 'submit-timestamp';
-                stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
-                bar.appendChild(stamp);
-            }
-=======
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
         }
     } catch (err) {
         console.error("Submit Error:", err);
@@ -289,21 +245,10 @@ submitBtn.addEventListener('click', () => {
     }
 
 
-<<<<<<< HEAD
-=======
     /*isSubmitted = true;
     submitBtn.textContent = 'Edit Submission';
     submitBtn.classList.add('submitted');
 
     lockWorkBox(true);*/
 
-    // Timestamp 
-    const bar = submitBtn.parentElement;
-    if (!document.querySelector('.submit-timestamp')) {
-        const stamp = document.createElement('p');
-        stamp.className = 'submit-timestamp';
-        stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
-        bar.appendChild(stamp);
-    }
->>>>>>> c7453da1a242c45ef3a1160339dbd3f11b4ec35e
 });
