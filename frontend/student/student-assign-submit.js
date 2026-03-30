@@ -29,27 +29,26 @@ let uploadedFiles = [];
 let isSubmitted = false;
 
 // api
-const BASE_URL = 'http://127.0.0.1:8000';
-
+const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
     window.location.href = "../auth/login.html";
 }
-const TOKEN   = userData ? userData.token   : '';
+const TOKEN = userData ? userData.token : '';
 const USER_ID = userData ? userData.user_id : '';
 
 const urlParams = new URLSearchParams(window.location.search);
-const assignment_Id = urlParams.get('id');       
-const courseId      = urlParams.get('course_id'); 
+const assignment_Id = urlParams.get('id');
+const courseId = urlParams.get('course_id');
 
 // ตรวจสอบ ID ก่อนเริ่มทำงาน
 if (!assignment_Id) {
-    console.error("No assignment ID found"); 
+    console.error("No assignment ID found");
     alert("ไม่พบรหัสการบ้าน กรุณากลับไปเลือกการบ้านใหม่อีกครั้ง");
 }
 
-async function checkCurrentSubmission(){
+async function checkCurrentSubmission() {
     try {
         const response = await fetch(`${BASE_URL}/submissions/assignment/${assignment_Id}/student/${USER_ID}`, {
             method: 'GET',
@@ -120,7 +119,7 @@ async function handleSubmission() {
     }
 
     try {
-        // เปลี่ยนสถานะปุ่มเป็น Loading
+        // เปลี่ยนสถานะปุ่มเป็น Uploading
         submitBtn.disabled = true;
         submitBtn.textContent = 'Uploading...';
 
