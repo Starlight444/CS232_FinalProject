@@ -4,6 +4,16 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
+// คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
+function getTeacherBasePath() {
+    const path = window.location.pathname;
+    const idx = path.indexOf('/teacher/');
+    if (idx !== -1) return path.substring(0, idx) + '/teacher/';
+    return '';
+}
+
+const TEACHER_BASE = getTeacherBasePath();
+
 //สถานะ Active
 function setActiveLink(target) {
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -41,9 +51,10 @@ courseBtn.addEventListener('click', (e) => {
 
 //แผนที่หน้าของแต่ละปุ่ม (teacher)
 const pageRoutes = {
-    'dashboard': 'teacher-dashboard.html',
-    'courses': 'teacher-assign-manage.html',
-    //'dashboard': 'teacher-assign-create.html',
+    'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
+    'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html',
+    'dashboard': 'teacher-assign-create.html',
+    'announcements': TEACHER_BASE + 'teacher-announcements.html'
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -63,6 +74,13 @@ document.querySelectorAll('.nav-link[data-page]').forEach(link => {
         const page = link.getAttribute('data-page');
         if (pageRoutes[page]) {
             window.location.href = pageRoutes[page];
+        }
+        console.log("Navigating to:", page); // เพิ่มไว้เช็คใน Console
+
+        if (pageRoutes[page]) {
+            window.location.href = pageRoutes[page];
+        } else {
+            console.warn("Route not found for:", page);
         }
     });
 });
@@ -112,7 +130,7 @@ function renderSidebarCourses(courses) {
             e.preventDefault();
 
             const courseId = course.course_id;
-            window.location.href = `../teacher/teacher-course-detail.html?id=${courseId}`;
+            window.location.href = `${TEACHER_BASE}teacher-course-detail.html?id=${courseId}`;
         });
 
         li.appendChild(link);
@@ -127,7 +145,7 @@ function initActiveFromURL() {
         'teacher-dashboard.html': 'dashboard',
         'teacher-assign-manage.html': 'courses',
         'teacher-assign-create.html': 'dashboard',
-        //'teacher-announcements.html': 'announcements',
+        'teacher-announcements.html': 'announcements',
         //'teacher-course-detail.html': 'courses'
     };
 
@@ -145,13 +163,13 @@ function initActiveFromURL() {
 initActiveFromURL();
 
 async function fetchSidebarCourses() {
-    const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+    BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
     const userData = JSON.parse(localStorage.getItem('user'));
     const TOKEN = userData ? userData.token : '';
     const USER_ID = userData ? userData.user_id : '';
 
     try {
-        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}?role=teacher`, {
+        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}`, {
             headers: { 'Authorization': `Bearer ${TOKEN}` }
         });
         const data = await res.json();
