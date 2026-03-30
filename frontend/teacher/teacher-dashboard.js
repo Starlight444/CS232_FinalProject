@@ -89,9 +89,6 @@ renderCalendar();
 // ── API ──
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
-// 
-
-
 // --- [DASHBOARD SUMMARY CARD: Courses, To Grade, and Missing] ---
 async function updateDashboardSummary() {
   try {
@@ -328,6 +325,92 @@ function setBottomColumns() {
 
   section.style.gridTemplateColumns = `${leftW}px ${rightW}px`;
 }
+
+// render announcement
+function renderAnnouncements(announcements) {
+  const container = document.getElementById("announcements-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!announcements || announcements.length === 0) {
+    container.innerHTML = `<div class="ann-card">
+      <div class="ann-body">No announcements</div>
+    </div>`;
+    return;
+  }
+
+  // เรียงจากใหม่ไปเก่า
+  const sorted = announcements.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  );
+
+  // เอาแค่ 5 ล่าสุด
+  sorted.slice(0, 5).forEach(a => {
+    container.innerHTML += `
+      <div class="ann-card">
+        <div class="ann-title">${a.course_name}</div>
+        <div class="ann-body">${a.title}</div>
+        <div class="ann-time">${getTimeAgo(a.created_at)}</div>
+      </div>
+    `;
+  });
+}
+
+// ฟังก์ชันเวลา
+function getTimeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diff = now - date;
+
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+
+  if (mins < 1) return "Now";
+  if (mins < 60) return `${mins} min ago`;
+  if (hours < 24) return `${hours} hours ago`;
+
+  return `${days} days ago`;
+}
+
+// โหลด announcements
+async function loadAnnouncements() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const courseRes = await fetch(`${API_BASE_URL}/courses/my/${user.user_id}`);
+    const courseResult = await courseRes.json();
+
+    //if (!courseResult.success) return;
+
+    let allAnnouncements = [];
+
+    for (const course of courseResult) {
+      const annRes = await fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`);
+      const annResult = await annRes.json();
+      const announcements = annResult.data || [];
+
+      announcements.forEach(a => {
+        a.course_name = course.course_name;
+      });
+
+      allAnnouncements.push(...announcements);
+      }
+
+      renderAnnouncements(allAnnouncements);
+      console.log(allAnnouncements);
+
+  } catch (error) {
+    console.error("Error loading announcements:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  document.querySelector('.welcome').textContent = `Welcome back, ${user.first_name}`;
+  loadAnnouncements();
+});
 
 window.addEventListener('DOMContentLoaded', () => {
 updateDashboardSummary();
