@@ -487,3 +487,96 @@ body.sidebar-collapsed .main {
         font-size: 12px;
     }
 }
+
+/* ── Announcement List ── */
+.announcement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.announcement-card {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #DADADA;
+    overflow: hidden;
+}
+
+
+.announcement-content-area {
+    flex: 1;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.announcement-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.announcement-top-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+}
+
+.announcement-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.announcement-card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    flex: 1;
+}
+
+.announcement-course {
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000000;
+    line-height: normal;
+}
+
+
+.announcement-new-badge {
+    background: #E53935;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: auto;
+}
+
+.announcement-body {
+    margin: 0;
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    align-self: stretch;
+}
+
+.announcement-time {
+    font-family: Inter, sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: #999;
+    line-height: normal;
+}

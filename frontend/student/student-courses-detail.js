@@ -120,7 +120,7 @@ function switchTab(element, tabId) {
 }
 
 // API
-const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
@@ -135,6 +135,7 @@ const courseId = urlParams.get('course_id');
 document.addEventListener('DOMContentLoaded', () => {
     if (courseId) {
         fetchAssignments(courseId);
+        fetchAnnouncements(courseId);
     }
 });
 
@@ -259,6 +260,64 @@ function getRelativeTime(dueDate, isSubmitted) {
 
     // 4. ทั่วไป (Days)
     return `Due in ${diffInDays} day${diffInDays > 1 ? 's' : ''}`;
+}
+
+const ACCENT_COLORS = ['#E53935', '#F9A825', '#6D4C41', '#1565C0', '#2E7D32', '#6A1B9A'];
+
+function getTimeAgo(dateStr) {
+    const diffMs = new Date() - new Date(dateStr);
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHrs = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffMin < 1) return 'Now';
+    if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+    if (diffHrs < 24) return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+async function fetchAnnouncements(courseId) {
+    const container = document.getElementById('announcement-list');
+    try {
+        const res = await fetch(`${API_BASE_URL}/announcements/course/${courseId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await res.json();
+        const announcements = data.data || [];
+
+        if (announcements.length === 0) {
+            container.innerHTML = `<div class="empty-state">No announcements yet.</div>`;
+            return;
+        }
+
+        const personIcon = `<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="50" height="50" rx="25" fill="#E6E6E6"/><path d="M24.9997 21.6666C28.6816 21.6666 31.6663 18.6818 31.6663 14.9999C31.6663 11.318 28.6816 8.33325 24.9997 8.33325C21.3178 8.33325 18.333 11.318 18.333 14.9999C18.333 18.6818 21.3178 21.6666 24.9997 21.6666Z" fill="black"/><path d="M38.3337 34.1667C38.3337 38.3084 38.3337 41.6667 25.0003 41.6667C11.667 41.6667 11.667 38.3084 11.667 34.1667C11.667 30.0251 17.637 26.6667 25.0003 26.6667C32.3637 26.6667 38.3337 30.0251 38.3337 34.1667Z" fill="black"/></svg>`;
+
+        container.innerHTML = announcements.map((a) => {
+            const isNew = (new Date() - new Date(a.created_at)) < 86400000;
+            const timeAgo = getTimeAgo(a.created_at);
+            return `
+                <div class="announcement-card">
+                    <div class="announcement-content-area">
+                        <div class="announcement-icon">${personIcon}</div>
+                        <div class="announcement-card-info">
+                            <div class="announcement-title-row">
+                                <span class="announcement-course">${a.title}</span>
+                                ${isNew ? '<span class="announcement-new-badge">New</span>' : ''}
+                            </div>
+                            <p class="announcement-body">${a.content}</p>
+                            <span class="announcement-time">${timeAgo}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error fetching announcements:', err);
+        container.innerHTML = `<div class="empty-state">Failed to load announcements.</div>`;
+    }
 }
 
 function createCardHTML(task) {
