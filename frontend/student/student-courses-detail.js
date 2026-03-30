@@ -258,7 +258,7 @@ async function fetchMembers(courseId) {
             return;
         }
 
-        renderMembers(members);
+        await renderMembers(members);
 
     } catch (err) {
         console.error("Error fetching members:", err);
@@ -266,20 +266,74 @@ async function fetchMembers(courseId) {
     }
 }
 
-function renderMembers(members) {
+async function renderMembers(members) {
     const container = document.getElementById('member-list');
+    if (!container) return;
 
-    container.innerHTML = members.map(m => {
-        const name = m.full_name || m.name || "Unknown";
-        const initial = name.charAt(0).toUpperCase();
+    const cards = await Promise.all(members.map(async (m) => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${m.user_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`
+                }
+            });
 
-        return `
-            <div class="member-item">
-                <div class="member-avatar">${initial}</div>
-                <div class="member-name">${name}</div>
+            const userData = await res.json();
+
+            const name = userData.data?.full_name 
+                || `${userData.data?.first_name || ''} ${userData.data?.last_name || ''}`.trim()
+                || "Unknown";
+
+            const initial = name.charAt(0).toUpperCase();
+
+            return {
+                role: m.role,
+                html: `
+                    <div class="member-card ${m.role}">
+                        <div class="member-avatar">${initial}</div>
+                        <div class="member-info">
+                            <div class="member-name">${name}</div>
+                            <div class="member-role">${m.role}</div>
+                        </div>
+                    </div>
+                `
+            };
+        } catch (err) {
+            return {
+                role: m.role,
+                html: `
+                    <div class="member-card ${m.role}">
+                        <div class="member-avatar">U</div>
+                        <div class="member-info">
+                            <div class="member-name">Unknown</div>
+                            <div class="member-role">${m.role}</div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+    }));
+
+    // ✅ แยก role
+    const teachers = cards.filter(c => c.role === 'teacher');
+    const students = cards.filter(c => c.role === 'student');
+
+    // ✅ render เป็น section
+    container.innerHTML = `
+        <div class="member-section">
+            <div class="member-section-title">👩‍🏫 Teacher</div>
+            <div class="member-list">
+                ${teachers.map(c => c.html).join('')}
             </div>
-        `;
-    }).join('');
+        </div>
+
+        <div class="member-section">
+            <div class="member-section-title">👨‍🎓 Students</div>
+            <div class="member-list">
+                ${students.map(c => c.html).join('')}
+            </div>
+        </div>
+    `;
 }
 
 function checkEmptyStates() {
