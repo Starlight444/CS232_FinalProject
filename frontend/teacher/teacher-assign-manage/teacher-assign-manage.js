@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default'; 
+
 //const urlParams = new URLSearchParams(window.location.search);
 //const ASSIGNMENT_ID = urlParams.get('id');
 const urlParams = new URLSearchParams(window.location.search);
@@ -30,7 +31,7 @@ function loadTeacherSidebarNavbar() {
 
             // Load sidebar JS (toggle / collapse logic)
             const sidebarScript = document.createElement('script');
-            sidebarScript.src = '../../components/student-sidebar/sidebar.js';
+            sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
             document.body.appendChild(sidebarScript);
 
             // Load navbar JS (profile dropdown)
@@ -94,20 +95,27 @@ function renderAssignmentDetails(data) {
     }
 }
 
-// 2. ดึงข้อมูลรายชื่อนักศึกษา (อัปเดตใหม่)
+// 2. ดึงข้อมูลรายชื่อนักศึกษา
 async function loadStudentsByStatus(statusFilter) {
     const tbody = document.querySelector('.grading-table tbody');
-    tbody.innerHTML = '<tr><td colspan="5" align="center">กำลังโหลดข้อมูล... ⏳</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" align="center">กำลังโหลดข้อมูล... </td></tr>';
 
     try {
-        // แปลงชื่อ Tab ให้เป็น query ส่งให้ Backend (submitted หรือ missing)
-        const apiStatus = statusFilter.toLowerCase();
-
-        const response = await fetch(`${API_BASE_URL}/assignments/${ASSIGNMENT_ID}/students?status=${apiStatus}`);
+        const response = await fetch(`${API_BASE_URL}/submissions/assignment/${ASSIGNMENT_ID}`);
         if (!response.ok) throw new Error('ดึงข้อมูลนักศึกษาไม่สำเร็จ');
-        
-        const realStudentsData = await response.json();
-        renderTable(realStudentsData.data, statusFilter); // สมมติว่า Backend ส่งมาใน .data
+
+        const result = await response.json();
+        const allSubmissions = result.data || [];
+
+        const tabStatusMap = {
+            'Needs Grading': 'submitted',
+            'Fully Graded':  'graded',
+            'Missing':       'missing'
+        };
+        const targetStatus = tabStatusMap[statusFilter];
+        const filtered = allSubmissions.filter(s => s.status === targetStatus);
+
+        renderTable(filtered, statusFilter);
     } catch (error) {
         console.error("Error:", error);
         tbody.innerHTML = '<tr><td colspan="5" align="center" style="color:red;">ไม่มีข้อมูลนักศึกษาในสถานะนี้</td></tr>';
@@ -150,8 +158,9 @@ function renderTable(studentsData, filterStr) {
 
         // จัดการปุ่มเปิดไฟล์
         let submissionContent = '';
-        if (student.file_url) {
-            submissionContent = `<button class="file-btn" type="button" onclick="window.open('${student.file_url}', '_blank')">
+        const fileUrl = student.attachments && student.attachments[0];
+        if (fileUrl) {
+            submissionContent = `<button class="file-btn" type="button" onclick="window.open('${fileUrl}', '_blank')">
                                     <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
                                     View File
                                  </button>`;
@@ -159,11 +168,14 @@ function renderTable(studentsData, filterStr) {
             submissionContent = `<span style="color: var(--text-muted); font-size: 0.9rem;">No File</span>`;
         }
 
-        // วาดแค่ 5 คอลัมน์
+        const submittedAt = student.submitted_at
+            ? new Date(student.submitted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+            : '-';
+
         tr.innerHTML = `
-            <td>${student.student_id || student.id}</td>
-            <td>${student.first_name} ${student.last_name || ''}</td>
-            <td>${student.submitted_date || '-'}</td>
+            <td>${student.student_id || '-'}</td>
+            <td>${student.student_name || '-'}</td>
+            <td>${submittedAt}</td>
             <td>${statusContent}</td>
             <td>${submissionContent}</td>
         `;
