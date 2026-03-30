@@ -53,7 +53,7 @@ courseBtn.addEventListener('click', (e) => {
 const pageRoutes = {
     'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
     'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html',
-    'dashboard': 'teacher-assign-create.html',
+    //'dashboard': 'teacher-assign-create.html',
     'announcements': TEACHER_BASE + 'teacher-announcements.html'
 };
 //จัดการเมนูหลักอื่นๆ
@@ -72,10 +72,6 @@ document.querySelectorAll('.nav-link[data-page]').forEach(link => {
         document.querySelectorAll('.sub-link').forEach(s => s.classList.remove('active-sub'));
         // นำทางไปยังหน้าที่กำหนด
         const page = link.getAttribute('data-page');
-        if (pageRoutes[page]) {
-            window.location.href = pageRoutes[page];
-        }
-        console.log("Navigating to:", page); // เพิ่มไว้เช็คใน Console
 
         if (pageRoutes[page]) {
             window.location.href = pageRoutes[page];
@@ -144,7 +140,7 @@ function initActiveFromURL() {
     const reverseRoutes = {
         'teacher-dashboard.html': 'dashboard',
         'teacher-assign-manage.html': 'courses',
-        'teacher-assign-create.html': 'dashboard',
+        //'teacher-assign-create.html': 'dashboard',
         'teacher-announcements.html': 'announcements',
         //'teacher-course-detail.html': 'courses'
     };
