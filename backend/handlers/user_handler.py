@@ -34,3 +34,28 @@ def login(
             "role": role
         }
     }
+
+@router.get("/{user_id}")
+def get_user(
+    user_id: str,
+    db: Session = Depends(get_db)
+):
+    repo = UserRepository(db)
+    user = repo.get_by_id(user_id)
+
+    if not user:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    return {
+        "success": True,
+        "data": {
+            "user_id": str(user.user_id),
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "full_name": f"{user.first_name} {user.last_name}"
+        }
+    }
