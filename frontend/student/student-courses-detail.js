@@ -121,14 +121,14 @@ function switchTab(element, tabId) {
 
 // API
 // เปลี่ยน BASE_URL
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
 // --- [MOCK] ---
 // ไม่เรียก Token
 // URL ยังไม่มี course_id 
 
 const urlParams = new URLSearchParams(window.location.search);
 //MOCK urlParam
-const courseId = urlParams.get('course_id')|| 'uuid-001';
+const courseId = urlParams.get('course_id');
 
 document.addEventListener('DOMContentLoaded', () => {
     if (courseId) {
@@ -264,7 +264,7 @@ function createCardHTML(task) {
     });
 
     return `
-        <div class="assignment-card" onclick="window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}'">
+        <div class="assignment-card" onclick="window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}&course_id=${courseId}'">
             <div class="task-icon">Pic</div>
             <div class="task-details">
                 <span class="task-name">${task.title}</span> 
