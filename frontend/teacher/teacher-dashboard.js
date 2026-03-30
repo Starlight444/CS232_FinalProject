@@ -1,48 +1,54 @@
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
-    window.location.href = "../auth/login.html";
+  window.location.href = "../auth/login.html";
 }
-const TOKEN   = userData ? userData.token   : '';
+const TOKEN = userData ? userData.token : '';
 const USER_ID = userData ? userData.user_id : '';
 
 document.addEventListener("DOMContentLoaded", function () {
-    loadTeacherSidebarNavbar();
+  loadTeacherSidebarNavbar();
 });
 
 function loadTeacherSidebarNavbar() {
-    fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-        .then(r => r.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const container = document.getElementById('teacher-sidebar-navbar-container');
+  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    .then(r => r.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const container = document.getElementById('teacher-sidebar-navbar-container');
 
-            const sidebar = doc.querySelector('#sidebar');
-            const navbar  = doc.querySelector('.navbar');
-            if (sidebar) container.appendChild(sidebar);
-            if (navbar)  container.appendChild(navbar);
+      const sidebar = doc.querySelector('#sidebar');
+      const navbar = doc.querySelector('.navbar');
+      if (sidebar) container.appendChild(sidebar);
+      if (navbar) container.appendChild(navbar);
 
-            const sidebarScript = document.createElement('script');
-            sidebarScript.src = '../components/student-sidebar/sidebar.js';
-            document.body.appendChild(sidebarScript);
+      // หน้านี้อยู่ลึก 2 ชั้น (teacher/teacher-assign-manage/) ต้องถอย ../
+      const logoImg = document.getElementById('logo-img');
+      if (logoImg) {
+        logoImg.src = '../components/image/tulogo.png';
+      }
 
-            const navbarScript = document.createElement('script');
-            navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
-            document.body.appendChild(navbarScript);
+      const sidebarScript = document.createElement('script');
+      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
+      document.body.appendChild(sidebarScript);
+
+      const navbarScript = document.createElement('script');
+      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
+      document.body.appendChild(navbarScript);
 
 
-            sidebarScript.onload = () => {
-                const sidebarEl = document.getElementById('sidebar');
-                if (sidebarEl) {
-                    new MutationObserver(() => {
-                        const collapsed = sidebarEl.classList.contains('collapsed');
-                        document.body.classList.toggle('sidebar-collapsed', collapsed);
-                        setBottomColumns();
-                    }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
-                }
-            };
-        })
-        .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+      sidebarScript.onload = () => {
+        const sidebarEl = document.getElementById('sidebar');
+        if (sidebarEl) {
+          new MutationObserver(() => {
+            const collapsed = sidebarEl.classList.contains('collapsed');
+            document.body.classList.toggle('sidebar-collapsed', collapsed);
+            setBottomColumns();
+          }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+        }
+      };
+    })
+    .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
 }
 
 // Re-calculate on window resize too
@@ -53,8 +59,8 @@ let currentViewDate = new Date();
 
 function renderCalendar() {
   const titleEl = document.getElementById('cui-monthYear');
-  const gridEl  = document.getElementById('cui-weekGrid');
-  const today   = new Date();
+  const gridEl = document.getElementById('cui-weekGrid');
+  const today = new Date();
 
   titleEl.innerText = currentViewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
@@ -96,7 +102,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 async function updateDashboardSummary() {
   try {
     const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-    const result   = await response.json();
+    const result = await response.json();
 
     if (result.success) {
       const courses = result.data;
@@ -106,10 +112,10 @@ async function updateDashboardSummary() {
       if (totalCoursesEl) totalCoursesEl.innerText = courses.length;
 
       // 2. เตรียมตัวแปรเพื่อคำนวณค่ารวม
-      let grandTotalSubmitted = 0; 
+      let grandTotalSubmitted = 0;
       let grandTotalStudents = 0;
-      let totalMissing = 0;          
-      let coursesWithMissingCount = 0; 
+      let totalMissing = 0;
+      let coursesWithMissingCount = 0;
 
       courses.forEach(course => {
         const stdInCourse = course.total_std || 0;
@@ -117,7 +123,7 @@ async function updateDashboardSummary() {
         const missingInCourse = Math.max(0, stdInCourse - submittedInCourse);
 
         grandTotalSubmitted += (course.total_submitted_student || 0);
-        grandTotalStudents  += (course.total_std || 0);
+        grandTotalStudents += (course.total_std || 0);
 
         // ถ้าวิชานี้มีคนค้างส่ง (Missing > 0)
         if (missingInCourse > 0) {
@@ -125,9 +131,9 @@ async function updateDashboardSummary() {
           coursesWithMissingCount++;
         }
       });
-      
+
       // --- [Update UI] ---
-      
+
       // Card: To Grade
       const toGradePct = grandTotalStudents > 0 ? Math.round((grandTotalSubmitted / grandTotalStudents) * 100) : 0;
       document.getElementById('to-grade-count').innerText = grandTotalSubmitted;
@@ -148,12 +154,12 @@ async function updateDashboardSummary() {
 
       const missingLabel = document.getElementById('missing-courses-label');
       if (missingLabel) {
-        missingLabel.innerText = `From ${coursesWithMissingCount} courses`; 
+        missingLabel.innerText = `From ${coursesWithMissingCount} courses`;
       }
     }
   } catch (error) {
     console.error('Could not load dashboard summary:', error);
-    if(document.getElementById('course-count-label')) 
+    if (document.getElementById('course-count-label'))
       document.getElementById('course-count-label').innerText = 'Data unavailable';
   }
 }
@@ -163,7 +169,7 @@ async function loadCourses() {
 
   try {
     const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-    const result   = await response.json();
+    const result = await response.json();
 
     if (result.success) {
       const container = document.getElementById('course-container');
@@ -171,13 +177,13 @@ async function loadCourses() {
 
       container.innerHTML = '';
 
- 
+
       const courses = result.data.filter(
         course => course.role === 'teacher' || course.role === 'ta'
       );
 
       courses.forEach((course, idx) => {
-        const colorClass     = CARD_COLORS[idx % CARD_COLORS.length];
+        const colorClass = CARD_COLORS[idx % CARD_COLORS.length];
         const codeColorClass = colorClass.replace('course-', 'code-');
         const studentCount = course.total_std || 0;
 
@@ -209,65 +215,65 @@ async function loadCourses() {
 }
 
 // ── Needs Grading — state ──
-let _gradingRows = [];   
-let _sortAsc     = true; 
+let _gradingRows = [];
+let _sortAsc = true;
 
 async function loadNeedsGrading() {
-    try {
-        // 1. ดึง courses ทั้งหมดของ user
-        const courseRes    = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-        const courseResult = await courseRes.json();
-        if (!courseResult.success) return;
+  try {
+    // 1. ดึง courses ทั้งหมดของ user
+    const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
+    const courseResult = await courseRes.json();
+    if (!courseResult.success) return;
 
-        const now = new Date();
-        _gradingRows = [];
+    const now = new Date();
+    _gradingRows = [];
 
-        // 2. วน loop เฉพาะ course ที่เป็น teacher หรือ ta
-        for (const course of courseResult.data) {
-            if (course.role !== 'teacher' && course.role !== 'ta') continue;
+    // 2. วน loop เฉพาะ course ที่เป็น teacher หรือ ta
+    for (const course of courseResult.data) {
+      if (course.role !== 'teacher' && course.role !== 'ta') continue;
 
-            // 3. ดึง assignments ของแต่ละ course
-            const assignRes    = await fetch(`${API_BASE_URL}/assignments/${course.course_id}`);
-            const assignResult = await assignRes.json();
-            if (!assignResult.success) continue;
+      // 3. ดึง assignments ของแต่ละ course
+      const assignRes = await fetch(`${API_BASE_URL}/assignments/${course.course_id}`);
+      const assignResult = await assignRes.json();
+      if (!assignResult.success) continue;
 
-            // 4. เก็บเฉพาะ assignment ที่เลยกำหนดส่งแล้ว (overdue)
-            assignResult.data.forEach(assign => {
-                if (new Date(assign.due_date) < now) {
-                    _gradingRows.push({
-                        course_code:   course.course_code,
-                        assignment_id: assign.assignment_id,
-                        title:         assign.title,
-                        due_date:      assign.due_date,
-                        submitted:     assign.submitted_count || 0, 
-                        total:         course.total_std || 0,        
-                    });
-                }
-            });
+      // 4. เก็บเฉพาะ assignment ที่เลยกำหนดส่งแล้ว (overdue)
+      assignResult.data.forEach(assign => {
+        if (new Date(assign.due_date) < now) {
+          _gradingRows.push({
+            course_code: course.course_code,
+            assignment_id: assign.assignment_id,
+            title: assign.title,
+            due_date: assign.due_date,
+            submitted: assign.submitted_count || 0,
+            total: course.total_std || 0,
+          });
         }
-
-        const badgeNum = document.getElementById('badge-num');
-        if (badgeNum) badgeNum.innerText = _gradingRows.length;
-
-        renderGradingTable();
-
-    } catch (err) {
-        console.error('Error loading grading table:', err);
+      });
     }
+
+    const badgeNum = document.getElementById('badge-num');
+    if (badgeNum) badgeNum.innerText = _gradingRows.length;
+
+    renderGradingTable();
+
+  } catch (err) {
+    console.error('Error loading grading table:', err);
+  }
 }
 
 function renderGradingTable() {
-    const tableBody = document.getElementById('grading-table-body');
-    if (!tableBody) return;
+  const tableBody = document.getElementById('grading-table-body');
+  if (!tableBody) return;
 
-    const sorted = [..._gradingRows].sort((a, b) => {
-        const diff = new Date(a.due_date) - new Date(b.due_date);
-        return _sortAsc ? diff : -diff;
-    });
+  const sorted = [..._gradingRows].sort((a, b) => {
+    const diff = new Date(a.due_date) - new Date(b.due_date);
+    return _sortAsc ? diff : -diff;
+  });
 
-    tableBody.innerHTML = sorted.map(item => {
-        const missing = Math.max(0, item.total - item.submitted);
-        return `
+  tableBody.innerHTML = sorted.map(item => {
+    const missing = Math.max(0, item.total - item.submitted);
+    return `
             <div class="grade-row-card">
                 <div class="gcol-class">${item.course_code}</div>
                 <div class="gcol-name">${item.title}</div>
@@ -285,52 +291,52 @@ function renderGradingTable() {
                     </button>
                 </div>
             </div>`;
-    }).join('');
+  }).join('');
 }
 
 function toggleGradingSort() {
-    _sortAsc = !_sortAsc;
+  _sortAsc = !_sortAsc;
 
-    const group = document.querySelector('.panel-sort-group');
-    const label = document.querySelector('.panel-sort-label');
+  const group = document.querySelector('.panel-sort-group');
+  const label = document.querySelector('.panel-sort-label');
 
-    if (label) label.textContent = _sortAsc ? 'Oldest' : 'Newest';
-    if (group) group.classList.toggle('sort-desc', !_sortAsc);
+  if (label) label.textContent = _sortAsc ? 'Oldest' : 'Newest';
+  if (group) group.classList.toggle('sort-desc', !_sortAsc);
 
-    renderGradingTable();
+  renderGradingTable();
 }
 
 function setBottomColumns() {
   const section = document.querySelector('.bottom-section');
   if (!section) return;
 
-  const CARD_W    = 220;
-  const GAP       = 20;
-  const PAD       = 40;
-  const MAX_ROW   = 3;
+  const CARD_W = 220;
+  const GAP = 20;
+  const PAD = 40;
+  const MAX_ROW = 3;
   const RIGHT_MAX = 570;
-  const CONTENT_PAD = 60; 
+  const CONTENT_PAD = 60;
 
   // Calculate from sidebar state — no need to wait for DOM to settle
   const isCollapsed = document.body.classList.contains('sidebar-collapsed');
   const sidebarW = isCollapsed
-      ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-width') || '75')
-      : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '250');
+    ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-width') || '75')
+    : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width') || '250');
 
   const dashW = window.innerWidth - sidebarW - CONTENT_PAD;
 
   const totalCards = document.querySelectorAll('#course-container .course-card').length;
-  const n          = Math.min(totalCards || 1, MAX_ROW);
+  const n = Math.min(totalCards || 1, MAX_ROW);
 
   const naturalLeft = PAD + n * CARD_W + (n - 1) * GAP;
-  const rightW      = Math.min(dashW - naturalLeft, RIGHT_MAX);
-  const leftW       = dashW - rightW;
+  const rightW = Math.min(dashW - naturalLeft, RIGHT_MAX);
+  const leftW = dashW - rightW;
 
   section.style.gridTemplateColumns = `${leftW}px ${rightW}px`;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-updateDashboardSummary();
-loadNeedsGrading()
+  updateDashboardSummary();
+  loadNeedsGrading()
   loadCourses();
 });
