@@ -6,6 +6,7 @@ const courseBtn = document.getElementById('courseBtn');
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
+
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
     const path = window.location.pathname;
@@ -74,9 +75,6 @@ document.querySelectorAll('.nav-link[data-page]').forEach(link => {
         document.querySelectorAll('.sub-link').forEach(s => s.classList.remove('active-sub'));
         // นำทางไปยังหน้าที่กำหนด
         const page = link.getAttribute('data-page');
-        if (pageRoutes[page]) {
-            window.location.href = pageRoutes[page];
-        }
         console.log("Navigating to:", page); // เพิ่มไว้เช็คใน Console
 
         if (pageRoutes[page]) {
@@ -132,7 +130,7 @@ function renderSidebarCourses(courses) {
             e.preventDefault();
 
             const courseId = course.course_id;
-            window.location.href = `${TEACHER_BASE}/teacher-assign-manage/teacher-assign-manage.html?id=${courseId}`;
+            window.location.href = `${TEACHER_BASE}teacher-assign-manage/teacher-assign-manage.html?id=${courseId}`;
         });
 
         li.appendChild(link);

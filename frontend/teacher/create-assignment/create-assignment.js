@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Load sidebar JS (toggle / collapse logic)
                 const sidebarScript = document.createElement('script');
-                sidebarScript.src = '../../components/student-sidebar/sidebar.js';
+                sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
                 document.body.appendChild(sidebarScript);
 
                 // Load navbar JS (profile dropdown)
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         }
     }
-    await loadTeacherCourses(); // สั่งรันโหลดวิชาทันที
+     // สั่งรันโหลดวิชาทันที
 
     // ==========================================
     // 2. จัดการ UI: Checkbox & Drag-Drop ไฟล์
@@ -205,7 +205,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (submitBtn) submitBtn.textContent = 'Save Changes';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/assignments/${assignmentId}`);
+            const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
             if (!response.ok) throw new Error('ดึงข้อมูลเดิมไม่สำเร็จ');
 
             const result = await response.json();
