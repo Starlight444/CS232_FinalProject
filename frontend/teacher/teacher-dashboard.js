@@ -1,7 +1,4 @@
-const userData = JSON.parse(localStorage.getItem("user"));
-if (!userData || !userData.token) {
-    window.location.href = "../auth/login.html";
-}
+
 const TOKEN   = userData ? userData.token   : '';
 const USER_ID = userData ? userData.user_id : '';
 
@@ -92,7 +89,15 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 // --- [DASHBOARD SUMMARY CARD: Courses, To Grade, and Missing] ---
 async function updateDashboardSummary() {
   try {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (!userData || !userData.user_id) {
+        console.error("No user data found in localStorage");
+        return;
+    }
+    const USER_ID = userData.user_id;
+
     const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
+    if (!response.ok) throw new Error("Fetch failed");
     const result   = await response.json();
 
     if (result.success) {
@@ -159,6 +164,10 @@ async function loadCourses() {
   const CARD_COLORS = ['course-orange', 'course-teal', 'course-blue'];
 
   try {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const USER_ID = userData?.user_id; // ใช้ ?. เพื่อป้องกัน Error ถ้า userData เป็น null
+
+    if (!USER_ID) return;
     const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
     const result   = await response.json();
 
@@ -169,6 +178,7 @@ async function loadCourses() {
       container.innerHTML = '';
 
  
+      console.log('courses from API:', result.data);
       const courses = result.data.filter(
         course => course.role === 'teacher' || course.role === 'ta'
       );
@@ -211,6 +221,10 @@ let _sortAsc     = true;
 
 async function loadNeedsGrading() {
     try {
+        const userData = JSON.parse(localStorage.getItem("user"));
+        const USER_ID = userData?.user_id; // ใช้ ?. เพื่อป้องกัน Error ถ้า userData เป็น null
+
+        if (!USER_ID) return;
         // 1. ดึง courses ทั้งหมดของ user
         const courseRes    = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
         const courseResult = await courseRes.json();
@@ -386,7 +400,7 @@ async function loadAnnouncements() {
 
     let allAnnouncements = [];
 
-    for (const course of courseResult) {
+    for (const course of (courseResult.data || [])) {
       const annRes = await fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`);
       const annResult = await annRes.json();
       const announcements = annResult.data || [];
