@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function loadTeacherSidebarNavbar() {
-  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+  fetch('/frontend/components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(r => r.text())
     .then(html => {
       const parser = new DOMParser();

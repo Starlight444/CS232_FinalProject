@@ -65,7 +65,7 @@ body.sidebar-collapsed .navbar {
     position: absolute;
     top: 55px;
     right: 0;
-    width: 400px;
+    width: 220px;
     height: auto;
     max-height: 300px;
     background: #ffffff;
@@ -147,18 +147,6 @@ body.sidebar-collapsed .navbar {
     margin-top: auto;
 }
 
-/* Student Profile Dropdown*/
-.profile-dropdown {
-    width: 220px;
-    height: auto;
-}
-
-.profile-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 10px 20px;
-}
 
 .avatar-gradient {
     margin-top: -15px;
