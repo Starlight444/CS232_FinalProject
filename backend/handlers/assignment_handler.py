@@ -71,3 +71,22 @@ def get_assignments(
         "success": True,
         "data": assignments
     }
+
+@router.get("/detail/{assignment_id}")
+def get_assignment(
+    assignment_id: UUID,
+    db: Session = Depends(get_db)
+):
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    service = AssignmentService(repo, member_repo)
+
+    assignment = service.get_assignment(assignment_id)
+
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    return {
+        "success": True,
+        "data": assignment
+    }

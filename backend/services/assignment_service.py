@@ -43,11 +43,33 @@ class AssignmentService:
             {
                 "assignment_id": str(a.assignment_id),
                 "title": a.title,
+                "description": a.description,
                 "due_date": a.due_date,
                 "max_score": a.max_score,
+                "allowed_file_types": a.allowed_file_types,
                 "course_id": str(a.course_id),
                 "status": a.status,
                 "submit_count": count
             }
             for a, count in rows
         ]
+    
+    def get_assignment(self, assignment_id):
+        row = self.repo.get_assignment_with_count_by_id(assignment_id)
+
+        if not row:
+            return None
+
+        a, count = row
+
+        return {
+            "assignment_id": str(a.assignment_id),
+            "title": a.title,
+            "description": a.description,
+            "due_date": a.due_date,
+            "max_score": a.max_score,
+            "allowed_file_types": a.allowed_file_types,
+            "course_id": str(a.course_id),
+            "status": a.status,
+            "submit_count": count
+        }
