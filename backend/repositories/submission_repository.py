@@ -40,7 +40,8 @@ class SubmissionRepository:
             if sid not in submission_map:
                 submission_map[sid] = {
                     "submission_id": sid,
-                    "student_id": submission.student_id,
+                    "user_id": submission.student_id,
+                    "student_code": user.student_id,
                     "student_name": f"{user.first_name} {user.last_name}",
                     "submitted_at": submission.submitted_at,
                     "status": submission.status,

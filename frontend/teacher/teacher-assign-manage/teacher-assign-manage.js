@@ -100,7 +100,7 @@ async function loadStudentsByStatus(statusFilter) {
     tbody.innerHTML = '<tr><td colspan="5" align="center">กำลังโหลดข้อมูล... </td></tr>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/submissions/assignment/${ASSIGNMENT_ID}`);
+        const response = await fetch(`${API_BASE_URL}/submissions/assignment/${ASS_ID}`);   //ใช้ mock assignment_id
         if (!response.ok) throw new Error('ดึงข้อมูลนักศึกษาไม่สำเร็จ');
 
         const result = await response.json();
@@ -172,7 +172,7 @@ function renderTable(studentsData, filterStr) {
             : '-';
 
         tr.innerHTML = `
-            <td>${student.student_id || '-'}</td>
+            <td>${student.student_code || '-'}</td>
             <td>${student.student_name || '-'}</td>
             <td>${submittedAt}</td>
             <td>${statusContent}</td>
@@ -184,4 +184,12 @@ function renderTable(studentsData, filterStr) {
 
 // สั่งรันครั้งแรก
 loadAssignmentDetails();
-loadStudentsByStatus('Submitted');
+loadStudentsByStatus('Needs Grading');
+
+document.addEventListener("DOMContentLoaded", () => {
+    const activeTab = document.querySelector('.tab-item.active');
+    if (activeTab) {
+        const currentFilter = activeTab.textContent.trim();
+        loadStudentsByStatus(currentFilter);
+    }
+});
