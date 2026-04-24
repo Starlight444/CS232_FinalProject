@@ -1,7 +1,7 @@
-const userData = JSON.parse(localStorage.getItem("user"));
+/*const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
   window.location.href = "../auth/login.html";
-}
+}*/
 const TOKEN = userData ? userData.token : '';
 const USER_ID = userData ? userData.user_id : '';
 
