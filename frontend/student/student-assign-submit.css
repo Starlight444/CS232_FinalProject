@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: 60px;
+    flex: 1;
+    padding: 40px;
+    transition: margin-left var(--transition);
+    background: #fff;
+    min-height: 100vh;
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/*Back buttun*/
+.back-btn {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.back-text {
+    color: #999898;
+    text-align: right;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+/*Assignment card*/
+.assignment-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e0e0ec;
+    padding: 28px 32px;
+    max-width: 100%;
+}
+
+.assign-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.assign-title {
+    font-size: 20px;
+    font-weight: 400;
+    color: #333;
+}
+
+.assign-due {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.assign-points {
+    font-size: 16px;
+    font-weight: 400;
+    color: #333;
+}
+
+/*Upload file*/
+.assign-section {
+    margin-top: 20px;
+}
+
+.section-label {
+    font-size: 16px;
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.section-body {
+    font-size: 14px;
+    font-weight: 100;
+    margin-top: -5px;
+}
+
+.file-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
+    margin-top: 8px;
+    border: 1px solid #e0e0ec;
+    padding-left: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 5px;
+    width: 150px;
+    cursor: pointer;
+}
+
+.pdf-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.work-box {
+    border: 1.5px solid #e0e0ec;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-start;
+    min-height: 120px;
+}
+
+.work-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+/*Add file button*/
+.add-file-btn {
+    width: 160px;
+    height: 110px;
+    border-radius: 10px;
+    border: 2px dashed #c8c8dc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #aaa;
+    transition: all 0.2s;
+}
+
+.add-file-btn:hover {
+    border-color: #7c6fc4;
+    color: #7c6fc4;
+    background: rgba(124, 111, 196, 0.04);
+}
+
+/*File that upload*/
+.work-file-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.work-thumb {
+    width: 160px;
+    height: 110px;
+    background: #e8e8ee;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.work-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/*Delete button*/
+.remove-file {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+/*Submit button*/
+.submit-bar {
+    margin-top: 20px;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(0deg, #6E6CDF 0%, #6E6CDF 100%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.submit-btn:hover {
+    opacity: 0.9;
+}
+
+.submit-btn.submitted {
+    background: #aeacf5;
+    cursor: pointer;
+}
+
+.submit-btn.submitted:hover {
+    background: #6E6CDF;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+}
+
+.submit-timestamp {
+    font-size: 12px;
+    margin-top: 5px;
+
+}

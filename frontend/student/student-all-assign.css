@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: 60px;
+    flex: 1;
+    padding: 40px;
+    transition: margin-left var(--transition);
+    background: #fff;
+    min-height: 100vh;
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* main page*/
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3B3392;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search */
+.search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid #ddd;
+    border-radius: 30px;
+    padding: 7px 16px;
+    width: 220px;
+    transition: border-color 0.2s;
+}
+
+.search-wrap:focus-within {
+    border-color: #7c6fc4;
+}
+
+.search-wrap iconify-icon {
+    color: #bbb;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: #bbb;
+}
+
+/* Sort Newest Closest*/
+.sort-group {
+    display: flex;
+    gap: 8px;
+}
+
+.sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    border-radius: 30px;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.sort-btn.active {
+    background: #6E6CDF;
+    color: #fff;
+}
+
+.sort-btn:not(.active):hover {
+    border-color: #6E6CDF;
+    color: #6E6CDF;
+}
+
+/* Filter button */
+.filter-wrap {
+    position: relative;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+    padding: 7px 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+#filter-chevron {
+    transition: transform 0.2s;
+}
+
+.filter-wrap.open #filter-chevron {
+    transform: rotate(180deg);
+    /* ลูกศรกลับทิศเมื่อเปิด */
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+    min-width: 140px;
+    display: none;
+    /* ซ่อนไว้ก่อน */
+    flex-direction: column;
+    gap: 4px;
+    z-index: 100;
+}
+
+.filter-wrap.open .filter-dropdown {
+    display: flex;
+    /* แสดงเมื่อ open */
+}
+
+.filter-option {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.filter-option:hover:not(.active) {
+    background: #f0f0f7;
+}
+
+.filter-option.active {
+    background: #6E6CDF;
+    color: #fff;
+}
+
+/*Tabs*/
+.tabs-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    background: #fff;
+    border-bottom: none;
+    padding: 0;
+    gap: 0;
+}
+
+.tab-btn {
+    padding: 13px 8px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    transition: background 0.2s, color 0.2s;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-btn[data-tab="due-today"] {
+    color: #CF2D2D;
+}
+
+.tab-btn[data-tab="complete"] {
+    color: #2C9536;
+}
+
+.tab-btn.active {
+    background: #6E6CDF;
+    color: #fff;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.assignment-container {
+    display: flex;
+    height: 500px;
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
+    border-radius: 8px;
+    border: 1px solid #6E6CDF;
+}
+
+.assignment-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.assignment-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f5;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.assignment-item:last-child {
+    border-bottom: none;
+}
+
+.assignment-item:hover {
+    background: #f8f8fd;
+    border-radius: 10px;
+}
+
+.assign-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #bbb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.assign-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.assign-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.assign-due-label {
+    font-size: 12px;
+    font-weight: 400;
+    margin-bottom: 2px;
+}
+
+/* due today / overdue */
+.due-urgent {
+    color: #e53935;
+}
+
+/* upcoming */
+.due-normal {
+    color: #544646;
+}
+
+/* complete */
+.due-done {
+    color: #888;
+}
+
+.assign-class {
+    font-size: 12px;
+    font-weight: 400;
+    color: #888;
+}
+
+/* Points / icons right */
+.assign-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.assign-points-label {
+    font-size: 10px;
+    font-weight: 400;
+    color: #888;
+}
+
+
+
+/* Ban icon (not submitted in complete) */
+.ban-icon {
+    color: #bbb;
+}
+
+/* Empty */
+.empty-msg {
+    text-align: center;
+    padding: 48px 20px;
+    color: #aaa;
+    font-size: 0.9rem;
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Navbar</title>
+    <link rel="stylesheet" href="/frontend/components/student-navbar/student-navbar.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="navbar-left"></div>
+
+        <div class="navbar-right">
+            <button class="icon-btn" id="bell-btn">
+                <i class="fa-solid fa-bell"></i>
+                <span class="badge" id="notif-badge"></span>
+            </button>
+
+            <div class="notif-dropdown" id="notif-dropdown">
+                <div class="notif-header">
+                    <span>Notifications</span>
+                    <button class="clear-btn" id="clear-btn">Clear all</button>
+                </div>
+                <!-- notifications list-->
+                <ul class="notif-list" id="notif-list"></ul>
+            </div>
+
+            <button class="icon-btn profile-btn" id="profile-btn">
+                <i class="fa-solid fa-user"></i>
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="profile-info">
+                    <div class="avatar-gradient" id="avatar-gradient"></div>
+                    <div class="user-details">
+                        <p class="user-name" id="user-name"></p>
+                        <p class="user-email" id="user-email"></p>
+                        <p class="user-id" id="user-id"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+    <script src="student-navbar.js"></script>
+</body>
+
+</html>

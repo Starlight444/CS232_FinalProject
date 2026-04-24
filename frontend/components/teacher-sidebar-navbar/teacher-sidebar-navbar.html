@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Sidebar and Navbar</title>
+    <link rel="stylesheet" href="teacher-sidebar.css">
+    <link rel="stylesheet" href="teacher-navbar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-wrap">
+                <img src="/frontend/components/image/tulogo.png" alt="Logo" class="logo-img">
+                <span class="brand">CourseHub</span>
+            </div>
+            <i class="fa-solid fa-bars" id="toggleBtn"></i>
+        </div>
+
+        <nav class="nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-page="dashboard">
+                        <i class="fa-solid fa-house nav-icon"></i>
+                        <span class="nav-label">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="grading">
+                        <i class="fa-solid fa-clipboard nav-icon"></i>
+                        <span class="nav-label">Grading Overview</span>
+                    </a>
+                </li>
+
+                <li class="nav-item" id="courses-item">
+                    <a href="#" class="nav-link" id="courseBtn">
+                        <i class="fa-solid fa-graduation-cap nav-icon"></i>
+                        <span class="nav-label">My courses</span>
+                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                    </a>
+                    <ul class="sub-list" id="submenu"></ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="announcements">
+                        <i class="fa-solid fa-bullhorn nav-icon"></i>
+                        <span class="nav-label">Announcements</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-link logout-link">
+                <i class="fa-solid fa-right-from-bracket nav-icon"></i>
+                <span class="nav-label">Log out</span>
+            </a>
+        </div>
+    </aside>
+
+
+    <!--Navbar-->
+    <div class="navbar">
+        <div class="navbar-left"></div>
+
+        <div class="navbar-right">
+            <button class="icon-btn profile-btn" id="profile-btn">
+                <i class="fa-solid fa-user"></i>
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="profile-teacher">
+                    <div class="avatar-teacher" id="avatar-gradient"></div>
+                    <div class="teacher-details">
+                        <p class="teacher-name" id="user-name"></p>
+                        <p class="teacher-email" id="user-email"></p>
+                        <p class="user-id" id="user-id"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="teacher-navbar.js"></script>
+    <script src="teacher-sidebar.js"></script>
+</body>
+
+</html>
