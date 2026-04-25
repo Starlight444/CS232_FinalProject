@@ -684,3 +684,160 @@ body.sidebar-collapsed .main {
 .member-name {
   font-size: 14px;
 }
+
+/* ============================================================
+   Materials Tab
+   ============================================================ */
+.materials-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 0;
+    width: 100%;
+}
+
+/* Week accordion section */
+.week-section {
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.week-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.week-header:hover {
+    background: #f8f7ff;
+}
+
+.week-chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    width: 16px;
+    height: 16px;
+}
+
+.week-section.open > .week-header .week-chevron {
+    transform: rotate(90deg);
+}
+
+.week-info {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: 1;
+}
+
+.week-title {
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.week-date {
+    font-family: Inter, sans-serif;
+    font-size: 11px;
+    color: #aaa;
+}
+
+.week-now-badge {
+    color: #CF2D2D;
+    font-family: Inter, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Accordion content */
+.week-content {
+    display: none;
+    flex-direction: column;
+    gap: 1px;
+    padding: 2px 16px 10px 16px;
+    border-top: 1px solid #F0F0F0;
+}
+
+.week-section.open > .week-content {
+    display: flex;
+}
+
+/* Material row */
+.material-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 2px;
+}
+
+/* Icon box (left) */
+.mat-icon-box {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: #EEEDFB;
+    border-radius: 6px;
+}
+
+.mat-icon-box svg {
+    width: 16px;
+    height: 16px;
+}
+
+.mat-icon-box--assign {
+    background: #EEEDFB;
+}
+
+/* File chip (PDF / MP4) */
+.mat-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: #fff;
+    border: 1px solid #DADADA;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.mat-chip:hover {
+    border-color: var(--primary-purple);
+}
+
+.mat-filename {
+    font-family: Inter, sans-serif;
+    font-size: 12px;
+    color: #333;
+}
+
+/* PDF badge text */
+.mat-pdf-badge {
+    font-family: Inter, sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    background: #E53935;
+    padding: 1px 4px;
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+}
+
+/* Assignment plain label */
+.mat-label {
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+}
