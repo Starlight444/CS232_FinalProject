@@ -1,0 +1,100 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: #222;
+}
+
+.page {
+  padding: 36px 40px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #6B5CE7;
+  margin-bottom: 28px;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* ── Card ── */
+.course-card {
+  width: 90%;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+  cursor: pointer;
+}
+
+/* Colored banner */
+.card-banner {
+  height: 200px;
+  position: relative;
+}
+
+/* Icons top-right */
+.card-banner-icons {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.icon-doc,
+.icon-gear {
+  display: flex;
+  align-items: center;
+  color: rgba(255,255,255,0.9);
+}
+
+.icon-gear-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.red-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  background: #e53e3e;
+  border-radius: 50%;
+  border: 1px solid #fff;
+}
+
+/* Course code badge */
+.course-code {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0,0,0,0.20);
+  border-radius: 4px;
+  padding: 3px 10px;
+}
+
+/* Card body */
+.card-body {
+  padding: 14px 16px 18px;
+}
+
+.course-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
