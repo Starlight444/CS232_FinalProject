@@ -98,14 +98,14 @@ document.querySelectorAll('.sub-link').forEach(link => {
 });
 
 // ปุ่ม Log out
-/*const logoutLink = document.querySelector('.logout-link');
+const logoutLink = document.querySelector('.logout-link');
 if (logoutLink) {
     logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('user');
         window.location.href = '../auth/login.html';
     });
-}*/
+}
 
 // ฟังก์ชันวิชาใน Sidebar จากข้อมูลจริง
 function renderSidebarCourses(courses) {
