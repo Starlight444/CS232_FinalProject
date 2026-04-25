@@ -125,7 +125,7 @@ function renderSidebarCourses(courses) {
             e.preventDefault();
 
             const courseId = course.course_id;
-            window.location.href = `${TEACHER_BASE}teacher-course-detail.html?id=${courseId}`;
+            window.location.href = `${TEACHER_BASE}courses-detail/courses-detail.html?course_id=${courseId}`;
         });
 
         li.appendChild(link);
@@ -140,7 +140,7 @@ function initActiveFromURL() {
         'teacher-dashboard.html': 'dashboard',
         'teacher-assign-manage.html': 'courses',
         'announcement-page.html': 'announcements',
-        //'teacher-course-detail.html': 'courses'
+        'courses-detail.html': 'courses',
     };
 
     const activePage = reverseRoutes[currentFile];
