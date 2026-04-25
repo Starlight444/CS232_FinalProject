@@ -1,24 +1,9 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
 
-//const userData = JSON.parse(localStorage.getItem("user"));
-/*if (!userData || !userData.token) {
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData || !userData.token) {
     window.location.href = "../auth/login.html";
-}*/
-
-
-// เปลี่ยนจาก const เป็น let เพื่อให้สามารถใช้ข้อมูลจำลองได้หากยังไม่มีการ Login
-let userData = JSON.parse(localStorage.getItem("user"));
-// ข้อมูลจำลองเพื่อการทดสอบ--------------------------
-if (!userData) {
-    console.warn("ยังไม่ได้ Login: กำลังใช้ข้อมูลจำลองเพื่อการทดสอบ");
-    userData = {
-        user_id: "test001",
-        role: "student",
-        token: "fake-token"
-    };
 }
-// --------------------------
-
 
 const TOKEN = userData ? userData.token : '';
 const USER_ID = userData ? userData.user_id : '';
@@ -58,9 +43,8 @@ async function loadAnnouncements() {
     listEl.innerHTML = `<div class="loading-state">Loading announcements...</div>`;
 
     try {
-        const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}?role=${userData.role}`, {
-            headers: { 'Authorization': `Bearer ${TOKEN}` }
-        });
+        const headers = { 'Authorization': `Bearer ${TOKEN}` };
+        const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}?role=${userData.role}`, { headers });
         const courseJson = await courseRes.json();
 
         const courses = Array.isArray(courseJson) ? courseJson : (courseJson.data || []);
@@ -73,27 +57,22 @@ async function loadAnnouncements() {
         const courseMap = {};
         courses.forEach(c => { courseMap[c.course_id] = c; });
 
-        const fetches = courses.map(c =>
-            fetch(`${API_BASE_URL}/announcements/course/${c.course_id}`, {
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
-            }).then(r => r.json())
+        // ดึง announcements ของแต่ละ course แล้วรวมกัน
+        const results = await Promise.all(
+            courses.map(course =>
+                fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`, { headers })
+                    .then(r => r.ok ? r.json() : { data: [] })
+                    .then(r => (r.data ?? [])
+                        .filter(a => String(a.course_id).trim() === String(course.course_id).trim())
+                        .map(a => ({ ...a, course_code: course.course_code }))
+                    )
+                    .catch(err => {
+                        console.error(`Error fetching for ${course.course_id}`, err);
+                        return [];
+                    })
+            )
         );
-
-        const results = await Promise.all(fetches);
-
-        allAnnouncements = [];
-        results.forEach((json, i) => {
-            const announcements = json.data || [];
-            const course = courses[i];
-            announcements.forEach(a => {
-                allAnnouncements.push({
-                    ...a,
-                    course_code: course.course_code,
-                    course_name: course.course_name,
-                    course_id: course.course_id
-                });
-            });
-        });
+        allAnnouncements = results.flat();
 
 
         buildFilterOptions(courses);
@@ -152,7 +131,7 @@ function renderAnnouncements() {
     });
 
     if (!filtered.length) {
-        listEl.innerHTML = `<div class="empty-state">No announcements found.</div>`;
+        listEl.innerHTML = `<div class="empty-state">No announcements found</div>`;
         return;
     }
 

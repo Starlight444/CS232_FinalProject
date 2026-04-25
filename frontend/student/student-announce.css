@@ -180,3 +180,10 @@ body.sidebar-collapsed .main-content {
 .filter-dropdown.open {
     display: block;
 }
+
+.empty-state {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 60px 0;
+    font-size: 0.95rem;
+}
