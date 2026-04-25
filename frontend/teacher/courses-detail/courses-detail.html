@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Detail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Amiko:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/all.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/buttons.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-sidebar.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-navbar.css">
+    <link rel="stylesheet" href="courses-detail.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <div class="side-nav" id="teacher-sidebar-navbar-container"></div>
+
+    <main class="main" id="main-content">
+        <div class="content">
+
+            <!-- ── Course Banner ── -->
+            <div class="course-banner">
+                <div class="banner-left">
+                    <div class="banner-course-title" id="banner-course-name">Loading...</div>
+                </div>
+                <div class="banner-right">
+                    <div class="banner-student-count">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
+                        <span id="banner-student-count">–</span>
+                    </div>
+                    <div class="grade-book-card" onclick="goToGradeBook()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#6E6CDF">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
+                        </svg>
+                        <div class="grade-book-text">
+                            <span class="grade-book-title">Grade Book</span>
+                            <span class="grade-book-link">view all</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Tab Navigation ── -->
+            <div class="tab-table-container">
+                <div class="tab-navigation" id="tab-nav">
+                    <div class="tab-indicator" id="tab-indicator"></div>
+
+                    <!-- Materials -->
+                    <button class="tab-btn active" onclick="switchTab(this, 'materials')">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 2H2V22H11V2ZM13 22H22V13H13V22ZM22 11V2H13V11H22Z"/>
+                        </svg>
+                        Materials
+                    </button>
+
+                    <!-- Assignments -->
+                    <button class="tab-btn" onclick="switchTab(this, 'assignments')">
+                        <svg width="17" height="20" viewBox="0 0 17 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.88889 20C1.36944 20 0.924926 19.8043 0.555333 19.413C0.185741 19.0217 0.00062963 18.5507 0 18V4C0 3.45 0.185111 2.97933 0.555333 2.588C0.925556 2.19667 1.37007 2.00067 1.88889 2H5.85556C6.06018 1.4 6.4027 0.916667 6.88311 0.55C7.36352 0.183333 7.90248 0 8.5 0C9.09752 0 9.6368 0.183333 10.1178 0.55C10.5989 0.916667 10.9411 1.4 11.1444 2H15.1111C15.6306 2 16.0754 2.196 16.4456 2.588C16.8158 2.98 17.0006 3.45067 17 4V18C17 18.55 16.8152 19.021 16.4456 19.413C16.076 19.805 15.6312 20.0007 15.1111 20H1.88889ZM4.72222 16H9.44444C9.9365 15.904 10.1178 15.712 10.3889 15C10.3883 14.7173 10.2976 14.48 10.1169 14.288C9.93618 14.096 9.71204 14 9.44444 14H4.72222C4.45463 14 4.23048 14.096 4.04978 14.288C3.86907 14.48 3.77841 14.7173 3.77778 15C3.77715 15.2827 3.86781 15.5203 4.04978 15.713C4.23174 15.9057 4.45589 16.0013 4.72222 16ZM4.72222 12H12.2778C12.5454 12 12.7698 11.904 12.9512 11.712C13.1325 11.52 13.2229 11.2827 13.2222 11C13.2216 10.7173 13.1309 10.48 12.9502 10.288C12.7695 10.096 12.5454 10 12.2778 10H4.72222C4.45463 10 4.23048 10.096 4.04978 10.288C3.86907 10.48 3.77841 10.7173 3.77778 11C3.77715 11.2827 3.86781 11.5203 4.04978 11.713C4.23174 11.9057 4.45589 12.0013 4.72222 12ZM4.72222 8H12.2778C12.5454 8 12.7698 7.904 12.9512 7.712C13.1325 7.52 13.2229 7.28267 13.2222 7C13.2216 6.71733 13.1309 6.48 12.9502 6.288C12.7695 6.096 12.5454 6 12.2778 6H4.72222C4.45463 6 4.23048 6.096 4.04978 6.288C3.86907 6.48 3.77841 6.71733 3.77778 7C3.77715 7.28267 3.86781 7.52033 4.04978 7.713C4.23174 7.90567 4.45589 8.00133 4.72222 8Z"/>
+                        </svg>
+                        <span>Assignments (<span id="assignment-count">0</span>)</span>
+                    </button>
+
+                    <!-- Announcements -->
+                    <button class="tab-btn" onclick="switchTab(this, 'announcements')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                        </svg>
+                        Announcements
+                    </button>
+
+                    <!-- People -->
+                    <button class="tab-btn" onclick="switchTab(this, 'people')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="M12 10C14.2091 10 16 8.20914 16 6C16 3.79086 14.2091 2 12 2C9.79086 2 8 3.79086 8 6C8 8.20914 9.79086 10 12 10Z"/>
+                            <path d="M20 17.5C20 19.985 20 22 12 22C4 22 4 19.985 4 17.5C4 15.015 7.582 13 12 13C16.418 13 20 15.015 20 17.5Z"/>
+                        </svg>
+                        People
+                    </button>
+                </div>
+
+                <div class="tab-content-body first-tab-active">
+
+                    <!-- Materials Panel -->
+                    <div id="materials" class="tab-panel active">
+                        <div class="panel-action-bar">
+                            <button class="btn-panel-action" onclick="/* UI only — Add Material not yet implemented */">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                </svg>
+                                Add Material
+                            </button>
+                        </div>
+                        <div class="materials-container" id="materials-list"></div>
+                    </div>
+
+                    <!-- Assignments Panel -->
+                    <div id="assignments" class="tab-panel">
+                        <div class="panel-action-bar">
+                            <div class="assign-filter-wrap">
+                                <button class="btn-panel-action btn-filter-assign" id="assign-filter-btn" onclick="toggleAssignFilter()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                                    </svg>
+                                    <span class="filter-label">Filter</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                                </button>
+                                <div class="assign-filter-dropdown" id="assign-filter-dropdown">
+                                    <button class="assign-filter-item" onclick="applyAssignFilter('all')">All</button>
+                                    <button class="assign-filter-item" onclick="applyAssignFilter('to-review')">To Review</button>
+                                    <button class="assign-filter-item" onclick="applyAssignFilter('upcoming')">Upcoming</button>
+                                    <button class="assign-filter-item" onclick="applyAssignFilter('reviewed')">Reviewed</button>
+                                </div>
+                            </div>
+                            <button class="btn-panel-action" onclick="goToCreateAssignment()">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                </svg>
+                                New Assignment
+                            </button>
+                        </div>
+                        <div class="assign-table-wrap">
+                            <table class="assign-table">
+                                <thead>
+                                    <tr>
+                                        <th>Assignment Name</th>
+                                        <th>Due</th>
+                                        <th>Submitted</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assign-table-body">
+                                    <tr><td colspan="4" class="assign-loading">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Announcements Panel -->
+                    <div id="announcements" class="tab-panel">
+                        <div class="panel-action-bar">
+                            <button class="btn-panel-action" onclick="goToCreateAnnouncement()">
+                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                </svg>
+                                New Announcement
+                            </button>
+                        </div>
+                        <div class="announcement-list" id="announcement-list">
+                            <div class="empty-state">Loading announcements...</div>
+                        </div>
+                    </div>
+
+                    <!-- People Panel -->
+                    <div id="people" class="tab-panel">
+                        <div id="member-list"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="courses-detail.js"></script>
+</body>
+</html>
