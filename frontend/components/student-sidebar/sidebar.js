@@ -43,7 +43,8 @@ courseBtn.addEventListener('click', (e) => {
 const pageRoutes = {
     'home': 'home.html',
     'assignments': 'student-all-assign.html',
-    'courses': 'student-courses-detail.html'
+    'courses': 'student-courses-detail.html',
+    'announcements': 'student-announce.html'
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -103,7 +104,7 @@ function initActiveFromURL() {
     const reverseRoutes = {
         'home.html': 'home',
         'student-all-assign.html': 'assignments',
-        'student-announcements.html': 'announcements',
+        'student-announce.html': 'announcements',
         'student-assign-submit.html': 'assignments',
         'student-courses-detail.html': 'courses'
     };
