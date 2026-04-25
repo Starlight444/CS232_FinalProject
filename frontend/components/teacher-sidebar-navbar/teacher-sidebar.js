@@ -53,8 +53,7 @@ courseBtn.addEventListener('click', (e) => {
 const pageRoutes = {
     'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
     'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html',
-    //'dashboard': 'teacher-assign-create.html',
-    'announcements': TEACHER_BASE + 'teacher-announcements.html'
+    'announcements': TEACHER_BASE + 'teacher-announcement/announcement-page.html'
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -103,7 +102,7 @@ if (logoutLink) {
     logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('user');
-        window.location.href = '../auth/login.html';
+        window.location.href = TEACHER_BASE + '../auth/login.html';
     });
 }
 
@@ -140,8 +139,7 @@ function initActiveFromURL() {
     const reverseRoutes = {
         'teacher-dashboard.html': 'dashboard',
         'teacher-assign-manage.html': 'courses',
-        //'teacher-assign-create.html': 'dashboard',
-        'teacher-announcements.html': 'announcements',
+        'announcement-page.html': 'announcements',
         //'teacher-course-detail.html': 'courses'
     };
 
