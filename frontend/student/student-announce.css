@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-purple: #8c85d8;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 75px;
+    --navbar-height: 60px;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+}
+
+.main-content {
+    /* ให้ส่วนเนื้อหาขยายเต็มความกว้าง */
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    padding: 32px 40px;
+    min-height: calc(100vh - var(--navbar-height));
+    background: #fff;
+    transition: margin-left 0.3s ease;
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-family: 'Amiko', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #3B3392 0%, #CF2D2D 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search */
+.search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid #ddd;
+    border-radius: 30px;
+    padding: 7px 16px;
+    width: 220px;
+    transition: border-color 0.2s;
+}
+
+.search-wrap:focus-within {
+    border-color: #7c6fc4;
+}
+
+.search-wrap iconify-icon {
+    color: #bbb;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: #bbb;
+}
+
+/* Sort */
+.sort-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+    transition: color 0.2s;
+    user-select: none;
+    /* ป้องกันการคลุมดำข้อความเวลาคลิกซ้ำๆ */
+}
+
+.sort-label:hover {
+    color: #7c6fc4;
+    /* เปลี่ยนสีตอนเอาเมาส์ชี้ */
+}
+
+/* คอนเทนเนอร์หลักต้องมี position: relative */
+.filter-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+    padding: 7px 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    width: 180px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+    padding: 5px 0;
+}
+
+.filter-option {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.filter-option:hover {
+    background: #f4f4ff;
+}
+
+.filter-option.active {
+    background: #e2e2f9;
+    color: #3a0373;
+    font-weight: 600;
+}
+
+.filter-dropdown.open {
+    display: block;
+}
