@@ -7,6 +7,7 @@
 }
 
 .create-card {
+    position: relative;
     background-color: var(--white, #FFFFFF);
     border-radius: 16px;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
@@ -26,10 +27,10 @@
     color: var(--text-main, #333);
     margin: 0;
 }
-.spacer {
-    width: 32px; /* ใช้บาลานซ์ให้ตัวหนังสืออยู่ตรงกลาง */
-}
 .close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
     background-color: #F1F3F5;
     color: var(--text-muted);
 }
