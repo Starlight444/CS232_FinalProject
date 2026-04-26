@@ -173,10 +173,14 @@ async function fetchSidebarCourses() {
     const USER_ID = userData ? userData.user_id : '';
 
     try {
-        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}`, {
-            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        //ดึงคอร์สทั้งหมด
+        const courseRes = await fetch(`${BASE_URL}/courses/my/${USER_ID}?role=student`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`
+            }
         });
-        const data = await res.json();
+        const data = await courseRes.json();
         const courses = data.data || data || [];
         renderSidebarCourses(courses);
     } catch (err) {

@@ -4,7 +4,7 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
 
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
@@ -104,7 +104,7 @@ if (logoutLink) {
     logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('user');
-        window.location.href = '../auth/login.html';
+        window.location.href = TEACHER_BASE + '../auth/login.html';
     });
 }
 
@@ -144,6 +144,7 @@ function initActiveFromURL() {
         'teacher-assign-manage.html': 'courses',
         'teacher-detail-grade.html': 'grading',
         'announcement-page.html': 'announcements',
+        'courses-detail.html': 'courses',
         'teacher-assign-create.html': 'dashboard'
     };
 

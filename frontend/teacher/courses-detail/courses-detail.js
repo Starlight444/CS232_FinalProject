@@ -42,9 +42,6 @@ function loadTeacherSidebarNavbar() {
         if (sidebar) container.appendChild(sidebar);
         if (navbar)  container.appendChild(navbar);
 
-        const logoImg = document.getElementById('logo-img');
-        if (logoImg) logoImg.src = '../../components/image/tulogo.png';
-
         const sidebarScript = document.createElement('script');
         sidebarScript.src   = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
         document.body.appendChild(sidebarScript);
