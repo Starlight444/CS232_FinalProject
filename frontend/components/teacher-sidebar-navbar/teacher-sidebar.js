@@ -52,7 +52,7 @@ courseBtn.addEventListener('click', (e) => {
 //แผนที่หน้าของแต่ละปุ่ม (teacher)
 const pageRoutes = {
     'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
-    'grading': TEACHER_BASE + 'teacher-detail-grade.html',
+    'grading': TEACHER_BASE + 'teacher-assign-overview/teacher-assign-overview.html',
     'courses': TEACHER_BASE + 'teacher-mycourses.html',
     'announcements': TEACHER_BASE + 'teacher-announcement/announcement-page.html'
 };
@@ -142,6 +142,7 @@ function initActiveFromURL() {
         'teacher-dashboard.html': 'dashboard',
         'teacher-mycourses.html': 'courses',
         'teacher-assign-manage.html': 'courses',
+        'teacher-assign-overview.html': 'grading',
         'teacher-detail-grade.html': 'grading',
         'announcement-page.html': 'announcements',
         'teacher-assign-create.html': 'dashboard'

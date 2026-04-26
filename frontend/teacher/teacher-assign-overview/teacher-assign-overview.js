@@ -31,13 +31,6 @@ function loadTeacherSidebarNavbar() {
             if (sidebar) container.appendChild(sidebar);
             if (navbar) container.appendChild(navbar);
 
-            // Highlight "Grading Overview" nav item (ใช้ data-page="grading")
-            const gradingLink = container.querySelector('[data-page="grading"]');
-            if (gradingLink) {
-                container.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
-                gradingLink.classList.add('active');
-            }
-
             const sidebarScript = document.createElement('script');
             sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
             document.body.appendChild(sidebarScript);
