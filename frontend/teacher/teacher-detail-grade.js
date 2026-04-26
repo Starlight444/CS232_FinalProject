@@ -1,79 +1,156 @@
-const _gradeUrlParams = new URLSearchParams(window.location.search);
-const _gradeCourseId = _gradeUrlParams.get('course_id');
+(() => {
+  const gradeUrlParams = new URLSearchParams(window.location.search);
+  const gradeCourseId = gradeUrlParams.get('course_id');
 
-function goBack() {
-    if (_gradeCourseId) {
-        window.location.href = 'courses-detail/courses-detail.html?course_id=' + _gradeCourseId;
+  // ทำให้ปุ่ม Back ใน HTML onclick="goBack()" ยังเรียกได้
+  window.goBack = function () {
+    if (gradeCourseId) {
+      window.location.href = 'courses-detail/courses-detail.html?course_id=' + gradeCourseId;
     } else {
-        history.back();
+      history.back();
     }
-}
+  };
 
-function loadTeacherSidebarNavbar() {
-  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(r => r.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+  function loadTeacherSidebarNavbar() {
+    fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+      .then(r => r.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-      const sidebar = doc.querySelector('#sidebar');
-      const navbar = doc.querySelector('.navbar');
-      if (sidebar) document.getElementById('sidebar-placeholder').appendChild(sidebar);
-      if (navbar) document.getElementById('navbar-placeholder').appendChild(navbar);
+        const sidebar = doc.querySelector('#sidebar');
+        const navbar = doc.querySelector('.navbar');
 
-      const sidebarScript = document.createElement('script');
-      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
-      document.body.appendChild(sidebarScript);
+        const sidebarPlaceholder = document.getElementById('sidebar-placeholder');
+        const navbarPlaceholder = document.getElementById('navbar-placeholder');
 
-      const navbarScript = document.createElement('script');
-      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
-      document.body.appendChild(navbarScript);
-    })
-    .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
-}
+        if (sidebar && sidebarPlaceholder) {
+          sidebarPlaceholder.appendChild(sidebar);
+        }
 
-document.addEventListener("DOMContentLoaded", function () {
-  loadTeacherSidebarNavbar();
-});
+        if (navbar && navbarPlaceholder) {
+          navbarPlaceholder.appendChild(navbar);
+        }
 
-const BASE_URL = "http://127.0.0.1:8000";
+        const sidebarScript = document.createElement('script');
+        sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js?v=2';
+        document.body.appendChild(sidebarScript);
 
-const editSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-</svg>`;
+        const navbarScript = document.createElement('script');
+        navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js?v=2';
+        document.body.appendChild(navbarScript);
+      })
+      .catch(err => console.error('Error loading teacher sidebar/navbar:', err));
+  }
 
-let allMembers = [];
+  const GRADE_API_BASE_URL = 'http://127.0.0.1:8000';
 
-function renderTable(data) {
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
-  data.forEach((m, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${m.user_id}</td>
-      <td>${m.role}</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td class="total">-</td>
-      <td><button class="edit-btn">${editSVG}</button></td>
+  const editSVG = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
     `;
-    tbody.appendChild(tr);
+
+  let allMembers = [];
+
+  function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align:center;">No data</td>
+                </tr>
+            `;
+      return;
+    }
+
+    data.forEach((m, i) => {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${m.user_id || '-'}</td>
+                <td>${m.name || m.role || '-'}</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td class="total">-</td>
+                <td><button class="edit-btn" type="button">${editSVG}</button></td>
+            `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadMembers() {
+    const tbody = document.getElementById('tableBody');
+
+    if (!gradeCourseId) {
+      if (tbody) {
+        tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center;color:red;">
+                            ไม่พบ course_id
+                        </td>
+                    </tr>
+                `;
+      }
+      return;
+    }
+
+    try {
+      const response = await fetch(`${GRADE_API_BASE_URL}/members/${gradeCourseId}`);
+      const result = await response.json();
+
+      console.log('MEMBERS RESPONSE:', result);
+
+      if (!response.ok) {
+        throw new Error(result.detail || 'โหลดรายชื่อนักศึกษาไม่สำเร็จ');
+      }
+
+      allMembers = Array.isArray(result) ? result : (result.data || []);
+      renderTable(allMembers);
+
+    } catch (err) {
+      console.error('Error loading members:', err);
+
+      if (tbody) {
+        tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center;color:red;">
+                            โหลดข้อมูลไม่สำเร็จ
+                        </td>
+                    </tr>
+                `;
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadTeacherSidebarNavbar();
+    loadMembers();
+
+    const searchInput = document.getElementById('searchInput');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+
+        const filtered = allMembers.filter(m =>
+          String(m.user_id || '').toLowerCase().includes(q) ||
+          String(m.name || '').toLowerCase().includes(q) ||
+          String(m.role || '').toLowerCase().includes(q)
+        );
+
+        renderTable(filtered);
+      });
+    }
   });
-}
-
-fetch(`${BASE_URL}/members/${_gradeCourseId}`)
-  .then(res => res.json())
-  .then(members => {
-    allMembers = members;
-    renderTable(members);
-  })
-  .catch(err => console.error(err));
-
-document.getElementById("searchInput").addEventListener("input", (e) => {
-  const q = e.target.value.toLowerCase();
-  const filtered = allMembers.filter(m => m.user_id.includes(q));
-  renderTable(filtered);
-});
+})();
