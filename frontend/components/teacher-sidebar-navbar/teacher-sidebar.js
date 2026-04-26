@@ -4,20 +4,7 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
-//const BASE_URL = 'http://127.0.0.1:8000';
-// เปลี่ยนจาก const เป็น let เพื่อให้สามารถใช้ข้อมูลจำลองได้หากยังไม่มีการ Login
-const BASE_URL = 'http://localhost:3000';
-let userData = JSON.parse(localStorage.getItem("user"));
-// ข้อมูลจำลองเพื่อการทดสอบ--------------------------
-if (!userData) {
-    console.warn("ยังไม่ได้ Login: กำลังใช้ข้อมูลจำลองเพื่อการทดสอบ");
-    userData = {
-        user_id: "test001",
-        role: "student",
-        token: "fake-token"
-    };
-}
-// --------------------------
+const BASE_URL = 'http://127.0.0.1:8000';
 
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
