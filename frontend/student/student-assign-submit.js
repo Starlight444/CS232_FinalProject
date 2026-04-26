@@ -88,8 +88,11 @@ async function fetchAssignmentDetail() {
             document.querySelector('.section-body').textContent = data.description;
             document.querySelector('.assign-points').textContent = `${data.max_score} Points`;
 
-            // ตรวจสอบว่าเคยส่งงานนี้ไปหรือยัง (ถ้ามี API Get Submission)
-            checkCurrentSubmission();
+            if (new Date() > new Date(data.due_date)) {
+                updateUIDeadlinePassed();
+            } else {
+                checkCurrentSubmission();
+            }
         }
     } catch (err) {
         console.error("Fetch Assignment Error:", err);
@@ -107,6 +110,21 @@ function updateUISubmitted() {
         const stamp = document.createElement('p');
         stamp.className = 'submit-timestamp';
         stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
+        bar.appendChild(stamp);
+    }
+}
+
+function updateUIDeadlinePassed() {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'หมดเวลาส่งงาน';
+    submitBtn.classList.add('submitted');
+    lockWorkBox(true);
+
+    const bar = submitBtn.parentElement;
+    if (!document.querySelector('.submit-timestamp')) {
+        const stamp = document.createElement('p');
+        stamp.className = 'submit-timestamp';
+        stamp.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> หมดเวลาส่งงานแล้ว`;
         bar.appendChild(stamp);
     }
 }
