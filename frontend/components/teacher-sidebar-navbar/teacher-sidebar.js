@@ -4,8 +4,20 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
-const BASE_URL = 'http://127.0.0.1:8000';
-
+//const BASE_URL = 'http://127.0.0.1:8000';
+// เปลี่ยนจาก const เป็น let เพื่อให้สามารถใช้ข้อมูลจำลองได้หากยังไม่มีการ Login
+const BASE_URL = 'http://localhost:3000';
+let userData = JSON.parse(localStorage.getItem("user"));
+// ข้อมูลจำลองเพื่อการทดสอบ--------------------------
+if (!userData) {
+    console.warn("ยังไม่ได้ Login: กำลังใช้ข้อมูลจำลองเพื่อการทดสอบ");
+    userData = {
+        user_id: "test001",
+        role: "student",
+        token: "fake-token"
+    };
+}
+// --------------------------
 
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
@@ -45,19 +57,17 @@ courseBtn.addEventListener('click', (e) => {
         sidebar.classList.remove('collapsed');
     }
 
-    const isOpen = coursesItem.classList.toggle('open');
-
-    if (isOpen) {
-        setActiveLink(courseBtn);
-    }
+    setActiveLink(courseBtn);
+    coursesItem.classList.add('open');
+    window.location.href = TEACHER_BASE + 'teacher-mycourses.html';
 });
 
 //แผนที่หน้าของแต่ละปุ่ม (teacher)
 const pageRoutes = {
     'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
-    'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html'
-    //'dashboard': 'teacher-assign-create.html',
-    //'announcements': TEACHER_BASE + 'teacher-announcements.html'
+    'grading': TEACHER_BASE + 'teacher-detail-grade.html',
+    'courses': TEACHER_BASE + 'teacher-mycourses.html',
+    'announcements': TEACHER_BASE + 'teacher-announcement/announcement-page.html'
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -143,10 +153,11 @@ function initActiveFromURL() {
     const currentFile = window.location.pathname.split('/').pop();
     const reverseRoutes = {
         'teacher-dashboard.html': 'dashboard',
+        'teacher-mycourses.html': 'courses',
         'teacher-assign-manage.html': 'courses',
+        'teacher-detail-grade.html': 'grading',
+        'announcement-page.html': 'announcements',
         'teacher-assign-create.html': 'dashboard'
-        //'teacher-announcements.html': 'announcements',
-        //'teacher-course-detail.html': 'courses'
     };
 
     const activePage = reverseRoutes[currentFile];
