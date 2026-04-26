@@ -127,7 +127,7 @@ function renderSidebarCourses(courses) {
             e.preventDefault();
 
             const courseId = course.course_id;
-            window.location.href = `${TEACHER_BASE}teacher-assign-manage/teacher-assign-manage.html?id=${courseId}`;
+            window.location.href = `${TEACHER_BASE}courses-detail/courses-detail.html?course_id=${courseId}`;
         });
 
         li.appendChild(link);
