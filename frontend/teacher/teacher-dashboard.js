@@ -73,9 +73,9 @@ function renderCalendar() {
     const dayCol = document.createElement('div');
     dayCol.className = `calendar-ui__day-col ${isToday ? 'calendar-ui__day-col--active' : ''}`;
     dayCol.innerHTML = `
-            <span class="calendar-ui__day-name">${days[i]}</span>
-            <div class="calendar-ui__date-num">${tempDate.getDate()}</div>
-        `;
+      <span class="calendar-ui__day-name">${days[i]}</span>
+      <div class="calendar-ui__date-num">${tempDate.getDate()}</div>
+    `;
     gridEl.appendChild(dayCol);
   }
 }
@@ -159,6 +159,7 @@ async function updateDashboardSummary() {
   }
 }
 
+// ── My Courses ──
 async function loadCourses() {
   const CARD_COLORS = ['course-orange', 'course-teal', 'course-blue'];
 
@@ -179,22 +180,22 @@ async function loadCourses() {
       const studentCount = course.total_std || 0;
 
       container.innerHTML += `
-                <div class="course-card">
-                    <div class="course-top ${colorClass}">
-                        <div class="course-count">
-                            <img src="../assets/icons/teacher-dashboard/person.svg" class="icon-svg">
-                            ${studentCount}
-                        </div>
-                        <div class="course-assign-icon">
-                            <img src="../assets/icons/teacher-dashboard/assign.svg" class="icon-svg">
-                        </div>
-                    </div>
-                    <div class="course-bottom">
-                        <div><span class="course-code ${codeColorClass}">${course.course_code}</span></div>
-                        <div class="course-name">${course.course_name}</div>
-                    </div>
-                </div>
-            `;
+        <div class="course-card" onclick="openCourseDetail('${course.course_id}')">
+          <div class="course-top ${colorClass}">
+            <div class="course-count">
+              <img src="../assets/icons/teacher-dashboard/person.svg" class="icon-svg">
+              ${studentCount}
+            </div>
+            <div class="course-assign-icon">
+              <img src="../assets/icons/teacher-dashboard/assign.svg" class="icon-svg">
+            </div>
+          </div>
+          <div class="course-bottom">
+            <div><span class="course-code ${codeColorClass}">${course.course_code}</span></div>
+            <div class="course-name">${course.course_name}</div>
+          </div>
+        </div>
+      `;
     });
 
     setBottomColumns();
@@ -202,6 +203,13 @@ async function loadCourses() {
     console.error('Error loading courses:', error);
     setBottomColumns();
   }
+}
+
+function openCourseDetail(courseId) {
+  console.log("OPEN COURSE DETAIL:", courseId);
+
+  window.location.href =
+    `${window.location.origin}/frontend/teacher/courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
 }
 
 // ── Needs Grading — state ──
@@ -217,7 +225,6 @@ async function loadNeedsGrading() {
     const now = new Date();
     _gradingRows = [];
 
-    // สร้าง array ของ promise สำหรับทุก course
     const coursePromises = safeCourses.map(async (course) => {
       const assignRes = await fetch(`${API_BASE_URL}/assignments/${course.course_id}`);
       const assignResult = await assignRes.json();
@@ -226,17 +233,15 @@ async function loadNeedsGrading() {
         ? assignResult
         : (assignResult.data || []);
 
-      // สำหรับแต่ละ assignment ที่ due date ผ่านแล้ว
       const assignPromises = assignments
         .filter(assign => new Date(assign.due_date) < now)
         .map(async (assign) => {
-          // เรียก API submissions แบบ parallel
           const subRes = await fetch(`${API_BASE_URL}/submissions/assignment/${assign.assignment_id}`);
           const subData = await subRes.json();
           const submissions = Array.isArray(subData.data) ? subData.data : [];
 
           const submittedCount = submissions.filter(s => s.status === 'submitted').length;
-          const totalStudents = course.total_std || 0; // หรือ assign.total_students ถ้ามี
+          const totalStudents = course.total_std || 0;
 
           _gradingRows.push({
             course_code: course.course_code,
@@ -248,14 +253,11 @@ async function loadNeedsGrading() {
           });
         });
 
-      // รอให้ทุก assignment ของ course เสร็จ
       await Promise.all(assignPromises);
     });
 
-    // รอให้ทุก course เสร็จ
     await Promise.all(coursePromises);
 
-    // Update badge
     const badgeNum = document.getElementById('badge-num');
     if (badgeNum) badgeNum.innerText = _gradingRows.length;
 
@@ -278,24 +280,24 @@ function renderGradingTable() {
   tableBody.innerHTML = sorted.map(item => {
     const missing = Math.max(0, item.total - item.submitted);
     return `
-            <div class="grade-row-card">
-                <div class="gcol-class">${item.course_code}</div>
-                <div class="gcol-name">${item.title}</div>
-                <div class="gcol-submitted">${item.submitted}/${item.total}</div>
-                <div class="gcol-missing">${missing}</div>
-                <div class="gcol-tograde">${item.submitted}</div>
-                <div class="gcol-action">
-                    <button class="grade-btn"
-                        onclick="window.location.href='../teacher/teacher-assign-manage/teacher-assign-manage.html?id=${item.assignment_id}'">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
-                            <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>
-                            <path d="M13.375 10.375L16 13.0187" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        `;
+      <div class="grade-row-card">
+        <div class="gcol-class">${item.course_code}</div>
+        <div class="gcol-name">${item.title}</div>
+        <div class="gcol-submitted">${item.submitted}/${item.total}</div>
+        <div class="gcol-missing">${missing}</div>
+        <div class="gcol-tograde">${item.submitted}</div>
+        <div class="gcol-action">
+          <button class="grade-btn"
+            onclick="window.location.href='../teacher/teacher-assign-manage/teacher-assign-manage.html?id=${item.assignment_id}'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+              <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>
+              <path d="M13.375 10.375L16 13.0187" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
   }).join('');
 }
 
@@ -339,7 +341,7 @@ function setBottomColumns() {
   section.style.gridTemplateColumns = `${leftW}px ${rightW}px`;
 }
 
-// render announcement
+// ── Recent Announcement ──
 function renderAnnouncements(announcements) {
   const container = document.getElementById("announcements-container");
   if (!container) return;
@@ -348,10 +350,10 @@ function renderAnnouncements(announcements) {
 
   if (!announcements || announcements.length === 0) {
     container.innerHTML = `
-            <div class="ann-card">
-                <div class="ann-body">No announcements</div>
-            </div>
-        `;
+      <div class="ann-card">
+        <div class="ann-body">No announcements</div>
+      </div>
+    `;
     return;
   }
 
@@ -361,12 +363,12 @@ function renderAnnouncements(announcements) {
 
   sorted.slice(0, 5).forEach(a => {
     container.innerHTML += `
-            <div class="ann-card">
-                <div class="ann-title">${a.course_name}</div>
-                <div class="ann-body">${a.title}</div>
-                <div class="ann-time">${getTimeAgo(a.created_at)}</div>
-            </div>
-        `;
+      <div class="ann-card">
+        <div class="ann-title">${a.course_name}</div>
+        <div class="ann-body">${a.title}</div>
+        <div class="ann-time">${getTimeAgo(a.created_at)}</div>
+      </div>
+    `;
   });
 }
 
