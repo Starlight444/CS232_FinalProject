@@ -13,6 +13,27 @@ body {
   width: 130%;
 }
 
+/* ── Back button ── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.back-btn:hover {
+  color: #6E6CDF;
+  background: #f0f0fb;
+}
+
 /* ── Header ── */
 .page-header {
   display: flex;

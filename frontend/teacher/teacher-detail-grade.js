@@ -1,3 +1,14 @@
+const _gradeUrlParams = new URLSearchParams(window.location.search);
+const _gradeCourseId = _gradeUrlParams.get('course_id');
+
+function goBack() {
+    if (_gradeCourseId) {
+        window.location.href = 'courses-detail/courses-detail.html?course_id=' + _gradeCourseId;
+    } else {
+        history.back();
+    }
+}
+
 function loadTeacherSidebarNavbar() {
   fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(r => r.text())
