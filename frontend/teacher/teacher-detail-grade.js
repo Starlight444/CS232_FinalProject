@@ -52,7 +52,7 @@ function renderTable(data) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i + 1}</td>
-      <td>${m.user_id}</td>
+      <td>${m.student_id}</td>
       <td>${m.role}</td>
       <td>-</td>
       <td>-</td>

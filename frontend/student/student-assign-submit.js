@@ -29,7 +29,7 @@ let uploadedFiles = [];
 let isSubmitted = false;
 
 // api
-const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+const BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {

@@ -208,8 +208,7 @@ async function loadCourses() {
 function openCourseDetail(courseId) {
   console.log("OPEN COURSE DETAIL:", courseId);
 
-  window.location.href =
-    `${window.location.origin}../teacher/courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
+  window.location.href = `../teacher/courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
 }
 
 // ── Needs Grading — state ──

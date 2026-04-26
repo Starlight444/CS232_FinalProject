@@ -62,7 +62,6 @@ function createAnnouncementCard(announcement, index) {
                 <div class="course-info" style="font-weight: bold; color: ${color}; font-size: 0.85em;">
                     ${announcement.course_code ?? 'Unknown Course'}
                 </div>
-                <div class="teacher">${teacher || ''}</div>
                 <h3 class="title">${announcement.title ?? ''}</h3>
                 <div class="desc">${announcement.content ?? ''}</div>
                 <div class="time">${formatTime(announcement.created_at)}</div>
