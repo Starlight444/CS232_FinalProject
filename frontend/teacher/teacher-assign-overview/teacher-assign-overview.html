@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments Overview</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/all.css">
+
+    <!-- Sidebar / Navbar CSS -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-sidebar.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-navbar.css">
+
+    <!-- Buttons / shared component CSS -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/buttons.css">
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="teacher-assign-overview.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+</head>
+
+<body>
+    <!-- Sidebar / Navbar will be injected here -->
+    <div id="teacher-sidebar-navbar-container"></div>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1 class="page-title">Assignments Overview</h1>
+            <div class="header-controls">
+                <div class="search-wrap">
+                    <iconify-icon icon="jam:search" width="20" height="20"></iconify-icon>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search assignment" />
+                </div>
+
+                <div class="sort-group">
+                    <button class="sort-btn" data-sort="newest">
+                        Newest
+                        <iconify-icon icon="grommet-icons:link-down" width="14" height="14"></iconify-icon>
+                    </button>
+                    <button class="sort-btn active" data-sort="closest">
+                        Closest
+                        <iconify-icon icon="grommet-icons:link-down" width="14" height="14"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs-container">
+            <button class="tab-btn" data-tab="due-today">Due Today</button>
+            <button class="tab-btn active" data-tab="upcoming">Upcoming</button>
+            <button class="tab-btn" data-tab="overdue">Overdue</button>
+            <button class="tab-btn" data-tab="complete">Complete</button>
+        </nav>
+
+        <section class="assignment-container">
+            <div class="container-header">
+                <div class="filter-wrap">
+                    <button class="filter-btn" id="filter-btn" type="button">
+                        <iconify-icon icon="majesticons:filter-line" width="18" height="18"></iconify-icon>
+                        Filter
+                        <iconify-icon icon="icon-park-outline:down" width="14" height="14"></iconify-icon>
+                    </button>
+                    <div class="filter-dropdown" id="filter-dropdown">
+                        <button class="filter-option active" data-class="all" type="button">All</button>
+                    </div>
+                </div>
+
+                <button class="btn-add-assignment" id="add-assignment-btn" type="button">
+                    <iconify-icon icon="ic:round-add" width="18" height="18"></iconify-icon>
+                    Add Assignment
+                </button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="assignments-table" id="assignments-table">
+                    <thead>
+                        <tr>
+                            <th class="col-class">Class</th>
+                            <th class="col-name">Assignment Name</th>
+                            <th class="col-due">Due</th>
+                            <th class="col-submitted">Submitted</th>
+                            <th class="col-action" aria-label="Actions"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignments-tbody">
+                        <!-- rows are injected by JS -->
+                    </tbody>
+                </table>
+                <p class="empty-msg" id="empty-msg" style="display:none;">There are no assignments in this category.</p>
+            </div>
+        </section>
+
+        <!-- Row action menu (positioned by JS) -->
+        <div class="row-action-menu" id="row-action-menu" hidden>
+            <button class="row-action-item" data-action="grade" type="button">
+                <iconify-icon icon="material-symbols:grading-rounded" width="16" height="16"></iconify-icon>
+                Grade
+            </button>
+            <button class="row-action-item" data-action="edit" type="button">
+                <iconify-icon icon="material-symbols:edit-outline-rounded" width="16" height="16"></iconify-icon>
+                Edit
+            </button>
+            <button class="row-action-item" data-action="close" type="button">
+                <iconify-icon icon="material-symbols:lock-outline" width="16" height="16"></iconify-icon>
+                Close
+            </button>
+        </div>
+    </main>
+
+    <script src="teacher-assign-overview.js"></script>
+</body>
+
+</html>
