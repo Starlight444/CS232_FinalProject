@@ -22,13 +22,13 @@ body {
 .courses-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 160px;
+  gap: 100px;
   margin-left: 180px;
 }
 
 /* ── Card ── */
 .course-card {
-  width: 160%;
+  width: 120%;
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
