@@ -30,7 +30,6 @@ function loadTeacherSidebarNavbar() {
       navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
       document.body.appendChild(navbarScript);
 
-
       sidebarScript.onload = () => {
         const sidebarEl = document.getElementById('sidebar');
         if (sidebarEl) {
@@ -45,7 +44,6 @@ function loadTeacherSidebarNavbar() {
     .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
 }
 
-// Re-calculate on window resize too
 window.addEventListener('resize', setBottomColumns);
 
 // ── Calendar ──
@@ -56,7 +54,10 @@ function renderCalendar() {
   const gridEl = document.getElementById('cui-weekGrid');
   const today = new Date();
 
-  titleEl.innerText = currentViewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  titleEl.innerText = currentViewDate.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
 
   const startOfWeek = new Date(currentViewDate);
   startOfWeek.setDate(currentViewDate.getDate() - currentViewDate.getDay());
@@ -72,9 +73,9 @@ function renderCalendar() {
     const dayCol = document.createElement('div');
     dayCol.className = `calendar-ui__day-col ${isToday ? 'calendar-ui__day-col--active' : ''}`;
     dayCol.innerHTML = `
-      <span class="calendar-ui__day-name">${days[i]}</span>
-      <div class="calendar-ui__date-num">${tempDate.getDate()}</div>
-    `;
+            <span class="calendar-ui__day-name">${days[i]}</span>
+            <div class="calendar-ui__date-num">${tempDate.getDate()}</div>
+        `;
     gridEl.appendChild(dayCol);
   }
 }
@@ -89,72 +90,72 @@ renderCalendar();
 // ── API ──
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
-// 
-
-
-// --- [DASHBOARD SUMMARY CARD: Courses, To Grade, and Missing] ---
+// --- Dashboard Summary ---
 async function updateDashboardSummary() {
   try {
     const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-    const result = await response.json();
+    const courses = await response.json();
 
-    if (result.success) {
-      const courses = result.data;
+    const safeCourses = Array.isArray(courses) ? courses : [];
 
-      // 1. อัปเดตจำนวนวิชาทั้งหมด (มาจาก updateCourseStats เดิม)
-      const totalCoursesEl = document.getElementById('total-courses-count');
-      if (totalCoursesEl) totalCoursesEl.innerText = courses.length;
+    const totalCoursesEl = document.getElementById('total-courses-count');
+    if (totalCoursesEl) totalCoursesEl.innerText = safeCourses.length;
 
-      // 2. เตรียมตัวแปรเพื่อคำนวณค่ารวม
-      let grandTotalSubmitted = 0;
-      let grandTotalStudents = 0;
-      let totalMissing = 0;
-      let coursesWithMissingCount = 0;
+    let grandTotalSubmitted = 0;
+    let grandTotalStudents = 0;
+    let totalMissing = 0;
+    let coursesWithMissingCount = 0;
 
-      courses.forEach(course => {
-        const stdInCourse = course.total_std || 0;
-        const submittedInCourse = course.total_submitted_student || 0;
-        const missingInCourse = Math.max(0, stdInCourse - submittedInCourse);
+    safeCourses.forEach(course => {
+      const stdInCourse = course.total_std || 0;
+      const submittedInCourse = course.total_submitted_student || 0;
+      const missingInCourse = Math.max(0, stdInCourse - submittedInCourse);
 
-        grandTotalSubmitted += (course.total_submitted_student || 0);
-        grandTotalStudents += (course.total_std || 0);
+      grandTotalSubmitted += submittedInCourse;
+      grandTotalStudents += stdInCourse;
 
-        // ถ้าวิชานี้มีคนค้างส่ง (Missing > 0)
-        if (missingInCourse > 0) {
-          totalMissing += missingInCourse;
-          coursesWithMissingCount++;
-        }
-      });
-
-      // --- [Update UI] ---
-
-      // Card: To Grade
-      const toGradePct = grandTotalStudents > 0 ? Math.round((grandTotalSubmitted / grandTotalStudents) * 100) : 0;
-      document.getElementById('to-grade-count').innerText = grandTotalSubmitted;
-      document.getElementById('grading-progress-bar').style.width = `${toGradePct}%`;
-      document.getElementById('grading-percentage').innerText = `${toGradePct}%`;
-      document.getElementById('course-count-label').innerText = `From ${courses.length} courses`;
-
-      // Card: Missing
-      const missingCountEl = document.getElementById('missing-count');
-      if (missingCountEl) missingCountEl.innerText = totalMissing;
-
-      const missingPct = grandTotalStudents > 0 ? Math.round((totalMissing / grandTotalStudents) * 100) : 0;
-      const missingBar = document.getElementById('missing-progress-bar');
-      if (missingBar) missingBar.style.width = `${missingPct}%`;
-
-      const missingPctText = document.getElementById('missing-percentage');
-      if (missingPctText) missingPctText.innerText = `${missingPct}%`;
-
-      const missingLabel = document.getElementById('missing-courses-label');
-      if (missingLabel) {
-        missingLabel.innerText = `From ${coursesWithMissingCount} courses`;
+      if (missingInCourse > 0) {
+        totalMissing += missingInCourse;
+        coursesWithMissingCount++;
       }
+    });
+
+    const toGradePct = grandTotalStudents > 0
+      ? Math.round((grandTotalSubmitted / grandTotalStudents) * 100)
+      : 0;
+
+    const toGradeCount = document.getElementById('to-grade-count');
+    if (toGradeCount) toGradeCount.innerText = grandTotalSubmitted;
+
+    const gradingProgressBar = document.getElementById('grading-progress-bar');
+    if (gradingProgressBar) gradingProgressBar.style.width = `${toGradePct}%`;
+
+    const gradingPercentage = document.getElementById('grading-percentage');
+    if (gradingPercentage) gradingPercentage.innerText = `${toGradePct}%`;
+
+    const courseCountLabel = document.getElementById('course-count-label');
+    if (courseCountLabel) courseCountLabel.innerText = `From ${safeCourses.length} courses`;
+
+    const missingCountEl = document.getElementById('missing-count');
+    if (missingCountEl) missingCountEl.innerText = totalMissing;
+
+    const missingPct = grandTotalStudents > 0
+      ? Math.round((totalMissing / grandTotalStudents) * 100)
+      : 0;
+
+    const missingBar = document.getElementById('missing-progress-bar');
+    if (missingBar) missingBar.style.width = `${missingPct}%`;
+
+    const missingPctText = document.getElementById('missing-percentage');
+    if (missingPctText) missingPctText.innerText = `${missingPct}%`;
+
+    const missingLabel = document.getElementById('missing-courses-label');
+    if (missingLabel) {
+      missingLabel.innerText = `From ${coursesWithMissingCount} courses`;
     }
+
   } catch (error) {
     console.error('Could not load dashboard summary:', error);
-    if (document.getElementById('course-count-label'))
-      document.getElementById('course-count-label').innerText = 'Data unavailable';
   }
 }
 
@@ -163,45 +164,40 @@ async function loadCourses() {
 
   try {
     const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-    const result = await response.json();
+    const courses = await response.json();
 
-    if (result.success) {
-      const container = document.getElementById('course-container');
-      if (!container) return;
+    const safeCourses = Array.isArray(courses) ? courses : [];
 
-      container.innerHTML = '';
+    const container = document.getElementById('course-container');
+    if (!container) return;
 
+    container.innerHTML = '';
 
-      const courses = result.data.filter(
-        course => course.role === 'teacher' || course.role === 'ta'
-      );
+    safeCourses.forEach((course, idx) => {
+      const colorClass = CARD_COLORS[idx % CARD_COLORS.length];
+      const codeColorClass = colorClass.replace('course-', 'code-');
+      const studentCount = course.total_std || 0;
 
-      courses.forEach((course, idx) => {
-        const colorClass = CARD_COLORS[idx % CARD_COLORS.length];
-        const codeColorClass = colorClass.replace('course-', 'code-');
-        const studentCount = course.total_std || 0;
+      container.innerHTML += `
+                <div class="course-card">
+                    <div class="course-top ${colorClass}">
+                        <div class="course-count">
+                            <img src="../assets/icons/teacher-dashboard/person.svg" class="icon-svg">
+                            ${studentCount}
+                        </div>
+                        <div class="course-assign-icon">
+                            <img src="../assets/icons/teacher-dashboard/assign.svg" class="icon-svg">
+                        </div>
+                    </div>
+                    <div class="course-bottom">
+                        <div><span class="course-code ${codeColorClass}">${course.course_code}</span></div>
+                        <div class="course-name">${course.course_name}</div>
+                    </div>
+                </div>
+            `;
+    });
 
-        container.innerHTML += `
-          <div class="course-card">
-            <div class="course-top ${colorClass}">
-              <div class="course-count">
-                <img src="../assets/icons/teacher-dashboard/person.svg" class="icon-svg">
-                ${studentCount}
-              </div>
-              <div class="course-assign-icon">
-                <img src="../assets/icons/teacher-dashboard/assign.svg" class="icon-svg">
-              </div>
-            </div>
-            <div class="course-bottom">
-              <div><span class="course-code ${codeColorClass}">${course.course_code}</span></div>
-              <div class="course-name">${course.course_name}</div>
-            </div>
-          </div>
-        `;
-      });
-
-      setBottomColumns();
-    }
+    setBottomColumns();
   } catch (error) {
     console.error('Error loading courses:', error);
     setBottomColumns();
@@ -214,43 +210,57 @@ let _sortAsc = true;
 
 async function loadNeedsGrading() {
   try {
-    // 1. ดึง courses ทั้งหมดของ user
     const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-    const courseResult = await courseRes.json();
-    if (!courseResult.success) return;
+    const courses = await courseRes.json();
 
+    const safeCourses = Array.isArray(courses) ? courses : [];
     const now = new Date();
     _gradingRows = [];
 
-    // 2. วน loop เฉพาะ course ที่เป็น teacher หรือ ta
-    for (const course of courseResult.data) {
-      if (course.role !== 'teacher' && course.role !== 'ta') continue;
-
-      // 3. ดึง assignments ของแต่ละ course
+    // สร้าง array ของ promise สำหรับทุก course
+    const coursePromises = safeCourses.map(async (course) => {
       const assignRes = await fetch(`${API_BASE_URL}/assignments/${course.course_id}`);
       const assignResult = await assignRes.json();
-      if (!assignResult.success) continue;
 
-      // 4. เก็บเฉพาะ assignment ที่เลยกำหนดส่งแล้ว (overdue)
-      assignResult.data.forEach(assign => {
-        if (new Date(assign.due_date) < now) {
+      const assignments = Array.isArray(assignResult)
+        ? assignResult
+        : (assignResult.data || []);
+
+      // สำหรับแต่ละ assignment ที่ due date ผ่านแล้ว
+      const assignPromises = assignments
+        .filter(assign => new Date(assign.due_date) < now)
+        .map(async (assign) => {
+          // เรียก API submissions แบบ parallel
+          const subRes = await fetch(`${API_BASE_URL}/submissions/assignment/${assign.assignment_id}`);
+          const subData = await subRes.json();
+          const submissions = Array.isArray(subData.data) ? subData.data : [];
+
+          const submittedCount = submissions.filter(s => s.status === 'submitted').length;
+          const totalStudents = course.total_std || 0; // หรือ assign.total_students ถ้ามี
+
           _gradingRows.push({
             course_code: course.course_code,
             assignment_id: assign.assignment_id,
             title: assign.title,
             due_date: assign.due_date,
-            submitted: assign.submitted_count || 0,
-            total: course.total_std || 0,
+            submitted: submittedCount,
+            total: totalStudents,
           });
-        }
-      });
-    }
+        });
 
+      // รอให้ทุก assignment ของ course เสร็จ
+      await Promise.all(assignPromises);
+    });
+
+    // รอให้ทุก course เสร็จ
+    await Promise.all(coursePromises);
+
+    // Update badge
     const badgeNum = document.getElementById('badge-num');
     if (badgeNum) badgeNum.innerText = _gradingRows.length;
 
+    console.log("GRADING ROWS", _gradingRows);
     renderGradingTable();
-
   } catch (err) {
     console.error('Error loading grading table:', err);
   }
@@ -276,7 +286,7 @@ function renderGradingTable() {
                 <div class="gcol-tograde">${item.submitted}</div>
                 <div class="gcol-action">
                     <button class="grade-btn"
-                        onclick="window.location.href='/teacher-assign-manage.html?id=${item.assignment_id}'">
+                        onclick="window.location.href='../teacher/teacher-assign-manage/teacher-assign-manage.html?id=${item.assignment_id}'">
                         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
                             <path d="M1 1H16M1 7H5.125M1 13H5.125" stroke="white" stroke-width="2" stroke-linecap="round"/>
                             <path d="M11.3125 11.125C12.1579 11.125 12.9686 10.7892 13.5664 10.1914C14.1642 9.59363 14.5 8.78288 14.5 7.9375C14.5 7.09212 14.1642 6.28137 13.5664 5.6836C12.9686 5.08582 12.1579 4.75 11.3125 4.75C10.4671 4.75 9.65637 5.08582 9.0586 5.6836C8.46082 6.28137 8.125 7.09212 8.125 7.9375C8.125 8.78288 8.46082 9.59363 9.0586 10.1914C9.65637 10.7892 10.4671 11.125 11.3125 11.125Z" stroke="white" stroke-width="2"/>
@@ -284,7 +294,8 @@ function renderGradingTable() {
                         </svg>
                     </button>
                 </div>
-            </div>`;
+            </div>
+        `;
   }).join('');
 }
 
@@ -311,7 +322,6 @@ function setBottomColumns() {
   const RIGHT_MAX = 570;
   const CONTENT_PAD = 60;
 
-  // Calculate from sidebar state — no need to wait for DOM to settle
   const isCollapsed = document.body.classList.contains('sidebar-collapsed');
   const sidebarW = isCollapsed
     ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-width') || '75')
@@ -329,8 +339,93 @@ function setBottomColumns() {
   section.style.gridTemplateColumns = `${leftW}px ${rightW}px`;
 }
 
+// render announcement
+function renderAnnouncements(announcements) {
+  const container = document.getElementById("announcements-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!announcements || announcements.length === 0) {
+    container.innerHTML = `
+            <div class="ann-card">
+                <div class="ann-body">No announcements</div>
+            </div>
+        `;
+    return;
+  }
+
+  const sorted = announcements.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  );
+
+  sorted.slice(0, 5).forEach(a => {
+    container.innerHTML += `
+            <div class="ann-card">
+                <div class="ann-title">${a.course_name}</div>
+                <div class="ann-body">${a.title}</div>
+                <div class="ann-time">${getTimeAgo(a.created_at)}</div>
+            </div>
+        `;
+  });
+}
+
+function getTimeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diff = now - date;
+
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+
+  if (mins < 1) return "Now";
+  if (mins < 60) return `${mins} min ago`;
+  if (hours < 24) return `${hours} hours ago`;
+
+  return `${days} days ago`;
+}
+
+async function loadAnnouncements() {
+  try {
+    const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
+    const courses = await courseRes.json();
+
+    const safeCourses = Array.isArray(courses) ? courses : [];
+    let allAnnouncements = [];
+
+    for (const course of safeCourses) {
+      const annRes = await fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`);
+      const annResult = await annRes.json();
+
+      const announcements = Array.isArray(annResult)
+        ? annResult
+        : (annResult.data || []);
+
+      announcements.forEach(a => {
+        a.course_name = course.course_name;
+      });
+
+      allAnnouncements.push(...announcements);
+    }
+
+    renderAnnouncements(allAnnouncements);
+  } catch (error) {
+    console.error("Error loading announcements:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const welcomeEl = document.querySelector('.welcome');
+  if (welcomeEl && user) {
+    welcomeEl.textContent = `Welcome back, ${user.first_name}`;
+  }
+  loadAnnouncements();
+});
+
 window.addEventListener('DOMContentLoaded', () => {
   updateDashboardSummary();
-  loadNeedsGrading()
+  loadNeedsGrading();
   loadCourses();
 });

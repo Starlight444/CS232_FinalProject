@@ -1,8 +1,10 @@
-const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+// const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default'; 
+const API_BASE_URL = 'http://localhost:8000';
+
 //const urlParams = new URLSearchParams(window.location.search);
 //const ASSIGNMENT_ID = urlParams.get('id');
 const urlParams = new URLSearchParams(window.location.search);
-const ASSIGNMENT_ID = urlParams.get('id');
+const ASSIGNMENT_ID = urlParams.get('id');      //--> ตอนนี้ยังเป็น course_id อยู่ ต้องเปลี่ยน💥
 
 // 🚨 ดัก Error กรณีที่ไม่มี ID ส่งมา (เช่น เข้าหน้านี้ตรงๆ)
 if (!ASSIGNMENT_ID) {
@@ -10,54 +12,50 @@ if (!ASSIGNMENT_ID) {
     window.location.href = '../teacher-dashboard.html'; // เด้งกลับหน้า Dashboard
 }
 
-// navbar
 document.addEventListener("DOMContentLoaded", function () {
-    loadTeacherSidebarNavbar();
+  loadTeacherSidebarNavbar();
 });
 
 function loadTeacherSidebarNavbar() {
-    fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-        .then(r => r.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const container = document.getElementById('teacher-sidebar-navbar-container');
+  fetch('/frontend/components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    .then(r => r.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const container = document.getElementById('teacher-sidebar-navbar-container');
 
-            const sidebar = doc.querySelector('#sidebar');
-            const navbar = doc.querySelector('.navbar');
-            if (sidebar) container.appendChild(sidebar);
-            if (navbar) container.appendChild(navbar);
+      const sidebar = doc.querySelector('#sidebar');
+      const navbar = doc.querySelector('.navbar');
+      if (sidebar) container.appendChild(sidebar);
+      if (navbar) container.appendChild(navbar);
 
-            // Load sidebar JS (toggle / collapse logic)
-            const sidebarScript = document.createElement('script');
-            sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
-            document.body.appendChild(sidebarScript);
+      const sidebarScript = document.createElement('script');
+      sidebarScript.src = '/frontend/components/teacher-sidebar-navbar/teacher-sidebar.js';
+      document.body.appendChild(sidebarScript);
 
-            // Load navbar JS (profile dropdown)
-            const navbarScript = document.createElement('script');
-            navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
-            document.body.appendChild(navbarScript);
+      const navbarScript = document.createElement('script');
+      navbarScript.src = '/frontend/components/teacher-sidebar-navbar/teacher-navbar.js';
+      document.body.appendChild(navbarScript);
 
-            // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
-            // listens to `body.sidebar-collapsed` — sync them here
-            sidebarScript.onload = () => {
-                const sidebarEl = document.getElementById('sidebar');
-                if (sidebarEl) {
-                    new MutationObserver(() => {
-                        const collapsed = sidebarEl.classList.contains('collapsed');
-                        document.body.classList.toggle('sidebar-collapsed', collapsed);
-                        setBottomColumns();
-                    }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
-                }
-            };
-        })
-        .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+      sidebarScript.onload = () => {
+        const sidebarEl = document.getElementById('sidebar');
+        if (sidebarEl) {
+          new MutationObserver(() => {
+            const collapsed = sidebarEl.classList.contains('collapsed');
+            document.body.classList.toggle('sidebar-collapsed', collapsed);
+            setBottomColumns();
+          }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+        }
+      };
+    })
+    .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
 }
 
 // 1. ดึงข้อมูลรายละเอียดงานด้านบน (เหมือนเดิม)
+ASS_ID = '64bf7a97-b91e-4214-ade3-6c0e4344f1bf';    //mock assignment_id
 async function loadAssignmentDetails() {
     try {
-        const response = await fetch(`${API_BASE_URL}/assignments/${ASSIGNMENT_ID}`);
+        const response = await fetch(`${API_BASE_URL}/assignments/detail/${ASS_ID}`);
         if (!response.ok) throw new Error('ดึงข้อมูลงานไม่สำเร็จ');
         const result = await response.json();
         renderAssignmentDetails(result.data);
@@ -68,25 +66,27 @@ async function loadAssignmentDetails() {
 
 function renderAssignmentDetails(data) {
     document.getElementById('display-title').textContent = data.title;
-    document.getElementById('display-due-date').textContent = `Due date on ${data.due_date}`;
-    document.getElementById('display-instructions').textContent = data.description;
 
+    const date = new Date(data.due_date);
+    document.getElementById('display-due-date').textContent = `Due date on ${date.toLocaleString()}`;
+
+    document.getElementById('display-instructions').textContent = data.description || 'No description';    
     // ตัดการแสดง Points ทิ้งไปเลยก็ได้ถ้าไม่มีการให้คะแนนแล้ว
     const pointsEl = document.getElementById('display-points');
-    if (pointsEl) pointsEl.style.display = 'none';
+    if(pointsEl) pointsEl.style.display = 'none';
 
     const formatsContainer = document.getElementById('display-allowed-formats');
     if (formatsContainer && data.allowed_file_types) {
-        formatsContainer.innerHTML = '';
-        const formatsArray = data.allowed_file_types.split(',');
+        formatsContainer.innerHTML = ''; 
+        const formatsArray = data.allowed_file_types.split(','); 
         formatsArray.forEach(format => {
             const formatTrimmed = format.trim().toLowerCase();
             const badge = document.createElement('span');
             badge.className = 'format-badge';
-
-            let iconHtml = '<iconify-icon icon="ph:file-duotone"></iconify-icon>';
-            if (formatTrimmed === 'pdf') iconHtml = '<iconify-icon icon="ph:file-pdf-duotone" style="color:#EF4444;"></iconify-icon>';
-            else if (formatTrimmed === 'zip') iconHtml = '<iconify-icon icon="ph:file-archive-duotone" style="color:#333;"></iconify-icon>';
+            
+            let iconHtml = '<iconify-icon icon="ph:file-duotone"></iconify-icon>'; 
+            if(formatTrimmed === 'pdf') iconHtml = '<iconify-icon icon="ph:file-pdf-duotone" style="color:#EF4444;"></iconify-icon>';
+            else if(formatTrimmed === 'zip') iconHtml = '<iconify-icon icon="ph:file-archive-duotone" style="color:#333;"></iconify-icon>';
 
             badge.innerHTML = `${iconHtml} ${formatTrimmed.toUpperCase()}`;
             formatsContainer.appendChild(badge);
@@ -94,20 +94,27 @@ function renderAssignmentDetails(data) {
     }
 }
 
-// 2. ดึงข้อมูลรายชื่อนักศึกษา (อัปเดตใหม่)
+// 2. ดึงข้อมูลรายชื่อนักศึกษา
 async function loadStudentsByStatus(statusFilter) {
     const tbody = document.querySelector('.grading-table tbody');
-    tbody.innerHTML = '<tr><td colspan="5" align="center">กำลังโหลดข้อมูล... ⏳</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" align="center">กำลังโหลดข้อมูล... </td></tr>';
 
     try {
-        // แปลงชื่อ Tab ให้เป็น query ส่งให้ Backend (submitted หรือ missing)
-        const apiStatus = statusFilter.toLowerCase();
-
-        const response = await fetch(`${API_BASE_URL}/assignments/${ASSIGNMENT_ID}/students?status=${apiStatus}`);
+        const response = await fetch(`${API_BASE_URL}/submissions/assignment/${ASS_ID}`);   //ใช้ mock assignment_id
         if (!response.ok) throw new Error('ดึงข้อมูลนักศึกษาไม่สำเร็จ');
 
-        const realStudentsData = await response.json();
-        renderTable(realStudentsData.data, statusFilter); // สมมติว่า Backend ส่งมาใน .data
+        const result = await response.json();
+        const allSubmissions = result.data || [];
+
+        const tabStatusMap = {
+            'Needs Grading': 'submitted',
+            'Fully Graded':  'graded',
+            'Missing':       'missing'
+        };
+        const targetStatus = tabStatusMap[statusFilter];
+        const filtered = allSubmissions.filter(s => s.status === targetStatus);
+
+        renderTable(filtered, statusFilter);
     } catch (error) {
         console.error("Error:", error);
         tbody.innerHTML = '<tr><td colspan="5" align="center" style="color:red;">ไม่มีข้อมูลนักศึกษาในสถานะนี้</td></tr>';
@@ -120,7 +127,7 @@ tabItems.forEach(tab => {
     tab.addEventListener('click', (e) => {
         tabItems.forEach(t => t.classList.remove('active'));
         e.currentTarget.classList.add('active');
-
+        
         const currentFilter = e.currentTarget.textContent.trim(); // 'Submitted' หรือ 'Missing'
         loadStudentsByStatus(currentFilter);
     });
@@ -129,9 +136,9 @@ tabItems.forEach(tab => {
 // 4. ฟังก์ชันวาดตาราง (อัปเดตใหม่ ตัดคอลัมน์คะแนนทิ้ง)
 function renderTable(studentsData, filterStr) {
     const tbody = document.querySelector('.grading-table tbody');
-    tbody.innerHTML = '';
+    tbody.innerHTML = ''; 
 
-    if (!studentsData || studentsData.length === 0) {
+    if(!studentsData || studentsData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" align="center">ไม่มีนักศึกษาในกลุ่ม ${filterStr}</td></tr>`;
         return;
     }
@@ -150,8 +157,9 @@ function renderTable(studentsData, filterStr) {
 
         // จัดการปุ่มเปิดไฟล์
         let submissionContent = '';
-        if (student.file_url) {
-            submissionContent = `<button class="file-btn" type="button" onclick="window.open('${student.file_url}', '_blank')">
+        const fileUrl = student.attachments && student.attachments[0];
+        if (fileUrl) {
+            submissionContent = `<button class="file-btn" type="button" onclick="window.open('${fileUrl}', '_blank')">
                                     <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
                                     View File
                                  </button>`;
@@ -159,11 +167,14 @@ function renderTable(studentsData, filterStr) {
             submissionContent = `<span style="color: var(--text-muted); font-size: 0.9rem;">No File</span>`;
         }
 
-        // วาดแค่ 5 คอลัมน์
+        const submittedAt = student.submitted_at
+            ? new Date(student.submitted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+            : '-';
+
         tr.innerHTML = `
-            <td>${student.student_id || student.id}</td>
-            <td>${student.first_name} ${student.last_name || ''}</td>
-            <td>${student.submitted_date || '-'}</td>
+            <td>${student.student_code || '-'}</td>
+            <td>${student.student_name || '-'}</td>
+            <td>${submittedAt}</td>
             <td>${statusContent}</td>
             <td>${submissionContent}</td>
         `;
@@ -172,6 +183,13 @@ function renderTable(studentsData, filterStr) {
 }
 
 // สั่งรันครั้งแรก
-loadTeacherSidebarNavbar();
 loadAssignmentDetails();
-loadStudentsByStatus('Submitted');
+loadStudentsByStatus('Needs Grading');
+
+document.addEventListener("DOMContentLoaded", () => {
+    const activeTab = document.querySelector('.tab-item.active');
+    if (activeTab) {
+        const currentFilter = activeTab.textContent.trim();
+        loadStudentsByStatus(currentFilter);
+    }
+});

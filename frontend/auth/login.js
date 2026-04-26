@@ -15,13 +15,15 @@ function togglePw() {
   }
 }
 
+const BASE_URL = 'http://localhost:8000';
+
 // call login API
 async function handleLogin() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("pw").value;
 
   try {
-     const res = await fetch("/users/login", {
+       const res = await fetch(`${BASE_URL}/users/login`, {
        method: "POST",
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({ email, password }),

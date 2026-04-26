@@ -96,7 +96,7 @@ body.sidebar-collapsed .main {
   font-size: 14px; 
   font-weight: 400; 
   cursor: pointer;
-  color: var(--text); 
+  color: #6E6CDF;
   transition: background .15s;
 }
 .action-btn:hover { background: #f3f0ff; }

@@ -4,6 +4,8 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
+const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
     const path = window.location.pathname;
@@ -42,17 +44,16 @@ courseBtn.addEventListener('click', (e) => {
         sidebar.classList.remove('collapsed');
     }
 
-    const isOpen = coursesItem.classList.toggle('open');
-
-    if (isOpen) {
-        setActiveLink(courseBtn);
-    }
+    setActiveLink(courseBtn);
+    coursesItem.classList.add('open');
+    window.location.href = TEACHER_BASE + 'teacher-mycourses.html';
 });
 
 //แผนที่หน้าของแต่ละปุ่ม (teacher)
 const pageRoutes = {
     'dashboard': TEACHER_BASE + 'teacher-dashboard.html',
-    'courses': TEACHER_BASE + 'teacher-assign-manage/teacher-assign-manage.html',
+    'grading': TEACHER_BASE + 'teacher-detail-grade.html',
+    'courses': TEACHER_BASE + 'teacher-mycourses.html',
     'announcements': TEACHER_BASE + 'teacher-announcement/announcement-page.html'
 };
 //จัดการเมนูหลักอื่นๆ
@@ -71,6 +72,7 @@ document.querySelectorAll('.nav-link[data-page]').forEach(link => {
         document.querySelectorAll('.sub-link').forEach(s => s.classList.remove('active-sub'));
         // นำทางไปยังหน้าที่กำหนด
         const page = link.getAttribute('data-page');
+        console.log("Navigating to:", page); // เพิ่มไว้เช็คใน Console
 
         if (pageRoutes[page]) {
             window.location.href = pageRoutes[page];
@@ -138,9 +140,12 @@ function initActiveFromURL() {
     const currentFile = window.location.pathname.split('/').pop();
     const reverseRoutes = {
         'teacher-dashboard.html': 'dashboard',
+        'teacher-mycourses.html': 'courses',
         'teacher-assign-manage.html': 'courses',
+        'teacher-detail-grade.html': 'grading',
         'announcement-page.html': 'announcements',
         'courses-detail.html': 'courses',
+        'teacher-assign-create.html': 'dashboard'
     };
 
     const activePage = reverseRoutes[currentFile];
@@ -157,7 +162,6 @@ function initActiveFromURL() {
 initActiveFromURL();
 
 async function fetchSidebarCourses() {
-    BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
     const userData = JSON.parse(localStorage.getItem('user'));
     const TOKEN = userData ? userData.token : '';
     const USER_ID = userData ? userData.user_id : '';

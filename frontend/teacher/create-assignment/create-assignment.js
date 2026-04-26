@@ -1,9 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
-    //  ตั้งค่า API
+    // 🌟 ตั้งค่า API
     // ==========================================
-    //const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';ฃ
-    const API_BASE_URL = 'http://127.0.0.1:5501:3000/';
+    const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (!userData || !userData.token) {
+        window.location.href = '../../auth/login.html';
+    }
+    const TOKEN   = userData ? userData.token   : '';
+    const USER_ID = userData ? userData.user_id : '';
 
     // ดึงค่าโหมดและ ID จาก URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -25,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Load sidebar JS (toggle / collapse logic)
                 const sidebarScript = document.createElement('script');
-                sidebarScript.src = '../../components/student-sidebar/sidebar.js';
+                sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
                 document.body.appendChild(sidebarScript);
 
                 // Load navbar JS (profile dropdown)
@@ -60,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!courseSelect) return;
 
         try {
-            courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา... ⏳</option>';
+            courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา... </option>';
 
             const response = await fetch(`${API_BASE_URL}/courses`, { method: 'GET' });
             if (!response.ok) throw new Error('ดึงข้อมูลวิชาไม่สำเร็จ');
@@ -85,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         }
     }
-    await loadTeacherCourses(); // สั่งรันโหลดวิชาทันที
+     // สั่งรันโหลดวิชาทันที
 
     // ==========================================
     // 2. จัดการ UI: Checkbox & Drag-Drop ไฟล์
@@ -199,7 +205,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (submitBtn) submitBtn.textContent = 'Save Changes';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/assignments/${assignmentId}`);
+            const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
             if (!response.ok) throw new Error('ดึงข้อมูลเดิมไม่สำเร็จ');
 
             const result = await response.json();
@@ -239,26 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitBtn.disabled = true;
 
             try {
-                let attachmentUrlOrId = null;
-
-                //  ขั้นตอนที่ 1: อัปโหลดไฟล์ (ถ้ามีการเลือกไฟล์ไว้)
-                if (selectedTeacherFile) {
-                    submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> Uploading file...`;
-
-                    const fileFormData = new FormData();
-                    fileFormData.append('file', selectedTeacherFile);
-
-                    const uploadRes = await fetch(`${API_BASE_URL}/attachments`, {
-                        method: 'POST',
-                        body: fileFormData
-                    });
-
-                    if (!uploadRes.ok) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ (Backend อาจจะยังไม่รองรับ)');
-                    const uploadData = await uploadRes.json();
-                    attachmentUrlOrId = uploadData.data.attachment_id;
-                }
-
-                //  ขั้นตอนที่ 2: รวบรวมข้อมูลสร้าง Assignment
+                // 🌟 ขั้นตอนที่ 1: รวบรวมข้อมูลสร้าง Assignment
                 submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> ${isEdit ? 'Saving...' : 'Posting...'}`;
 
                 let allowedTypesStr = 'any';
@@ -267,16 +256,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         .filter(cb => cb.checked).map(cb => cb.value.toLowerCase());
                     if (selectedTypes.length > 0) allowedTypesStr = selectedTypes.join(',');
                 }
-
-                const payload = {
-                    title: document.getElementById('assign-title').value,
-                    description: document.getElementById('assign-desc').value,
-                    due_date: document.getElementById('assign-date').value,
-                    max_score: parseInt(document.getElementById('assign-points').value) || 0,
-                    status: "published",
-                    allowed_file_types: allowedTypesStr,
-                    attachment_id: attachmentUrlOrId // ส่ง ID ไฟล์ไปด้วย
-                };
 
                 let fetchUrl = '';
                 let fetchMethod = '';
@@ -288,49 +267,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const selectedCourseId = document.getElementById('assign-course').value;
                     if (!selectedCourseId) {
                         alert('กรุณาเลือกวิชาก่อนนะคะ!');
-                        throw new Error('No course selected'); // หยุดการทำงานถ้าไม่เลือกวิชา
+                        throw new Error('No course selected');
                     }
-                    fetchUrl = `${API_BASE_URL}/courses/${selectedCourseId}/assignments`;
+                    fetchUrl = `${API_BASE_URL}/assignments/`;
                     fetchMethod = 'POST';
                 }
 
-                //  ขั้นตอนที่ 3: ยิง API สร้าง/แก้ไข Assignment
-                // ==========================================
+                const payload = {
+                    title: document.getElementById('assign-title').value,
+                    description: document.getElementById('assign-desc').value,
+                    due_date: document.getElementById('assign-date').value,
+                    max_score: parseInt(document.getElementById('assign-points').value) || 0,
+                    allowed_file_types: allowedTypesStr,
+                    course_id: isEdit ? undefined : document.getElementById('assign-course').value,
+                    created_by: USER_ID
+                };
 
-                // ส่วน API ของจริงปิดไว้ก่อน รอ Backend ทำเสร็จค่อยเปิดใช้ 
-                /*const response = await fetch(fetchUrl, {
+                const response = await fetch(fetchUrl, {
                     method: fetchMethod,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
                     body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) throw new Error('บันทึกข้อมูล Assignment ไม่สำเร็จ');
 
-                // 1. แกะกล่องของขวัญที่ Backend ส่งกลับมา เพื่อเอา ID ของงานใหม่
-                const responseData = await response.json();
-                
-                // 2. หาค่า ID ของงาน (ถ้าเป็นโหมด Edit ใช้ ID เดิม, ถ้าโหมด Create ให้ดึงจากที่ Backend ตอบกลับมา)
-                const savedAssignmentId = isEdit ? assignmentId : responseData.data.assignment_id;
+                // 🌟 ขั้นตอนที่ 2: อัปโหลดไฟล์ (ถ้ามี) — ต้องสร้าง assignment ก่อนเพื่อให้ได้ assignment_id
+                const resultData = await response.json();
+                const newAssignmentId = isEdit ? assignmentId : resultData.data.assignment_id;
 
-                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้ว!' : 'สร้าง Assignment สำเร็จแล้ว!');
-                
-                // 3. เปลี่ยนจาก history.back() เป็นการพาไปหน้า Manage พร้อมแนบ ID ไปใน URL
-                window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${savedAssignmentId}`;
-                */
+                if (selectedTeacherFile) {
+                    submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> Uploading file...`;
 
-                // ==========================================
-                // โค้ดจำลอง (Mock) สำหรับรันเทสฝั่ง Frontend ไปก่อน
-                // ==========================================
-                console.log("ข้อมูลที่เตรียมจะส่งให้ Backend:", payload);
-                
-                // แกล้งทำเป็นรอโหลด API 1 วินาที ให้เห็นแอนิเมชันปุ่มหมุนๆ
-                setTimeout(() => {
-                    alert(isEdit ? '[จำลอง] บันทึกการแก้ไขเรียบร้อยแล้ว! ' : '[จำลอง] สร้าง Assignment สำเร็จแล้ว!');
-                    
-                    // สมมติ ID ปลอมขึ้นมาเพื่อใช้เปลี่ยนหน้า
-                    const mockSavedId = isEdit ? assignmentId : 'mock-new-uuid-9999';
-                    window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${mockSavedId}`;
-                }, 1000);
+                    const fileFormData = new FormData();
+                    fileFormData.append('file', selectedTeacherFile);
+
+                    const uploadRes = await fetch(`${API_BASE_URL}/attachments/assignment/${newAssignmentId}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${TOKEN}` },
+                        body: fileFormData
+                    });
+
+                    if (!uploadRes.ok) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ');
+                }
+
+                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้วค่ะ! ' : 'สร้าง Assignment สำเร็จแล้วค่ะ! ');
+                window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${newAssignmentId}`;
 
             } catch (error) {
                 console.error("Submit Error:", error);

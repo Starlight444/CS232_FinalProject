@@ -5,12 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CS232 - Assignment Grading</title>
-    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-sidebar.css">
-    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-navbar.css">
+    <link rel="stylesheet" href="/frontend/components/teacher-sidebar-navbar/teacher-sidebar.css">
+    <link rel="stylesheet" href="/frontend/components/teacher-sidebar-navbar/teacher-navbar.css">
+    <link rel="stylesheet" href="/frontend/components/teacher-sidebar-navbar/all.css">
+    <link rel="stylesheet" href="/frontend/components/teacher-sidebar-navbar/card-swap-component.css">
+    <link rel="stylesheet" href="/frontend/components/teacher-sidebar-navbar/buttons.css">
+    <link rel="stylesheet" href="/frontend/components/teacher-sidebar-navbar/components.css">
     <link rel="stylesheet" href="teacher-assign-manage.css">
-    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/card-swap-component.css">
-    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/all.css">
-    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/buttons.css">
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -27,8 +28,7 @@
                 <div class="header-actions">
                     <div class="button-group">
                         <button class="btn btn-outline">
-                            <iconify-icon icon="material-symbols:edit-outline-rounded" width="20"
-                                height="20"></iconify-icon> Edit
+                            <iconify-icon icon="material-symbols:edit-outline-rounded" width="20" height="20"></iconify-icon> Edit
                         </button>
                         <button class="btn btn-outline btn-outline-danger">
                             <iconify-icon icon="tabler:trash" width="24" height="24"></iconify-icon>
@@ -40,7 +40,7 @@
                 <div class="assignment-details">
                     <h1 id="display-title">Loading Title...</h1>
                     <p id="display-due-date">Loading date...</p>
-
+                    
                     <h2>คำสั่ง</h2>
                     <p id="display-instructions">Loading instructions...</p>
 
@@ -114,8 +114,7 @@
 
                 <br>
 
-                <div class="bottom-actions mt-6"
-                    style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="bottom-actions mt-6" style="display: flex; justify-content: space-between; align-items: center;">
                     <button class="btn btn-secondary flex items-center gap-2">
                         <iconify-icon icon="material-symbols:download" width="20" height="20"></iconify-icon>
                         Download All Submissions
@@ -123,8 +122,7 @@
 
                     <div class="button-group" style="display: flex; gap: 10px;">
                         <button class="btn btn-outline" id="edit-grades-btn">
-                            <iconify-icon icon="material-symbols:edit-outline-rounded" width="20"
-                                height="20"></iconify-icon>Edit
+                            <iconify-icon icon="material-symbols:edit-outline-rounded" width="20" height="20"></iconify-icon>Edit
                         </button>
                         <button class="btn btn-primary">
                             Save Grades
@@ -137,8 +135,7 @@
         </div>
     </main>
 
-    <script src="teacher-assign-manage.js"></script>
-    <script src="../../components/teacher-sidebar-navbar/teacher-sidebar.js"></script>
+    <script src="/frontend/teacher/teacher-assign-manage/teacher-assign-manage.js"></script>
 </body>
 
 </html>

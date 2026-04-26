@@ -32,18 +32,17 @@ courseBtn.addEventListener('click', (e) => {
         sidebar.classList.remove('collapsed');
     }
 
-    const isOpen = coursesItem.classList.toggle('open');
-
-    if (isOpen) {
-        setActiveLink(courseBtn);
-    }
+    setActiveLink(courseBtn);
+    coursesItem.classList.add('open');
+    window.location.href = 'student-mycourses.html';
 });
 
 //แผนที่หน้าของแต่ละปุ่ม
 const pageRoutes = {
     'home': 'home.html',
     'assignments': 'student-all-assign.html',
-    'courses': 'student-courses-detail.html'
+    'courses': 'student-mycourses.html',
+    'announcements': 'student-announce.html'
 };
 //จัดการเมนูหลักอื่นๆ
 document.querySelectorAll('.nav-link[data-page]').forEach(link => {
@@ -103,8 +102,9 @@ function initActiveFromURL() {
     const reverseRoutes = {
         'home.html': 'home',
         'student-all-assign.html': 'assignments',
-        'student-announcements.html': 'announcements',
+        'student-announce.html': 'announcements',
         'student-assign-submit.html': 'assignments',
+        'student-mycourses.html': 'courses',
         'student-courses-detail.html': 'courses'
     };
 
@@ -161,7 +161,8 @@ function renderSidebarCourses(courses) {
 
 // ดึงรายวิชาจาก API แล้วแสดงใน sidebar
 async function fetchSidebarCourses() {
-    const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+    const BASE_URL = "http://127.0.0.1:8000";
+
     // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData || !userData.token) {

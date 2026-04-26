@@ -40,6 +40,4 @@ function profileInfo() {
     const nameAlpha = Fname[0].toUpperCase();
     avatarGradient.textContent = `${nameAlpha}`;
 }
-document.addEventListener("DOMContentLoaded", () => {
-    profileInfo();
-});
+profileInfo();

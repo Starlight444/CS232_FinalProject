@@ -251,3 +251,10 @@ submitBtn.addEventListener('click', () => {
     lockWorkBox(true);*/
 
 });
+
+// back button
+const backBtn = document.getElementById('back-btn');
+
+backBtn.addEventListener('click', () => {
+    window.history.back();
+});

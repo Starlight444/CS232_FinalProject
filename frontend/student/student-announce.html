@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements</title>
+    <link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
+    <link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
+    <link rel="stylesheet" href="../components/announcement-card/announce-card.css">
+    <link rel="stylesheet" href="student-announce.css">
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+</head>
+
+<body>
+    <div id="sidebar-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <main class="main-content">
+
+        <header class="page-header">
+            <h1 class="page-title">Here All Announcement</h1>
+            <div class="header-controls">
+                <div class="search-wrap">
+                    <iconify-icon icon="jam:search" width="24" height="24"></iconify-icon>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search" />
+                </div>
+
+                <span class="sort-label" id="sort-label">Newest
+                    <iconify-icon icon="grommet-icons:link-down" width="14" height="14"></iconify-icon>
+                </span>
+
+
+                <div class="filter-wrap">
+                    <button class="filter-btn" id="filter-btn">
+                        <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon>
+                        Filter
+                        <iconify-icon icon="icon-park-outline:down" width="14" height="14"></iconify-icon>
+                    </button>
+                    <div class="filter-dropdown" id="filter-dropdown">
+                        <button class="filter-option active" data-filter="all">All</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </header>
+
+        <div class="announcement-list-container" id="announcement-list">
+            <div class="loading-state">Loading announcements...</div>
+        </div>
+
+    </main>
+
+    <script src="../components/announcement-card/announce-card.js"></script>
+    <script src="student-announce.js"></script>
+</body>
+
+</html>
