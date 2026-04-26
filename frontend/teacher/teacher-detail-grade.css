@@ -4,11 +4,13 @@ body {
   font-family: 'Inter', sans-serif;
   background: #f0f0f8;
   color: #222;
-  min-height: 100vh;
+  
 }
 
 .page {
-  padding: 32px 40px;
+  padding: 100px 160px;
+  margin-left: 180px;
+  width: 130%;
 }
 
 /* ── Header ── */
@@ -72,8 +74,6 @@ body {
 
 /* ── Table wrapper ── */
 .table-wrap {
-  background: #fff;
-  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
@@ -106,7 +106,7 @@ body {
 }
 
 .grade-table tbody tr:last-child { border-bottom: none; }
-.grade-table tbody tr:hover { background: #faf9ff; }
+
 
 .grade-table td {
   padding: 14px 18px;

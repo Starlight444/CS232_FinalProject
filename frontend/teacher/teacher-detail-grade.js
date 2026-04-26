@@ -1,14 +1,41 @@
+// sidebar
+fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('sidebar-placeholder').innerHTML = data;
+
+        const script = document.createElement("script");
+        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
+        document.body.appendChild(script);
+    });
+
+// navbar
+fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('navbar-placeholder').innerHTML = data;
+
+        const script = document.createElement("script");
+        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
+        document.body.appendChild(script);
+    });
 const students = [
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาววัญโอ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
+  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
 ];
 
 const editSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
