@@ -1,3 +1,12 @@
+
+
+// ดึงสมาชิกในวิชา (นักศึกษา)
+GET /members/{course_id}
+
+fetch(`${BASE_URL}/members/${course_id}`)
+  .then(res => res.json())
+  .then(data => renderTable(data))
+  
 // sidebar
 fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(response => response.text())
