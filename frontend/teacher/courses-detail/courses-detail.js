@@ -164,7 +164,7 @@ function goToCreateAssignment() {
 }
 
 function goToAssignmentDetail(assignmentId) {
-    window.location.href = '../teacher-assign-manage/teacher-assign-manage.html?id=' + assignmentId;
+    window.location.href = '../teacher-assign-manage/teacher-assign-manage.html?id=' + assignmentId + '&course_id=' + courseId;
 }
 
 function goToEditAnnouncement(announcementId) {

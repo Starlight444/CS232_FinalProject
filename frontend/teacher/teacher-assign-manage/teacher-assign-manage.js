@@ -12,6 +12,17 @@ if (!ASSIGNMENT_ID) {
     window.location.href = '../teacher-dashboard.html'; // เด้งกลับหน้า Dashboard
 }
 
+const _manageUrlParams = new URLSearchParams(window.location.search);
+const _manageCourseId = _manageUrlParams.get('course_id');
+
+function goBack() {
+    if (_manageCourseId) {
+        window.location.href = '../courses-detail/courses-detail.html?course_id=' + _manageCourseId;
+    } else {
+        history.back();
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   loadTeacherSidebarNavbar();
 });
@@ -43,7 +54,6 @@ function loadTeacherSidebarNavbar() {
           new MutationObserver(() => {
             const collapsed = sidebarEl.classList.contains('collapsed');
             document.body.classList.toggle('sidebar-collapsed', collapsed);
-            setBottomColumns();
           }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
         }
       };
