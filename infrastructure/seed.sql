@@ -11,7 +11,8 @@ INSERT INTO users (email, password_hash, first_name, last_name, student_id, teac
 VALUES
 ('alice@example.com', '$2b$12$v8G5hUD9RV/sfs9enVh27u.iP/KwlnlwOZOjk0W7ZdQ9TLCwtGAq.', 'Alice', 'Tan', NULL, '1005432001'),
 ('bob@example.com', '$2b$12$pJ7GK5cF8nbHqFZJxebdYezGD.RCfhlV5CqaEn3HPBToFOtKfveLm', 'Bob', 'Smith', '6709610101', NULL),
-('charlie@example.com', '$2b$12$8.SJ69MQ3Ysq1r6rL5LSE.b/R3waH1nKeCFJAA7pCM7.yTfq8y0l6', 'Charlie', 'Lee', '6709610202', NULL)
+('charlie@example.com', '$2b$12$8.SJ69MQ3Ysq1r6rL5LSE.b/R3waH1nKeCFJAA7pCM7.yTfq8y0l6', 'Charlie', 'Lee', '6709610202', NULL),
+('min@example.com', '$2b$12$VYV0ZGQDCfn5qpWuuDmfk.MUAVSPtZitRxDb6hPtbnKDtuO4ijgcG', 'Mintita', 'Kullapatjirakul', '6709616822', NULL)
 ON CONFLICT (email) DO NOTHING;
 
 -- mock up course member: add everyone to every course
@@ -166,3 +167,164 @@ WHERE NOT EXISTS (
           WHERE course_code = 'CS251'
       )
 );
+
+-- Bob account in Course web (mock user)
+INSERT INTO external_accounts (
+    user_id,
+    source_name,
+    external_username,
+    external_password_encrypted,
+    is_connected,
+    is_mock
+)
+VALUES (
+    'f3655636-b22d-4d38-9f4b-42dc44d7b24d',
+    'Course web',
+    'Bob Smith',
+    'gAAAAABp7SLD4o3uKSG9heKTfJtK0gfC8lEdpEI_4wyUib8-T85deB_1Hv8zEd98iGPCTXBscL7qaa6hx9w8L_fJs_whkTk3Ig==',
+    true,
+    true
+)
+ON CONFLICT (user_id, source_name)
+DO UPDATE SET
+    external_username = EXCLUDED.external_username,
+    external_password_encrypted = EXCLUDED.external_password_encrypted,
+    is_connected = EXCLUDED.is_connected;
+
+-- Bob account in TU moodle (mock user)
+INSERT INTO external_accounts (
+    user_id,
+    source_name,
+    external_username,
+    external_password_encrypted,
+    is_connected,
+    is_mock
+)
+VALUES (
+    'f3655636-b22d-4d38-9f4b-42dc44d7b24d',
+    'TU moodle',
+    'Bob Smith',
+    'gAAAAABp7SLD4o3uKSG9heKTfJtK0gfC8lEdpEI_4wyUib8-T85deB_1Hv8zEd98iGPCTXBscL7qaa6hx9w8L_fJs_whkTk3Ig==',
+    true,
+    true
+)
+ON CONFLICT (user_id, source_name)
+DO UPDATE SET
+    external_username = EXCLUDED.external_username,
+    external_password_encrypted = EXCLUDED.external_password_encrypted,
+    is_connected = EXCLUDED.is_connected;
+
+-- AA account in Course web (real user)
+INSERT INTO external_accounts (
+    user_id,
+    source_name,
+    external_username,
+    external_password_encrypted,
+    is_connected,
+    is_mock
+)
+VALUES (
+    '53d403c8-ca5e-4d8d-99c9-0f21d4c0a1b4',
+    'Course web',
+    '6709616822',
+    'gAAAAABp7TYtGMA3uk2wBd2-QKebEV1vbTALC2BmHAw7oWQqN3eTcAxK7S7HbyfcSv_zf9rOhME_3TTiFwajpLbK9134T2L1oQ==',
+    true,
+    false
+)
+ON CONFLICT (user_id, source_name)
+DO UPDATE SET
+    external_username = EXCLUDED.external_username,
+    external_password_encrypted = EXCLUDED.external_password_encrypted,
+    is_connected = EXCLUDED.is_connected;
+
+-- AA account in TU moodle (real user)
+INSERT INTO external_accounts (
+    user_id,
+    source_name,
+    external_username,
+    external_password_encrypted,
+    is_connected,
+    is_mock
+)
+VALUES (
+    '53d403c8-ca5e-4d8d-99c9-0f21d4c0a1b4',
+    'TU moodle',
+    '6709616822',
+    'gAAAAABp7TYtGMA3uk2wBd2-QKebEV1vbTALC2BmHAw7oWQqN3eTcAxK7S7HbyfcSv_zf9rOhME_3TTiFwajpLbK9134T2L1oQ==',
+    true,
+    false
+)
+ON CONFLICT (user_id, source_name)
+DO UPDATE SET
+    external_username = EXCLUDED.external_username,
+    external_password_encrypted = EXCLUDED.external_password_encrypted,
+    is_connected = EXCLUDED.is_connected;
+
+INSERT INTO external_assignments (
+    user_id,
+    source_name,
+    external_course_name,
+    external_course_url,
+    title,
+    external_link,
+    submission_status,
+    grading_status,
+    due_date,
+    time_remaining,
+    last_modified,
+    file_submission,
+    raw_data
+)
+VALUES (
+    'f3655636-b22d-4d38-9f4b-42dc44d7b24d',
+    'Course web',
+    'CS001',
+    'https://mock-course-link',
+    'Assignment 1: Final summary',
+    'https://mock-assignment-link',
+    'Submitted',
+    'Graded',
+    '2026-04-30 23:59:00',
+    'Submitted 2 hours early',
+    '2026-04-20 22:00:00',
+    'report.pdf',
+    '{}'
+)
+ON CONFLICT (user_id, source_name, external_link)
+DO UPDATE SET
+    submission_status = EXCLUDED.submission_status,
+    grading_status = EXCLUDED.grading_status,
+    due_date = EXCLUDED.due_date,
+    time_remaining = EXCLUDED.time_remaining,
+    last_modified = EXCLUDED.last_modified,
+    file_submission = EXCLUDED.file_submission,
+    raw_data = EXCLUDED.raw_data;
+
+INSERT INTO external_announcements (
+    user_id,
+    source_name,
+    external_course_name,
+    external_course_url,
+    title,
+    external_link,
+    author,
+    created_at,
+    raw_data
+)
+VALUES (
+    'f3655636-b22d-4d38-9f4b-42dc44d7b24d',
+    'TU moodle',
+    'CS001',
+    'https://mock-course-link',
+    'New assignment on Course web',
+    'https://mock-announcement-link',
+    'Ajarn A',
+    '2026-04-20 10:00:00',
+    '{}'
+)
+ON CONFLICT (user_id, source_name, external_link)
+DO UPDATE SET
+    title = EXCLUDED.title,
+    author = EXCLUDED.author,
+    created_at = EXCLUDED.created_at,
+    raw_data = EXCLUDED.raw_data;
