@@ -23,12 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (sidebar) container.appendChild(sidebar);
                 if (navbar) container.appendChild(navbar);
 
-                // หน้านี้อยู่ลึก 2 ชั้น (teacher/teacher-assign-manage/) ต้องถอย ../../
-                const logoImg = document.getElementById('logo-img');
-                if (logoImg) {
-                    logoImg.src = '../../components/image/tulogo.png';
-                }
-
                 // Load sidebar JS (toggle / collapse logic)
                 const sidebarScript = document.createElement('script');
                 sidebarScript.src = '../../components/student-sidebar/sidebar.js';

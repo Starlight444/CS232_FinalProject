@@ -63,6 +63,10 @@ body.sidebar-collapsed .sidebar {
     width: 35px;
     height: 35px;
     flex-shrink: 0;
+    background-image: url('../image/tulogo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .brand {

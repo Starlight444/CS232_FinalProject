@@ -27,10 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (sidebar) container.appendChild(sidebar);
                 if (navbar) container.appendChild(navbar);
 
-                // หน้านี้อยู่ลึก 2 ชั้น (teacher/teacher-announcement/) ต้องถอย ../../
-                const logoImg = document.getElementById('logo-img');
-                if (logoImg) logoImg.src = '../../components/image/tulogo.png';
-
                 // ทำให้ลิงก์ Announcements active
                 const navLinks = container.querySelectorAll('.nav-link');
                 navLinks.forEach(a => a.classList.remove('active'));
