@@ -1,22 +1,22 @@
 // sidebar
-fetch('../components/student-sidebar/sidebar.html')
+fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(response => response.text())
     .then(data => {
         document.getElementById('sidebar-placeholder').innerHTML = data;
 
         const script = document.createElement("script");
-        script.src = "../components/student-sidebar/sidebar.js";
+        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
         document.body.appendChild(script);
     });
 
 // navbar
-fetch('../components/student-navbar/student-navbar.html')
+fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(response => response.text())
     .then(data => {
         document.getElementById('navbar-placeholder').innerHTML = data;
 
         const script = document.createElement("script");
-        script.src = "../components/student-navbar/student-navbar.js";
+        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
         document.body.appendChild(script);
     });
 const courses = [

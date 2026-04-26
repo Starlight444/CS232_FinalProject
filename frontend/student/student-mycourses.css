@@ -7,7 +7,8 @@ body {
 }
 
 .page {
-  padding: 36px 40px;
+  padding: 60px 100px;
+  margin-top: 20px;
 }
 
 .page-title {
@@ -15,13 +16,14 @@ body {
   font-weight: 700;
   color: #6B5CE7;
   margin-bottom: 28px;
+  margin-left: 180px;
 }
 
 .courses-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 160px;
-  margin-left: 300px;
+  margin-left: 180px;
 }
 
 /* ── Card ── */
