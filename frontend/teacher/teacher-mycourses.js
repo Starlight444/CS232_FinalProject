@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   loadTeacherSidebarNavbar();
 });
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 const userData = JSON.parse(localStorage.getItem('user'));
 if (!userData || !userData.token) {
     window.location.href = '../auth/login.html';

@@ -1,9 +1,9 @@
 // ── Auth & URL params ──────────────────────────────────────────────────────
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 
 const userData = JSON.parse(localStorage.getItem('user'));
 if (!userData || !userData.token) {
-    window.location.href = '/frontend/auth/login.html';
+    window.location.href = '../auth/login.html';
 }
 const TOKEN   = userData ? userData.token   : '';
 const USER_ID = userData ? userData.user_id : '';
@@ -13,7 +13,7 @@ const courseId  = urlParams.get('course_id') || urlParams.get('id');
 
 if (!courseId) {
     alert('ไม่พบ ID ของ Course');
-    window.location.href = '/frontend/teacher/teacher-dashboard.html';
+    window.location.href = '../teacher/teacher-dashboard.html';
 }
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────

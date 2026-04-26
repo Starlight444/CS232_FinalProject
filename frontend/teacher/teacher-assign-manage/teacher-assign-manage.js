@@ -1,5 +1,5 @@
 // const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default'; 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 
 //const urlParams = new URLSearchParams(window.location.search);
 //const ASSIGNMENT_ID = urlParams.get('id');
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function loadTeacherSidebarNavbar() {
-  fetch('/frontend/components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(r => r.text())
     .then(html => {
       const parser = new DOMParser();
@@ -41,11 +41,11 @@ function loadTeacherSidebarNavbar() {
       if (navbar) container.appendChild(navbar);
 
       const sidebarScript = document.createElement('script');
-      sidebarScript.src = '/frontend/components/teacher-sidebar-navbar/teacher-sidebar.js';
+      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
       document.body.appendChild(sidebarScript);
 
       const navbarScript = document.createElement('script');
-      navbarScript.src = '/frontend/components/teacher-sidebar-navbar/teacher-navbar.js';
+      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
       document.body.appendChild(navbarScript);
 
       sidebarScript.onload = () => {

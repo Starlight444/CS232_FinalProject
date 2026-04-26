@@ -15,7 +15,7 @@ function togglePw() {
   }
 }
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 
 // call login API
 async function handleLogin() {

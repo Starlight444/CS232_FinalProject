@@ -1,6 +1,6 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com";
 
-fetch('/frontend/components/student-sidebar/sidebar.html')
+fetch('../components/student-sidebar/sidebar.html')
   .then(response => response.text())
   .then(data => {
     document.getElementById('sidebar-placeholder').innerHTML = data;
@@ -300,7 +300,7 @@ function renderAssignmentList(assignments) {
 
     // click card event
     item.addEventListener('click', () => {
-      window.location.href = `/frontend/student/student-assign-submit.html?id=${a.assignment_id}&course_id=${a.course_id}`;
+      window.location.href = `../student/student-assign-submit.html?id=${a.assignment_id}&course_id=${a.course_id}`;
     });
 
     list.appendChild(item);

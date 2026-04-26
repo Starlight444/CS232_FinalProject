@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
   loadTeacherSidebarNavbar();
 });
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com";
 
 const editSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
