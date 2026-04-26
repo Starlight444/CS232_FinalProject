@@ -155,7 +155,7 @@ function switchTab(element, tabId) {
 // ── Navigation helpers ─────────────────────────────────────────────────────
 
 function goToGradeBook() {
-    window.location.href = '../teacher-assignment-grading/teacher-assignment-grading.html?course_id=' + courseId;
+    window.location.href = '../teacher-detail-grade.html?course_id=' + courseId;
 }
 
 function goToCreateAnnouncement() {
