@@ -14,7 +14,10 @@
     padding: 40px;
     transition: margin-left var(--transition);
     background: var(--bg-body);
-    min-height: calc(100vh - 60px);
+    height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 body.sidebar-collapsed .main-content {
@@ -113,48 +116,6 @@ body.sidebar-collapsed .main-content {
 }
 
 /* ==========================================
-   Tabs
-   ========================================== */
-.tabs-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border-radius: 12px 12px 0 0;
-    overflow: hidden;
-    background: var(--white);
-    padding: 0;
-    gap: 0;
-}
-
-.tab-btn {
-    padding: 13px 8px;
-    border: none;
-    background: var(--white);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-muted);
-    transition: background 0.2s, color 0.2s;
-    border-radius: 8px 8px 0 0;
-}
-
-.tab-btn[data-tab="due-today"] {
-    color: #CF2D2D;
-}
-
-.tab-btn[data-tab="complete"] {
-    color: #2C9536;
-}
-
-.tab-btn.active {
-    background: var(--primary);
-    color: var(--white);
-}
-
-.tab-btn:hover:not(.active) {
-    background: rgba(0, 0, 0, 0.03);
-}
-
-/* ==========================================
    Container — Filter + Add Assignment + Table
    ========================================== */
 .assignment-container {
@@ -163,9 +124,10 @@ body.sidebar-collapsed .main-content {
     gap: 16px;
     padding: 20px;
     border: 1px solid var(--primary);
-    border-radius: 0 0 12px 12px;
+    border-radius: 12px;
     background: var(--white);
-    min-height: 500px;
+    flex: 1;
+    min-height: 0;
 }
 
 .container-header {
@@ -276,7 +238,9 @@ body.sidebar-collapsed .main-content {
    ========================================== */
 .table-wrap {
     width: 100%;
-    overflow-x: auto;
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
 }
 
 .assignments-table {

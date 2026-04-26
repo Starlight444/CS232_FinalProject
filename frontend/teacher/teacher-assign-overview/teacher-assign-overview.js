@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // State
 // =============================================================
 let ASSIGNMENTS = [];           // [{id, course_id, course_code, name, due, max_score, status, submitted, total}]
-let activeTab = 'upcoming';     // due-today | upcoming | overdue | complete
 let activeSort = 'closest';     // closest | newest
 let activeFilter = 'all';       // course_code or 'all'
 let searchQuery = '';
@@ -250,7 +249,7 @@ function formatDue(date) {
 function render() {
     if (!tbody) return;
 
-    let list = ASSIGNMENTS.filter(a => a.status === activeTab);
+    let list = ASSIGNMENTS.slice();
 
     if (activeFilter !== 'all') {
         list = list.filter(a => a.course_code === activeFilter);
@@ -307,16 +306,6 @@ function escapeHtml(s) {
 // UI bindings — tabs, sort, search, filter, kebab, add
 // =============================================================
 function bindControls() {
-    // Tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            activeTab = btn.dataset.tab;
-            render();
-        });
-    });
-
     // Sort
     document.querySelectorAll('.sort-btn').forEach(btn => {
         btn.addEventListener('click', () => {
