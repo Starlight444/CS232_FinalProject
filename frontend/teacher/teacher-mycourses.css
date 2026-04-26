@@ -20,12 +20,13 @@ body {
 .courses-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 160px;
+  margin-left: 300px;
 }
 
 /* ── Card ── */
 .course-card {
-  width: 90%;
+  width: 160%;
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
@@ -35,7 +36,7 @@ body {
 
 /* Colored banner */
 .card-banner {
-  height: 200px;
+  height: 160px;
   position: relative;
 }
 
