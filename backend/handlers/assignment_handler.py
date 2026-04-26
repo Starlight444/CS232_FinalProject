@@ -67,22 +67,6 @@ def create_assignment(
         }
     }
 
-@router.get("/{course_id}")
-def get_assignments(
-    course_id: UUID,
-    db: Session = Depends(get_db)
-):
-
-    repo = AssignmentRepository(db)
-    member_repo = CourseMemberRepository(db)
-    service = AssignmentService(repo, member_repo)
-    assignments = service.get_assignments(course_id)
-
-    return {
-        "success": True,
-        "data": assignments
-    }
-
 @router.get("/detail/{assignment_id}")
 def get_assignment(
     assignment_id: UUID,
@@ -164,3 +148,19 @@ def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
         })
 
     return result
+
+@router.get("/{course_id}")
+def get_assignments(
+    course_id: UUID,
+    db: Session = Depends(get_db)
+):
+
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    service = AssignmentService(repo, member_repo)
+    assignments = service.get_assignments(course_id)
+
+    return {
+        "success": True,
+        "data": assignments
+    }

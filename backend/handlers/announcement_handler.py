@@ -56,36 +56,6 @@ def get_by_course(course_id: str, db: Session = Depends(get_db)):
     announcements = service.get_by_course(course_id)
     return {"success": True, "data": [_serialize(a) for a in announcements]}
 
-@router.get("/{announcement_id}")
-def get_detail(announcement_id: str, db: Session = Depends(get_db)):
-    service = AnnouncementService(AnnouncementRepository(db))
-    try:
-        announcement = service.get_by_id(announcement_id)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    return {"success": True, "data": _serialize(announcement)}
-
-@router.put("/{announcement_id}")
-def update_announcement(
-    announcement_id: str,
-    request: UpdateAnnouncementRequest,
-    db: Session = Depends(get_db),
-    requester_id: str = Depends(get_current_user_id),
-):
-    service = AnnouncementService(AnnouncementRepository(db))
-    try:
-        announcement = service.update_announcement(
-            announcement_id=announcement_id,
-            title=request.title,
-            content=request.content,
-            requester_id=requester_id,
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except PermissionError as e:
-        raise HTTPException(status_code=403, detail=str(e))
-    return {"success": True, "data": _serialize(announcement)}
-
 def _serialize(a) -> dict:
     return {
         "announcement_id": str(a.announcement_id),
@@ -154,3 +124,33 @@ def get_external_announcements(user_id: str, db: Session = Depends(get_db)):
         })
 
     return result
+
+@router.get("/{announcement_id}")
+def get_detail(announcement_id: str, db: Session = Depends(get_db)):
+    service = AnnouncementService(AnnouncementRepository(db))
+    try:
+        announcement = service.get_by_id(announcement_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {"success": True, "data": _serialize(announcement)}
+
+@router.put("/{announcement_id}")
+def update_announcement(
+    announcement_id: str,
+    request: UpdateAnnouncementRequest,
+    db: Session = Depends(get_db),
+    requester_id: str = Depends(get_current_user_id),
+):
+    service = AnnouncementService(AnnouncementRepository(db))
+    try:
+        announcement = service.update_announcement(
+            announcement_id=announcement_id,
+            title=request.title,
+            content=request.content,
+            requester_id=requester_id,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    return {"success": True, "data": _serialize(announcement)}
