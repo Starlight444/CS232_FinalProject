@@ -1,29 +1,34 @@
-// sidebar
-fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('sidebar-placeholder').innerHTML = data;
+function loadTeacherSidebarNavbar() {
+  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    .then(r => r.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
 
-        const script = document.createElement("script");
-        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
-        document.body.appendChild(script);
-    });
+      const sidebar = doc.querySelector('#sidebar');
+      const navbar = doc.querySelector('.navbar');
+      if (sidebar) document.getElementById('sidebar-placeholder').appendChild(sidebar);
+      if (navbar) document.getElementById('navbar-placeholder').appendChild(navbar);
 
-// navbar
-fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('navbar-placeholder').innerHTML = data;
+      const sidebarScript = document.createElement('script');
+      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
+      document.body.appendChild(sidebarScript);
 
-        const script = document.createElement("script");
-        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
-        document.body.appendChild(script);
-    });
+      const navbarScript = document.createElement('script');
+      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
+      document.body.appendChild(navbarScript);
+    })
+    .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  loadTeacherSidebarNavbar();
+});
 const courses = [
-  { code: "CS222", name: "OPERATING SYSTEMS",                           bg: "#E8926A" },
+  { code: "CS222", name: "OPERATING SYSTEMS", bg: "#E8926A" },
   { code: "CS232", name: "INTRODUCTION TO CLOUD\nCOMPUTING TECHNOLOGY", bg: "#3BCFCF" },
   { code: "CS242", name: "COMPUTER PROGRAMMING\nUSING PYTHON/PYTHON...", bg: "#7B9FD4" },
-  { code: "CS251", name: "DATABASE SYSTEMS 1",                           bg: "#6DC06D" },
+  { code: "CS251", name: "DATABASE SYSTEMS 1", bg: "#6DC06D" },
 ];
 
 const docSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">

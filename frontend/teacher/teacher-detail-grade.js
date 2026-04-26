@@ -1,24 +1,29 @@
-// sidebar
-fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('sidebar-placeholder').innerHTML = data;
+function loadTeacherSidebarNavbar() {
+  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    .then(r => r.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
 
-        const script = document.createElement("script");
-        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
-        document.body.appendChild(script);
-    });
+      const sidebar = doc.querySelector('#sidebar');
+      const navbar = doc.querySelector('.navbar');
+      if (sidebar) document.getElementById('sidebar-placeholder').appendChild(sidebar);
+      if (navbar) document.getElementById('navbar-placeholder').appendChild(navbar);
 
-// navbar
-fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('navbar-placeholder').innerHTML = data;
+      const sidebarScript = document.createElement('script');
+      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
+      document.body.appendChild(sidebarScript);
 
-        const script = document.createElement("script");
-        script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
-        document.body.appendChild(script);
-    });
+      const navbarScript = document.createElement('script');
+      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
+      document.body.appendChild(navbarScript);
+    })
+    .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  loadTeacherSidebarNavbar();
+});
 const students = [
   { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
   { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
