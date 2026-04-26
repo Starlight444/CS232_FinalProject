@@ -104,7 +104,7 @@ if (logoutLink) {
     logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('user');
-        window.location.href = TEACHER_BASE + '../auth/login.html';
+        window.location.href = '/frontend/auth/login.html';
     });
 }
 
@@ -122,17 +122,34 @@ function renderSidebarCourses(courses) {
         link.href = '#';
         link.className = 'sub-link';
         link.textContent = course.course_code;
+        link.dataset.courseId = String(course.course_id);
 
         link.addEventListener('click', (e) => {
             e.preventDefault();
-
-            const courseId = course.course_id;
-            window.location.href = `${TEACHER_BASE}courses-detail/courses-detail.html?course_id=${courseId}`;
+            window.location.href = `${TEACHER_BASE}courses-detail/courses-detail.html?course_id=${course.course_id}`;
         });
 
         li.appendChild(link);
         sidebarList.appendChild(li);
     });
+
+    highlightActiveCourseSubLink();
+}
+
+function highlightActiveCourseSubLink() {
+    const COURSE_PAGES = ['courses-detail.html', 'teacher-detail-grade.html', 'teacher-assign-manage.html'];
+    const currentFile = window.location.pathname.split('/').pop();
+    if (!COURSE_PAGES.includes(currentFile)) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('course_id');
+    if (!courseId) return;
+
+    const subLink = document.querySelector(`.sub-link[data-course-id="${courseId}"]`);
+    if (subLink) {
+        document.querySelectorAll('.sub-link').forEach(l => l.classList.remove('active-sub'));
+        subLink.classList.add('active-sub');
+    }
 }
 
 // ตั้งค่า Active ตามหน้าปัจจุบัน
@@ -143,10 +160,12 @@ function initActiveFromURL() {
         'teacher-mycourses.html': 'courses',
         'teacher-assign-manage.html': 'courses',
         'teacher-assign-overview.html': 'grading',
-        'teacher-detail-grade.html': 'grading',
+        'teacher-detail-grade.html': 'courses',
         'create-assignment.html': 'grading',
         'announcement-page.html': 'announcements',
-        'courses-detail.html': 'courses'
+        'announcement-create.html': 'announcements',
+        'courses-detail.html': 'courses',
+        'teacher-assign-create.html': 'dashboard'
     };
 
     const activePage = reverseRoutes[currentFile];
