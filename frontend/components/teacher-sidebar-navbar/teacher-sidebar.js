@@ -144,9 +144,9 @@ function initActiveFromURL() {
         'teacher-assign-manage.html': 'courses',
         'teacher-assign-overview.html': 'grading',
         'teacher-detail-grade.html': 'grading',
+        'create-assignment.html': 'grading',
         'announcement-page.html': 'announcements',
-        'courses-detail.html': 'courses',
-        'teacher-assign-create.html': 'dashboard'
+        'courses-detail.html': 'courses'
     };
 
     const activePage = reverseRoutes[currentFile];
