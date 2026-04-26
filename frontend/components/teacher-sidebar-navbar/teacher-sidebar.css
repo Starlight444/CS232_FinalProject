@@ -30,6 +30,9 @@ body {
     transition: all 0.3s ease;
     overflow: hidden;
     position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
 }
 
 body.sidebar-collapsed .sidebar {

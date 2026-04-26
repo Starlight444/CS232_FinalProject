@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 function loadTeacherSidebarNavbar() {
   fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(r => r.text())
@@ -25,6 +24,7 @@ function loadTeacherSidebarNavbar() {
 document.addEventListener("DOMContentLoaded", function () {
   loadTeacherSidebarNavbar();
 });
+
 const API_BASE_URL = 'http://127.0.0.1:8000';
 const userData = JSON.parse(localStorage.getItem('user'));
 if (!userData || !userData.token) {
@@ -34,8 +34,6 @@ const TOKEN   = userData ? userData.token   : '';
 const USER_ID = userData ? userData.user_id : '';
 
 const CARD_COLORS = ['#E8926A', '#3BCFCF', '#7B9FD4', '#6DC06D', '#A78BFA', '#F472B6'];
-=======
-const BASE_URL = "http://127.0.0.1:8000";
 
 const colorMap = {
   "CS222": "#E8926A",
@@ -43,7 +41,6 @@ const colorMap = {
   "CS242": "#7B9FD4",
   "CS251": "#6DC06D",
 };
->>>>>>> frontend-login
 
 const docSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -53,7 +50,6 @@ const docSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stro
 </svg>`;
 
 const gearSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-<<<<<<< HEAD
   <circle cx="12" cy="12" r="3"/>
   <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
 </svg>`;
@@ -76,7 +72,7 @@ async function loadCourses() {
 
         grid.innerHTML = '';
         courses.forEach((c, idx) => {
-            const bg   = CARD_COLORS[idx % CARD_COLORS.length];
+            const bg   = colorMap[c.course_code] || CARD_COLORS[idx % CARD_COLORS.length];
             const card = document.createElement('div');
             card.className = 'course-card';
             card.style.cursor = 'pointer';
@@ -106,51 +102,3 @@ async function loadCourses() {
 }
 
 document.addEventListener('DOMContentLoaded', loadCourses);
-=======
-  <path d="M22 8.5c0 2.5-1.5 4.5-4 5.5H6c-2.5-1-4-3-4-5.5S3.5 4 6 3h12c2.5 1 4 3 4 5.5z"/>
-  <path d="M6 14v4"/>
-  <path d="M10 14v4"/>
-</svg>`;
-
-function renderCourses(courses) {
-  const grid = document.getElementById("coursesGrid");
-  grid.innerHTML = "";
-  courses.forEach((c) => {
-    const bg = colorMap[c.course_code] || "#999";
-    const card = document.createElement("div");
-    card.className = "course-card";
-    card.innerHTML = `
-      <div class="card-banner" style="background:${bg};">
-        <div class="card-banner-icons">
-          <span class="icon-doc">${docSVG}</span>
-          <span class="icon-gear-wrap">
-            <span class="icon-gear">${gearSVG}</span>
-            <span class="red-dot"></span>
-          </span>
-        </div>
-        <span class="course-code">${c.course_code}</span>
-      </div>
-      <div class="card-body">
-        <div class="course-name">${c.course_name.toUpperCase()}</div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-// ดึงข้อมูลจาก API
-fetch(`${BASE_URL}/courses/`)
-  .then(res => res.json())
-  .then(data => renderCourses(data))
-  .catch(err => console.error(err));
-
-// sidebar + navbar
-fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById('sidebar-placeholder').innerHTML = data;
-    const script = document.createElement("script");
-    script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
-    document.body.appendChild(script);
-  });
->>>>>>> frontend-login
