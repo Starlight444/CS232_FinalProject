@@ -23,9 +23,9 @@
                 <div class="card-header">
                     <div class="spacer"></div>
                     <h2 id="page-title">Create New Assignment</h2>
-                    <!--<button type="button" class="btn-icon-only close-btn" onclick="history.back()">
-                    <iconify-icon icon="jam:close" width="24" height="24"></iconify-icon>
-                </button>-->
+                    <button type="button" class="btn-icon-only close-btn" onclick="history.back()" aria-label="Close">
+                        <iconify-icon icon="jam:close" width="20" height="20"></iconify-icon>
+                    </button>
                 </div>
 
                 <form id="create-assignment-form" class="card-body-grid">
@@ -105,6 +105,8 @@
                 </form>
 
                 <div class="card-footer">
+                    <button type="button" class="btn btn-outline btn-cancel"
+                        onclick="history.back()">Cancel</button>
                     <button type="submit" id="submit-btn" form="create-assignment-form"
                         class="btn btn-primary btn-post">Post</button>
                 </div>

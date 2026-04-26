@@ -181,15 +181,23 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-/* --- ปุ่ม Post --- */
+/* --- Footer Buttons (Cancel + Post) --- */
 .card-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
     margin-top: 32px;
 }
-.btn-post {
-    width: 100%; /* ปุ่มกว้างเต็มพื้นที่ */
+.card-footer .btn-cancel,
+.card-footer .btn-post {
+    width: 100%;
     padding: 14px;
     font-size: 1rem;
     border-radius: 8px;
+}
+.card-footer .btn-cancel {
+    color: var(--primary, #6E6CDF);
+    border-color: #E5E7EB;
 }
 
 /* =========================================
@@ -203,6 +211,10 @@ input[type="checkbox"] {
     /* 💡 พี่แนะนำให้เพิ่มกล่องวันที่กับคะแนนให้เป็น 1 คอลัมน์ด้วยค่ะ 
        ไม่งั้นในมือถือมันจะบีบจนช่องเล็กจิ๋วเลย */
     .date-points-row {
+        grid-template-columns: 1fr;
+    }
+
+    .card-footer {
         grid-template-columns: 1fr;
     }
 }
