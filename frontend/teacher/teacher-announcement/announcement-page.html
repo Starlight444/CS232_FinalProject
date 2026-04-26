@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements</title>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/all.css">
+
+    <!-- Sidebar / Navbar CSS -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-sidebar.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-navbar.css">
+
+    <!-- Announcement Card Component CSS -->
+    <link rel="stylesheet" href="../../components/announcement-card/announce-card.css">
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="announcement.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+
+</head>
+
+<body class="bg-light">
+    <div class="side-nav" id="teacher-sidebar-navbar-container"></div>
+
+    <main>
+        <!-- Page Header -->
+        <div class="page-header-row">
+            <h1 class="page-title">Here All Announcement</h1>
+            <button class="btn-add-announce" onclick="window.location.href='announcement-create.html'">
+                + Add announcement
+            </button>
+        </div>
+
+        <!-- Toolbar: Search + Sort | Filter -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="search-input-wrap">
+                    <iconify-icon icon="bx:search" width="16"></iconify-icon>
+                    <input type="search" id="search-input" class="search-input" placeholder="Search">
+                </div>
+                <button class="sort-btn" id="sort-btn" title="Toggle sort order">
+                    <span id="sort-label">Newest</span>
+                    <iconify-icon id="sort-icon" icon="bx:down-arrow-alt" width="16"></iconify-icon>
+                </button>
+            </div>
+
+            <div class="filter-wrap">
+                <button class="filter-btn" id="filter-btn">
+                    <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon>
+                    Filter
+                    <iconify-icon icon="icon-park-outline:down" width="14" height="14"></iconify-icon>
+                </button>
+                <div class="filter-dropdown" id="filter-dropdown">
+                    <button class="filter-option active" data-filter="all">All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Announcement Card List (populated by JS via announce-card.js component) -->
+        <div class="announcement-list" id="announcement-list">
+            <p class="loading-state">กำลังโหลด...</p>
+        </div>
+    </main>
+
+    <!-- Load announcement card component functions first -->
+    <script src="../../components/announcement-card/announce-card.js"></script>
+    <script src="announcement-page.js"></script>
+</body>
+
+</html>

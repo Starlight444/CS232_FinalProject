@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Announcement</title>
+
+    <!-- Global CSS (ต้องโหลดก่อนเสมอ) -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/all.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/buttons.css">
+
+    <!-- Sidebar / Navbar CSS -->
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-sidebar.css">
+    <link rel="stylesheet" href="../../components/teacher-sidebar-navbar/teacher-navbar.css">
+
+    <!-- Page specific CSS -->
+    <link rel="stylesheet" href="announcement.css">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+</head>
+
+<body class="bg-light">
+    <div class="side-nav" id="teacher-sidebar-navbar-container"></div>
+
+    <main>
+        <div class="announce-page-container">
+            <div class="announce-card">
+                <!-- Header: title + close button -->
+                <div class="announce-card-header">
+                    <div class="spacer"></div>
+                    <h2 id="page-title">Create New Announcement</h2>
+                    <button type="button" class="btn-icon-only close-btn" onclick="history.back()" aria-label="Close">
+                        <iconify-icon icon="jam:close" width="20" height="20"></iconify-icon>
+                    </button>
+                </div>
+
+                <hr class="announce-divider">
+
+                <!-- Form -->
+                <form id="create-announcement-form" class="announce-form">
+                    <div class="form-group">
+                        <label for="announce-course">Course <span class="required">*</span></label>
+                        <div class="select-wrapper">
+                            <select id="announce-course" class="form-input" required>
+                                <option value="" disabled selected>Select Courses</option>
+                            </select>
+                            <iconify-icon icon="bx:chevron-down" class="select-icon"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="announce-title">Title <span class="required">*</span></label>
+                        <input type="text" id="announce-title" class="form-input" placeholder="Announce Topic"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="announce-desc">Description</label>
+                        <textarea id="announce-desc" class="form-input announce-textarea"
+                            placeholder="Description"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Attach</label>
+                        <div class="upload-zone" id="drop-zone">
+                            <iconify-icon icon="ph:cloud-arrow-up-light" class="upload-icon"></iconify-icon>
+                            <p>Drag &amp; drop files or <label for="file-upload" class="browse-link">Browse</label>
+                            </p>
+                            <small>Supported formats: JPG, PNG, MP4, PDF, PSD, AI, Word, PPT, Zip</small>
+                            <input type="file" id="file-upload" hidden multiple>
+                        </div>
+                    </div>
+
+                    <!-- Footer Buttons -->
+                    <div class="announce-card-footer">
+                        <button type="button" class="btn btn-outline btn-cancel"
+                            onclick="history.back()">Cancel</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary btn-create">Create
+                            Announce</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="announcement-create.js"></script>
+</body>
+
+</html>
