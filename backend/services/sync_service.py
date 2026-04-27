@@ -1,5 +1,7 @@
 from datetime import datetime
+# from datetime import date
 from dateutil import parser
+import re
 
 class SyncService:
 
@@ -28,10 +30,28 @@ class SyncService:
 
     def parse_date(self, date_str):
         try:
-            return parser.parse(date_str)
+            date_str = date_str.replace(".", "")
+            return datetime.strptime(date_str, "%d %b %Y").date()
         except Exception as e:
             print("DATE PARSE ERROR:", date_str, e)
             return None
+        
+    def parse_due_date(self, date_str):
+        if not date_str or date_str.strip() == "-":
+            return None
+        try:
+            return parser.parse(date_str)
+        except Exception as e:
+            print("DUE DATE PARSE ERROR:", date_str, e)
+            return None
+        
+    def clean_filename(self, file_str):
+        if not file_str:
+            return None
+
+        cleaned = re.sub(r"\d{1,2}\s+[A-Za-z]+\s+\d{4}.*", "", file_str)
+
+        return cleaned.strip()
 
     def sync_assignments(self, user_id, mode="mock"):
         source_name = "Course web"
@@ -66,6 +86,38 @@ class SyncService:
         for item in data:
             item["user_id"] = user_id
             item["source_name"] = source_name
+
+            # formating due_date
+            raw_due = item.get("due_date")
+            if raw_due:
+                parsed = self.parse_due_date(raw_due)
+
+                if parsed:
+                    item["due_date"] = parsed
+                else:
+                    item["due_date"] = None
+
+            # formating last_modified
+            raw_last_modified = item.get("last_modified")
+            if raw_last_modified:
+                parsed = self.parse_due_date(raw_last_modified)
+                if parsed:
+                    item["last_modified"] = parsed
+                else:
+                    item["last_modified"] = None
+            else:
+                item["last_modified"] = None
+
+            # clean file_submission name
+            raw_file = item.get("file_submission")
+            if raw_file:
+                item["file_submission"] = self.clean_filename(raw_file)
+            else:
+                item["file_submission"] = None
+
+            # enforce rule: none file_submission -> none last_modified
+            if not item.get("file_submission"):
+                item["last_modified"] = None
 
         self.external_assignment_repo.bulk_create(data)
 
@@ -117,10 +169,9 @@ class SyncService:
 
                 parsed_date = self.parse_date(date_str)
 
-                if isinstance(parsed_date, datetime):
+                if parsed_date:
                     item["created_at"] = parsed_date
                 else:
-                    print("INVALID DATE:", raw_date)
                     item["created_at"] = None
             else:
                 item["created_at"] = None

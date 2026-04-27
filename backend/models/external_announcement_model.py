@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Text, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.sql import func
+from sqlalchemy import Date
 import uuid
 from database import Base
 
@@ -16,7 +16,7 @@ class ExternalAnnouncement(Base):
     title = Column(Text, nullable=False)
     external_link = Column(Text)
     author = Column(Text)
-    created_at = Column(DateTime)
+    created_at = Column(Date)
     raw_data = Column(JSONB)
 
     __table_args__ = (
