@@ -11,7 +11,8 @@ INSERT INTO users (email, password_hash, first_name, last_name, student_id, teac
 VALUES
 ('alice@example.com', '$2b$12$v8G5hUD9RV/sfs9enVh27u.iP/KwlnlwOZOjk0W7ZdQ9TLCwtGAq.', 'Alice', 'Tan', NULL, '1005432001'),
 ('bob@example.com', '$2b$12$pJ7GK5cF8nbHqFZJxebdYezGD.RCfhlV5CqaEn3HPBToFOtKfveLm', 'Bob', 'Smith', '6709610101', NULL),
-('charlie@example.com', '$2b$12$8.SJ69MQ3Ysq1r6rL5LSE.b/R3waH1nKeCFJAA7pCM7.yTfq8y0l6', 'Charlie', 'Lee', '6709610202', NULL)
+('charlie@example.com', '$2b$12$8.SJ69MQ3Ysq1r6rL5LSE.b/R3waH1nKeCFJAA7pCM7.yTfq8y0l6', 'Charlie', 'Lee', '6709610202', NULL),
+('min@example.com', '$2b$12$VYV0ZGQDCfn5qpWuuDmfk.MUAVSPtZitRxDb6hPtbnKDtuO4ijgcG', 'Mintita', 'Kullapatjirakul', '6709616822', NULL)
 ON CONFLICT (email) DO NOTHING;
 
 -- mock up course member: add everyone to every course
@@ -166,3 +167,49 @@ WHERE NOT EXISTS (
           WHERE course_code = 'CS251'
       )
 );
+
+-- AA account in Course web (real user)
+INSERT INTO external_accounts (
+    user_id,
+    source_name,
+    external_username,
+    external_password_encrypted,
+    is_connected,
+    is_mock
+)
+VALUES (
+    '53d403c8-ca5e-4d8d-99c9-0f21d4c0a1b4',
+    'Course web',
+    '6709616822',
+    'gAAAAABp7TYtGMA3uk2wBd2-QKebEV1vbTALC2BmHAw7oWQqN3eTcAxK7S7HbyfcSv_zf9rOhME_3TTiFwajpLbK9134T2L1oQ==',
+    true,
+    false
+)
+ON CONFLICT (user_id, source_name)
+DO UPDATE SET
+    external_username = EXCLUDED.external_username,
+    external_password_encrypted = EXCLUDED.external_password_encrypted,
+    is_connected = EXCLUDED.is_connected;
+
+-- AA account in TU moodle (real user)
+INSERT INTO external_accounts (
+    user_id,
+    source_name,
+    external_username,
+    external_password_encrypted,
+    is_connected,
+    is_mock
+)
+VALUES (
+    '53d403c8-ca5e-4d8d-99c9-0f21d4c0a1b4',
+    'TU moodle',
+    '6709616822',
+    'gAAAAABp7TYtGMA3uk2wBd2-QKebEV1vbTALC2BmHAw7oWQqN3eTcAxK7S7HbyfcSv_zf9rOhME_3TTiFwajpLbK9134T2L1oQ==',
+    true,
+    false
+)
+ON CONFLICT (user_id, source_name)
+DO UPDATE SET
+    external_username = EXCLUDED.external_username,
+    external_password_encrypted = EXCLUDED.external_password_encrypted,
+    is_connected = EXCLUDED.is_connected;

@@ -8,8 +8,19 @@ from database import get_db
 
 from repositories.assignment_repository import AssignmentRepository
 from repositories.course_member_repository import CourseMemberRepository
+from repositories.external_account_repository import ExternalAccountRepository
+from repositories.external_assignment_repository import ExternalAssignmentRepository
+from repositories.external_announcement_repository import ExternalAnnouncementRepository
+
+from scrapers.assignment_scraper import AssignmentScraper
+from scrapers.announcement_scraper import AnnouncementScraper
+from scrapers.mock_assignment_scraper import MockAssignmentScraper
+from scrapers.mock_announcement_scraper import MockAnnouncementScraper
 
 from services.assignment_service import AssignmentService
+from services.sync_service import SyncService
+from crypto import Crypto
+from config import Settings
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
 
@@ -56,22 +67,6 @@ def create_assignment(
         }
     }
 
-@router.get("/{course_id}")
-def get_assignments(
-    course_id: UUID,
-    db: Session = Depends(get_db)
-):
-
-    repo = AssignmentRepository(db)
-    member_repo = CourseMemberRepository(db)
-    service = AssignmentService(repo, member_repo)
-    assignments = service.get_assignments(course_id)
-
-    return {
-        "success": True,
-        "data": assignments
-    }
-
 @router.get("/detail/{assignment_id}")
 def get_assignment(
     assignment_id: UUID,
@@ -89,4 +84,83 @@ def get_assignment(
     return {
         "success": True,
         "data": assignment
+    }
+
+@router.post("/sync")
+def sync_assignments(user_id: str, db: Session = Depends(get_db)):
+
+    external_repo = ExternalAccountRepository(db)
+    external_assignment_repo = ExternalAssignmentRepository(db)
+    external_announcement_repo = ExternalAnnouncementRepository(db)
+
+    real_assignment_scraper = AssignmentScraper()
+    real_announcement_scraper = AnnouncementScraper()
+    mock_assignment_scraper = MockAssignmentScraper(external_assignment_repo)
+    mock_announcement_scraper = MockAnnouncementScraper(external_announcement_repo)
+
+    crypto = Crypto()
+
+    service = SyncService(
+        external_repo,
+        external_assignment_repo,
+        external_announcement_repo,
+        real_assignment_scraper,
+        real_announcement_scraper,
+        mock_assignment_scraper,
+        mock_announcement_scraper,
+        crypto
+    )
+
+    settings = Settings()
+
+    mode = "mock" if settings.USE_MOCK else "real"
+
+    data = service.sync_assignments(user_id=user_id, mode=mode)
+
+    return {
+        "success": True,
+        "mode": mode,
+        "data": data
+    }
+
+@router.get("/external")
+def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
+    
+    repo = ExternalAssignmentRepository(db)
+    data = repo.get_by_user(user_id)
+
+    result = []
+
+    for item in data:
+        result.append({
+            "id": str(item.id),
+            "source_name": item.source_name,
+            "course_name": item.external_course_name,
+            "course_link": item.external_course_url,
+            "title": item.title,
+            "link": item.external_link,
+            "submission_status": item.submission_status,
+            "grading_status": item.grading_status,
+            "due_date": item.due_date,
+            "time_remaining": item.time_remaining,
+            "last_modified": item.last_modified,
+            "file_submission": item.file_submission,
+        })
+
+    return result
+
+@router.get("/{course_id}")
+def get_assignments(
+    course_id: UUID,
+    db: Session = Depends(get_db)
+):
+
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    service = AssignmentService(repo, member_repo)
+    assignments = service.get_assignments(course_id)
+
+    return {
+        "success": True,
+        "data": assignments
     }
