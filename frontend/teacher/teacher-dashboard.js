@@ -364,12 +364,53 @@ function renderAnnouncements(announcements) {
   sorted.slice(0, 5).forEach(a => {
     container.innerHTML += `
       <div class="ann-card">
-        <div class="ann-title">${a.course_name}</div>
-        <div class="ann-body">${a.title}</div>
+        <div class="ann-title">${a.title || "Untitled Announcement"}</div>
+        <div class="ann-body">${a.course_code || "-"}</div>
         <div class="ann-time">${getTimeAgo(a.created_at)}</div>
       </div>
     `;
   });
+}
+
+async function loadAnnouncements() {
+  try {
+    const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`, {
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`
+      }
+    });
+
+    const courses = await courseRes.json();
+    const safeCourses = Array.isArray(courses) ? courses : (courses.data || []);
+
+    let allAnnouncements = [];
+
+    for (const course of safeCourses) {
+      const annRes = await fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`, {
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`
+        }
+      });
+
+      const annResult = await annRes.json();
+
+      const announcements = Array.isArray(annResult)
+        ? annResult
+        : (annResult.data || []);
+
+      announcements.forEach(a => {
+        a.course_code = course.course_code;
+        a.course_name = course.course_name;
+      });
+
+      allAnnouncements.push(...announcements);
+    }
+
+    renderAnnouncements(allAnnouncements);
+
+  } catch (error) {
+    console.error("Error loading announcements:", error);
+  }
 }
 
 function getTimeAgo(dateString) {
@@ -386,35 +427,6 @@ function getTimeAgo(dateString) {
   if (hours < 24) return `${hours} hours ago`;
 
   return `${days} days ago`;
-}
-
-async function loadAnnouncements() {
-  try {
-    const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`);
-    const courses = await courseRes.json();
-
-    const safeCourses = Array.isArray(courses) ? courses : [];
-    let allAnnouncements = [];
-
-    for (const course of safeCourses) {
-      const annRes = await fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`);
-      const annResult = await annRes.json();
-
-      const announcements = Array.isArray(annResult)
-        ? annResult
-        : (annResult.data || []);
-
-      announcements.forEach(a => {
-        a.course_name = course.course_name;
-      });
-
-      allAnnouncements.push(...announcements);
-    }
-
-    renderAnnouncements(allAnnouncements);
-  } catch (error) {
-    console.error("Error loading announcements:", error);
-  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
