@@ -10,7 +10,7 @@ from repositories.attachment_repository import AttachmentRepository
 
 from services.submission_service import SubmissionService
 
-#from storage.s3_storage import S3Storage
+from storage.s3_storage import S3Storage
 
 
 router = APIRouter(prefix="/submissions", tags=["submission"])
@@ -47,8 +47,7 @@ async def submit_assignment(
     member_repo = CourseMemberRepository(db)
     attachment_repo = AttachmentRepository(db)
 
-    #storage = S3Storage()
-    storage = None
+    storage = S3Storage()
 
     service = SubmissionService(repo, member_repo, attachment_repo, storage)
 

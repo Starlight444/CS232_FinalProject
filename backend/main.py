@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from handlers.submission_handler import router as submission_router
@@ -13,13 +12,7 @@ from handlers.announcement_handler import router as announcement_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(root_path="/default")
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,4 +34,4 @@ app.include_router(course_router)
 app.include_router(course_member_router)
 app.include_router(announcement_router)
 
-handler = Mangum(app, lifespan="off", api_gateway_base_path="/default")
+handler = Mangum(app)
