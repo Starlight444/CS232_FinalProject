@@ -59,9 +59,13 @@ body.sidebar-collapsed main {
 }
 
 .page-title {
+    font-family: 'Amiko', sans-serif;
     font-size: 24px;
     font-weight: 700;
-    color: #3B3392;
+    background: linear-gradient(90deg, #3B3392 0%, #CF2D2D 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin: 0;
-    margin-bottom: 20px;
+    width: fit-content;
 }

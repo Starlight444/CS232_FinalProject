@@ -51,6 +51,7 @@ body {
   justify-content: space-evenly;
   padding-right: 5%;
   overflow: hidden;
+  gap:20px;
 }
 
 .tu-logo {
@@ -63,8 +64,8 @@ body {
 
 .cstu-logo {
   font-size: clamp(1rem, 3vw, 3rem);
-  font-weight: 700;
-  color: #3d1f8e;
+  font-weight: 100;
+  color: #160c31;
 }
 
 .right-panel {

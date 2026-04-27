@@ -23,7 +23,7 @@ body {
     flex: 1;
     margin-left: var(--sidebar-width);
     margin-top: var(--navbar-height);
-    padding: 32px 40px;
+    padding: 40px;
     min-height: calc(100vh - var(--navbar-height));
     background: #fff;
     transition: margin-left 0.3s ease;
