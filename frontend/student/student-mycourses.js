@@ -25,8 +25,13 @@ function renderCourses(courses) {
   grid.innerHTML = "";
   courses.forEach((c) => {
     const bg = colorMap[c.course_code] || "#999";
+    const courseId = c.course_id || c.id;
     const card = document.createElement("div");
+    card.style.cursor = "pointer";
     card.className = "course-card";
+    card.addEventListener("click", () => {
+      window.location.href = `/frontend/student/student-courses-detail.html?course_id=${courseId}`;
+    });
     card.innerHTML = `
       <div class="card-banner" style="background:${bg};">
         <div class="card-banner-icons">

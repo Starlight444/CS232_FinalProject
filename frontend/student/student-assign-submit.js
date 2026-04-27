@@ -29,7 +29,7 @@ let uploadedFiles = [];
 let isSubmitted = false;
 
 // api
-const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+const BASE_URL = 'http://127.0.0.1:8000';
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
@@ -137,11 +137,9 @@ async function handleSubmission() {
     }
 
     try {
-        // เปลี่ยนสถานะปุ่มเป็น Uploading
         submitBtn.disabled = true;
         submitBtn.textContent = 'Uploading...';
 
-        // POST /submissions/ — ส่ง FormData (assignment_id, course_id, student_id, file) ครั้งเดียว
         const userData = JSON.parse(localStorage.getItem("user") || '{}');
         const studentId = userData.user_id || '';
 
@@ -152,22 +150,33 @@ async function handleSubmission() {
         formData.append('student_id', studentId);
 
         const submitRes = await fetch(`${BASE_URL}/submissions/`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${TOKEN}` },
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`
+                // ห้ามใส่ Content-Type เองเวลาใช้ FormData
+            },
             body: formData
         });
+
         const submitData = await submitRes.json();
 
         if (submitData.success) {
             isSubmitted = true;
             updateUISubmitted();
             alert("ส่งงานสำเร็จเรียบร้อย!");
+        } else {
+            console.error("Submit failed:", submitData);
+            alert(submitData.message || "ส่งงานไม่สำเร็จ");
         }
+
     } catch (err) {
         console.error("Submit Error:", err);
         alert("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
     } finally {
         submitBtn.disabled = false;
+        if (!isSubmitted) {
+            submitBtn.textContent = 'Submit';
+        }
     }
 }
 // เรียกทำงานทันทีที่โหลดหน้า
