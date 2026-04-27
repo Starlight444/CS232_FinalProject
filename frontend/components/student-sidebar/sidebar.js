@@ -96,14 +96,42 @@ if (logoutLink) {
     });
 }
 
+function getActiveCourseIdFromURL() {
+    const currentFile = window.location.pathname.split('/').pop();
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // หน้า student-assign-submit.html
+    // id = assignment_id
+    // course_id = course_id ของวิชาจริง
+    if (currentFile === 'student-assign-submit.html') {
+        return urlParams.get('course_id');
+    }
+
+    // หน้า course detail
+    // id = course_id
+    if (currentFile === 'student-courses-detail.html') {
+        return urlParams.get('id');
+    }
+
+    return urlParams.get('course_id') || urlParams.get('id');
+}
+
 // ตั้งค่า Active ตามหน้าปัจจุบัน
 function initActiveFromURL() {
     const currentFile = window.location.pathname.split('/').pop();
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (currentFile === 'student-assign-submit.html' && urlParams.get('course_id')) {
+        setActiveLink(courseBtn);
+        coursesItem.classList.add('open');
+        return;
+    }
+
+
     const reverseRoutes = {
         'home.html': 'home',
         'student-all-assign.html': 'assignments',
         'student-announce.html': 'announcements',
-        'student-assign-submit.html': 'assignments',
         'student-mycourses.html': 'courses',
         'student-courses-detail.html': 'courses'
     };
@@ -146,9 +174,9 @@ function renderSidebarCourses(courses) {
         });
 
         // highlight วิชาที่ตรงกับ URL ปัจจุบัน
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentId = urlParams.get('id');
-        if (currentId && String(course.course_id) === String(currentId)) {
+        const currentCourseId = getActiveCourseIdFromURL();
+
+        if (currentCourseId && String(course.course_id) === String(currentCourseId)) {
             link.classList.add('active-sub');
             setActiveLink(courseBtn);
             coursesItem.classList.add('open');

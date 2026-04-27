@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Sidebar</title>
     <link rel="stylesheet" href="/frontend/components/student-sidebar/sidebar.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 </head>
 
 <body>
@@ -15,29 +15,29 @@
                 <div id="logo-img" class="logo-img" role="img" aria-label="Logo"></div>
                 <span class="brand">CourseHub</span>
             </div>
-            <i class="fa-solid fa-bars" id="toggleBtn"></i>
+            <iconify-icon icon="ph:list-bold" id="toggleBtn" width="24" height="24"></iconify-icon>
         </div>
 
         <nav class="nav">
             <ul class="nav-list">
                 <li class="nav-item">
                     <a href="#" class="nav-link active" data-page="home">
-                        <i class="fa-solid fa-house nav-icon"></i>
+                        <iconify-icon icon="ph:house-bold" class="nav-icon" width="24" height="24"></iconify-icon>
                         <span class="nav-label">Home</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" data-page="assignments">
-                        <i class="fa-solid fa-clipboard nav-icon"></i>
+                        <iconify-icon icon="ph:clipboard-text-bold" class="nav-icon" width="24" height="24"></iconify-icon>
                         <span class="nav-label">Assignments</span>
                     </a>
                 </li>
 
                 <li class="nav-item" id="courses-item">
                     <a href="#" class="nav-link" id="courseBtn">
-                        <i class="fa-solid fa-graduation-cap nav-icon"></i>
+                        <iconify-icon icon="ph:graduation-cap-bold" class="nav-icon" width="24" height="24"></iconify-icon>
                         <span class="nav-label">My courses</span>
-                        <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        <iconify-icon icon="ph:caret-right-bold" class="arrow-icon" width="16" height="16"></iconify-icon>
                     </a>
                     <ul class="sub-list" id="submenu">
                     </ul>
@@ -45,7 +45,7 @@
 
                 <li class="nav-item">
                     <a href="#" class="nav-link" data-page="announcements">
-                        <i class="fa-solid fa-bullhorn nav-icon"></i>
+                        <iconify-icon icon="ph:megaphone-simple-bold" class="nav-icon" width="24" height="24"></iconify-icon>
                         <span class="nav-label">Announcements</span>
                     </a>
                 </li>
@@ -54,7 +54,7 @@
 
         <div class="sidebar-footer">
             <a href="#" class="nav-link logout-link">
-                <i class="fa-solid fa-right-from-bracket nav-icon"></i>
+                <iconify-icon icon="ph:sign-out-bold" class="nav-icon" width="24" height="24"></iconify-icon>
                 <span class="nav-label">Log out</span>
             </a>
         </div>

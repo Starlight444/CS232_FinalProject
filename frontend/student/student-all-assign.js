@@ -185,12 +185,10 @@ function formatDueLabel(a) {
 
 function rightContent(a) {
     if (a.status === 'complete') {
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6.36641 12.0001L2.56641 8.20007L3.51641 7.25007L6.36641 10.1001L12.4831 3.9834L13.4331 4.9334L6.36641 12.0001Z" fill="#1ABC14"/>
-        </svg>`;
+        return `<iconify-icon icon="ph:check-circle-fill" style="color: #1ABC14; font-size: 20px;"></iconify-icon>`;
     }
     if (a.status === 'overdue') {
-        return `<svg class="ban-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`;
+        return `<iconify-icon icon="ph:prohibit-bold" style="color: #E53935; font-size: 20px;"></iconify-icon>`;
     }
     return `<span class="assign-points-label">${a.points} Point</span>`;
 }

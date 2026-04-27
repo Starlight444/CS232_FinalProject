@@ -158,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     sortLabel.addEventListener('click', () => {
         sortOrder = sortOrder === 'newest' ? 'oldest' : 'newest';
         sortLabel.innerHTML = sortOrder === 'newest'
-            ? `Newest <iconify-icon icon="grommet-icons:link-down" width="14" height="14"></iconify-icon>`
-            : `Oldest <iconify-icon icon="grommet-icons:link-up" width="14" height="14"></iconify-icon>`;
+            ? `Newest <iconify-icon icon="ph:caret-down-bold" width="14" height="14"></iconify-icon>`
+            : `Oldest <iconify-icon icon="ph:caret-up-bold" width="14" height="14"></iconify-icon>`;
         renderAnnouncements();
     });
 

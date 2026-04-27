@@ -240,7 +240,7 @@ function renderAssignments(tasks) {
 
 // fetch course members
 async function fetchMembers(courseId) {
-    const container = document.getElementById('people'); // 🔥 ต้องมี div นี้ใน HTML
+    const container = document.getElementById('people'); // must have this div in HTML
 
     try {
         const res = await fetch(`${API_BASE_URL}/members/${courseId}`, {
@@ -315,21 +315,21 @@ async function renderMembers(members) {
         }
     }));
 
-    // ✅ แยก role
+    // Map role
     const teachers = cards.filter(c => c.role === 'teacher');
     const students = cards.filter(c => c.role === 'student');
 
-    // ✅ render เป็น section
+    // render as sections
     container.innerHTML = `
         <div class="member-section">
-            <div class="member-section-title">👩‍🏫 Teacher</div>
+            <div class="member-section-title"><iconify-icon icon="ph:chalkboard-teacher-bold"></iconify-icon> Teacher</div>
             <div class="member-list">
                 ${teachers.map(c => c.html).join('')}
             </div>
         </div>
 
         <div class="member-section">
-            <div class="member-section-title">👨‍🎓 Students</div>
+            <div class="member-section-title"><iconify-icon icon="ph:student-bold"></iconify-icon> Students</div>
             <div class="member-list">
                 ${students.map(c => c.html).join('')}
             </div>

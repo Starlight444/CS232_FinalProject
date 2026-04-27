@@ -24,12 +24,10 @@ body {
 
 /* ============================================
    Main Content
-   ✅ แก้: เพิ่ม margin-top เพื่อไม่ให้ navbar ทับ
-   ✅ แก้: height ต้องหัก navbar ออก
+   - Fix: add margin-top to prevent navbar overlap
+   - Fix: height should subtract navbar height
    ============================================ */
-.main {
-    margin-left: var(--sidebar-width);
-    margin-top: var(--navbar-height);         
+.main {       
     display: flex;
     flex-direction: column;
     background-color: #ffffff;
@@ -41,7 +39,6 @@ body {
 }
 
 .content {
-    padding: 30px;
     flex: 1;
     overflow: hidden;
     display: flex;
@@ -369,8 +366,8 @@ body.sidebar-collapsed .main {
 
 
 /* ============================================
-   4. Responsive Breakpoints
-   ✅ แก้: เปลี่ยน .main-content → .main ทุกที่
+   Responsive Breakpoints
+   - Fix: change .main-content to .main everywhere
    ============================================ */
 @media (max-width: 1024px) {
     .tab-btn {
@@ -599,6 +596,10 @@ body.sidebar-collapsed .main {
   align-items: center;
   justify-content: center;
   font-weight: 600;
+}
+
+#people {
+    margin: 20px;
 }
 
 /* ===== Member Section ===== */
