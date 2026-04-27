@@ -11,6 +11,7 @@ class ExternalAnnouncement(Base):
 
     user_id = Column(UUID(as_uuid=True),ForeignKey("users.user_id", ondelete="CASCADE"),nullable=False)
     source_name = Column(String(100), nullable=False)
+    external_course_code = Column(String(10))
     external_course_name = Column(Text)
     external_course_url = Column(Text)
     title = Column(Text, nullable=False)

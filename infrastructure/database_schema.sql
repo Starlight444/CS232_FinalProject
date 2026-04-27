@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS external_assignments (
     grading_status TEXT,
     due_date TIMESTAMP,
     time_remaining TEXT,
-    last_modified TEXT,
+    last_modified TIMESTAMP,
     file_submission TEXT,
 
     raw_data JSONB,  -- เก็บ dump เผื่อ debug

@@ -11,6 +11,7 @@ class ExternalAssignment(Base):
 
     user_id = Column(UUID(as_uuid=True), nullable=False)
     source_name = Column(String(50), nullable=True)
+    external_course_code = Column(String(10))
     external_course_name = Column(Text)
     external_course_url = Column(Text)
     title = Column(Text)
@@ -19,7 +20,7 @@ class ExternalAssignment(Base):
     grading_status = Column(Text)
     due_date = Column(DateTime)
     time_remaining = Column(Text)
-    last_modified = Column(Text)
+    last_modified = Column(DateTime)
     file_submission = Column(Text)
     raw_data = Column(JSONB)
     created_at = Column(DateTime, server_default=func.now())

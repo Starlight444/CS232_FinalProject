@@ -53,6 +53,13 @@ class SyncService:
 
         return cleaned.strip()
 
+    def extract_course_code(self, full_name: str):
+        matches = re.findall(r"[A-Z]{2,3}\d{3}", full_name)
+        if not matches:
+            return None
+        # เลือก course code อันที่สอง
+        return matches[-1]
+
     def sync_assignments(self, user_id, mode="mock"):
         source_name = "Course web"
 
@@ -119,6 +126,10 @@ class SyncService:
             if not item.get("file_submission"):
                 item["last_modified"] = None
 
+            # extract course_code from course_name
+            full_name = item.get("external_course_name", "")
+            item["external_course_code"] = self.extract_course_code(full_name)
+
         self.external_assignment_repo.bulk_create(data)
 
         return data
@@ -167,14 +178,18 @@ class SyncService:
                 else:
                     date_str = raw_date.strip()
 
+                # formating date
                 parsed_date = self.parse_date(date_str)
-
                 if parsed_date:
                     item["created_at"] = parsed_date
                 else:
                     item["created_at"] = None
             else:
                 item["created_at"] = None
+
+            # extract course_code from course_name
+            full_name = item.get("external_course_name", "")
+            item["external_course_code"] = self.extract_course_code(full_name)
 
         self.external_announcement_repo.bulk_create(data)
 
