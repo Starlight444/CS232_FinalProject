@@ -7,11 +7,18 @@
 .main-content {
     margin-left: var(--sidebar-width);
     margin-top: 60px;
+    width: calc(100% - var(--sidebar-width));
     flex: 1;
     padding: 40px;
-    transition: margin-left var(--transition);
+    transition: margin-left var(--transition), width var(--transition);
     background: #fff;
-    min-height: 100vh;
+    min-height: calc(100vh - 60px);
+    box-sizing: border-box;
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+    width: calc(100% - var(--sidebar-collapsed-width));
 }
 
 body.sidebar-collapsed .main-content {
@@ -229,14 +236,19 @@ body.sidebar-collapsed .main-content {
 
 .assignment-container {
     display: flex;
-    height: 500px;
+    width: 100%;
+    min-height: 500px;
+    height: auto;
     padding: 10px;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 10px;
     align-self: stretch;
     border-radius: 8px;
     border: 1px solid #6E6CDF;
+    background: #fff;
+    box-sizing: border-box;
+    overflow: visible;
 }
 
 .assignment-list {
