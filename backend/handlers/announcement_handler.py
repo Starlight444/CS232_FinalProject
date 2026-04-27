@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
 
+from repositories.course_repository import CourseRepository
 from repositories.announcement_repository import AnnouncementRepository
 from repositories.external_account_repository import ExternalAccountRepository
 from repositories.external_assignment_repository import ExternalAssignmentRepository
@@ -124,6 +125,26 @@ def get_external_announcements(user_id: str, db: Session = Depends(get_db)):
         })
 
     return result
+
+@router.get("/all")
+def get_all_announcements(user_id: str, db: Session = Depends(get_db)):
+
+    ann_repo = AnnouncementRepository(db)
+    ext_repo = ExternalAnnouncementRepository(db)
+    course_repo = CourseRepository(db)
+
+    service = AnnouncementService(ann_repo)
+
+    data = service.get_all_announcements(
+        user_id=user_id,
+        external_repo=ext_repo,
+        course_repo=course_repo
+    )
+
+    return {
+        "success": True,
+        "data": data
+    }
 
 @router.get("/{announcement_id}")
 def get_detail(announcement_id: str, db: Session = Depends(get_db)):

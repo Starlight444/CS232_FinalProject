@@ -6,6 +6,7 @@ from datetime import datetime
 
 from database import get_db
 
+from repositories.course_repository import CourseRepository
 from repositories.assignment_repository import AssignmentRepository
 from repositories.course_member_repository import CourseMemberRepository
 from repositories.external_account_repository import ExternalAccountRepository
@@ -138,7 +139,7 @@ def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
             "course_name": item.external_course_name,
             "course_link": item.external_course_url,
             "title": item.title,
-            "link": item.external_link,
+            "box_link": item.external_link,
             "submission_status": item.submission_status,
             "grading_status": item.grading_status,
             "due_date": item.due_date,
@@ -148,6 +149,27 @@ def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
         })
 
     return result
+
+@router.get("/all")
+def get_all_assignments(user_id: str, db: Session = Depends(get_db)):
+
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    external_repo = ExternalAssignmentRepository(db)
+    course_repo = CourseRepository(db)
+
+    service = AssignmentService(repo, member_repo)
+
+    data = service.get_all_assignments(
+        user_id=user_id,
+        course_repo=course_repo,
+        external_repo=external_repo
+    )
+
+    return {
+        "success": True,
+        "data": data
+    }
 
 @router.get("/{course_id}")
 def get_assignments(
