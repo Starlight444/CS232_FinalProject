@@ -139,62 +139,90 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchAnnouncements(courseId);
     }
     renderMaterials();
+
+    // Sync button — เรียก scraper backend แล้วโหลด assignments + announcements ใหม่
+    // TODO: confirm endpoint/method กับ backend ใน scraper-merge.js
+    window.ScraperMerge?.bindSyncButton(
+        document.getElementById('sync-btn'),
+        API_BASE_URL,
+        TOKEN,
+        async () => {
+            if (!courseId) return;
+            await Promise.all([
+                fetchAssignments(courseId),
+                fetchAnnouncements(courseId),
+            ]);
+        }
+    );
 });
 
 async function fetchAssignments(courseId) {
     try {
-        const resAssignments = await fetch(`${API_BASE_URL}/assignments/${courseId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${TOKEN}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        const dataAssignments = await resAssignments.json();
-
         // fetch for course code
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user) return;
 
         const resCourse = await fetch(`${API_BASE_URL}/courses/my/${user.user_id}?role=${user.role}`, {
-            headers: {
-                'Authorization': `Bearer ${TOKEN}`
-            }
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
         });
         const courseData = await resCourse.json();
-        
         const courses = courseData;
         const course = courses.find(c => String(c.course_id) === String(courseId));
         const courseCode = course?.course_code || "N/A";
 
-        console.log("courseCode:", courseCode);
+        // ใช้ merged endpoint รวม internal + external
+        // TODO: รอ backend confirm /assignments/merged/:course_id
+        let merged = [];
+        if (window.ScraperMerge) {
+            merged = await window.ScraperMerge.fetchMergedAssignments(
+                API_BASE_URL, courseId, TOKEN, course || {}
+            );
+        }
 
-        const allTasks = dataAssignments.data || [];
+        // Fallback: ใช้ internal endpoint เดิมถ้า merged ยังไม่พร้อม
+        // TODO: ลบ block fallback นี้เมื่อ merged endpoint ใช้งานได้จริง
+        if (!merged.length) {
+            const resAssignments = await fetch(`${API_BASE_URL}/assignments/${courseId}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const dataAssignments = await resAssignments.json();
+            const allTasks = dataAssignments.data || [];
+            merged = allTasks.map(t => window.ScraperMerge.normalizeAssignment(
+                { ...t, source: 'internal' },
+                course || {}
+            ));
+        }
 
-        const tasksWithStatus = await Promise.all(allTasks.map(async (task) => {
+        // ดึง submission status เฉพาะ internal
+        const tasksWithStatus = await Promise.all(merged.map(async (m) => {
+            const base = {
+                // คงรูปแบบเดิมที่ renderAssignments ต้องการ
+                assignment_id: m.id,
+                title: m.title,
+                due_date: m.due_date,
+                max_score: m.max_score,
+                course_code: m.course_code || courseCode,
+                // ฟิลด์เพิ่มสำหรับ external
+                isExternal: m.isExternal,
+                external_url: m.external_url,
+                source: m.source,
+            };
+            if (m.isExternal) return { ...base, status: null };
             try {
-                const resSub = await fetch(`${API_BASE_URL}/submissions/assignment/${task.assignment_id}/student/${USER_ID}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${TOKEN}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const resSub = await fetch(
+                    `${API_BASE_URL}/submissions/assignment/${m.id}/student/${USER_ID}`,
+                    { headers: { 'Authorization': `Bearer ${TOKEN}` } }
+                );
                 const dataSub = await resSub.json();
-
-                console.log(`Task: ${task.title}, Status from API:`, dataSub);
-
                 return {
-                    ...task,
-                    course_code: courseCode,
+                    ...base,
                     status: (dataSub.data && dataSub.data.status) ? dataSub.data.status : (dataSub.status || null)
                 };
-            } catch (err) {
-                return { ...task, course_code: courseCode, status: null };
+            } catch {
+                return { ...base, status: null };
             }
         }));
 
-        console.log("Final tasks to render:", tasksWithStatus);
         const countEl = document.getElementById('assignment-count');
         if (countEl) countEl.textContent = tasksWithStatus.length;
         renderAssignments(tasksWithStatus);
@@ -399,16 +427,26 @@ async function fetchAnnouncements(courseId) {
     const container = document.getElementById('announcement-list');
 
     try {
-        const res = await fetch(`${API_BASE_URL}/announcements/course/${courseId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${TOKEN}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        // ใช้ merged endpoint รวม internal + external
+        // TODO: รอ backend confirm /announcements/merged/:course_id
+        let announcements = [];
+        if (window.ScraperMerge) {
+            announcements = await window.ScraperMerge.fetchMergedAnnouncements(
+                API_BASE_URL, courseId, TOKEN, {}
+            );
+        }
 
-        const data = await res.json();
-        let announcements = data.data || [];
+        // Fallback: ใช้ internal endpoint เดิมถ้า merged ยังไม่พร้อม
+        // TODO: ลบ block fallback นี้เมื่อ merged พร้อมจริง
+        if (!announcements.length) {
+            const res = await fetch(`${API_BASE_URL}/announcements/course/${courseId}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const data = await res.json();
+            announcements = (data.data || []).map(a =>
+                window.ScraperMerge.normalizeAnnouncement({ ...a, source: 'internal' }, {})
+            );
+        }
 
         if (announcements.length === 0) {
             container.innerHTML = `<div class="empty-state">No announcements yet.</div>`;
@@ -433,14 +471,26 @@ async function fetchAnnouncements(courseId) {
             const isLatest = index === 0;
             const timeAgo = getTimeAgo(a.created_at);
 
+            // External announcement -> เปิด link ภายนอกเมื่อคลิก
+            const isExternal = !!a.isExternal;
+            const externalUrl = a.external_url || '';
+            const cardOnclick = isExternal && externalUrl
+                ? `onclick="window.open('${externalUrl}','_blank','noopener,noreferrer')" style="cursor:pointer;"`
+                : '';
+            const externalBadge = isExternal
+                ? `<span class="ext-badge" title="From external source">
+                       <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
+                   </span>`
+                : '';
+
             return `
-                <div class="announcement-card">
+                <div class="announcement-card${isExternal ? ' is-external' : ''}" ${cardOnclick}>
                     <div class="announcement-content-area">
                         <div class="announcement-icon">${personIcon}</div>
 
                         <div class="announcement-card-info">
                             <div class="announcement-title-row">
-                                <span class="announcement-course">${a.title}</span>
+                                <span class="announcement-course">${a.title} ${externalBadge}</span>
                                 ${isLatest ? '<span class="announcement-new-badge">NEW</span>' : ''}
                             </div>
 
@@ -626,11 +676,23 @@ function createCardHTML(task) {
         hour12: false
     });
 
+    // External assignment (จาก scraper) -> เปิด external_url แทนหน้า submit
+    const isExternal = !!task.isExternal;
+    const externalUrl = task.external_url || '';
+    const onclickAction = isExternal && externalUrl
+        ? `window.open('${externalUrl}','_blank','noopener,noreferrer')`
+        : `window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}&course_id=${courseId}'`;
+    const externalBadge = isExternal
+        ? `<span class="ext-badge" title="From external source">
+               <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
+           </span>`
+        : '';
+
     return `
-        <div class="assignment-card" onclick="window.location.href='../student/student-assign-submit.html?id=${task.assignment_id}&course_id=${courseId}'">
+        <div class="assignment-card${isExternal ? ' is-external' : ''}" onclick="${onclickAction}">
             <div class="task-icon">${task.course_code}</div>
             <div class="task-details">
-                <span class="task-name">${task.title}</span> 
+                <span class="task-name">${task.title} ${externalBadge}</span> 
                 <span class="task-status ${isPast ? 'status-past' : ''} ${isSubmitted ? 'status-complete' : ''}">
                     ${relativeStatus}
                 </span> 

@@ -73,43 +73,62 @@ async function fetchAssignments() {
 
         let allAssignments = [];
 
-        // ดึงงานของแต่ละคอร์ส
+        // ดึงงานของแต่ละคอร์ส (ใช้ merged endpoint รวม internal + external)
+        // TODO: รอ backend ทำ /assignments/merged/:course_id ให้เรียบร้อยก่อน
+        //       ตอนนี้ถ้า merged ยังไม่มี fetchMergedAssignments จะคืน [] แล้วเราจะ
+        //       fallback ไปใช้ internal endpoint เดิมก่อน เพื่อไม่ให้หน้าเสีย
         for (let course of courses) {
+            let merged = [];
+            if (window.ScraperMerge) {
+                merged = await window.ScraperMerge.fetchMergedAssignments(
+                    BASE_URL, course.course_id, TOKEN, course
+                );
+            }
 
-            // Step 2 — ดึง assignments ของ course นี้
-            const assignRes = await fetch(`${BASE_URL}/assignments/${course.course_id}`, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
-            });
-            const assignJson = await assignRes.json();
-            if (!assignJson.success || !Array.isArray(assignJson.data)) continue;
+            // Fallback: ถ้า merged ว่าง (อาจเพราะ endpoint ยังไม่พร้อม) → ใช้ internal เดิม
+            // TODO: เมื่อ merged endpoint พร้อมจริง ค่อยลบ block fallback นี้ออก
+            if (!merged.length) {
+                const assignRes = await fetch(`${BASE_URL}/assignments/${course.course_id}`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const assignJson = await assignRes.json();
+                if (!assignJson.success || !Array.isArray(assignJson.data)) continue;
+                merged = assignJson.data.map(a =>
+                    window.ScraperMerge.normalizeAssignment(
+                        { ...a, source: 'internal' },
+                        course
+                    )
+                );
+            }
 
-            // Step 3 — ดึง submission status ของแต่ละ assignment พร้อมกัน
-            const assignmentsWithStatus = await Promise.all(
-                assignJson.data.map(async (a) => {
-                    try {
-                        const subRes = await fetch(
-                            `${BASE_URL}/submissions/assignment/${a.assignment_id}/student/${USER_ID}`,
-                            { headers: { 'Authorization': `Bearer ${TOKEN}` } }
-                        );
-                        const subJson = await subRes.json();
-                        // ใช้ status จาก submission แทน assignment
-                        const submissionStatus = subJson.data?.status || null;
-                        return { ...a, status: submissionStatus };
-                    } catch {
-                        return { ...a, status: null };
-                    }
-                })
-            );
+            // ดึง submission status เฉพาะ internal (external ไม่มีในระบบเรา)
+            const withStatus = await Promise.all(merged.map(async (m) => {
+                if (m.isExternal) return m; // external ไม่มี submission
+                try {
+                    const subRes = await fetch(
+                        `${BASE_URL}/submissions/assignment/${m.id}/student/${USER_ID}`,
+                        { headers: { 'Authorization': `Bearer ${TOKEN}` } }
+                    );
+                    const subJson = await subRes.json();
+                    return { ...m, status: subJson.data?.status || null };
+                } catch {
+                    return { ...m, status: null };
+                }
+            }));
 
-            const mapped = assignmentsWithStatus.map(a => ({
-                id: a.assignment_id,
-                course_id: course.course_id,
-                name: a.title,
-                className: course.course_code,
-                points: a.max_score || 0,
-                due: new Date(a.due_date),
-                status: mapStatus(a) // mapStatus ใช้ status จาก submission แล้ว
+            const mapped = withStatus.map(m => ({
+                id: m.id,
+                course_id: m.course_id,
+                name: m.title,
+                className: m.course_code,
+                points: m.max_score || 0,
+                due: m.due_date ? new Date(m.due_date) : new Date(),
+                status: mapStatus({ status: m.status, due_date: m.due_date }),
+                // === ฟิลด์ที่เพิ่มจาก scraper ===
+                isExternal: m.isExternal,
+                external_url: m.external_url,
+                source: m.source,
             }));
 
             allAssignments.push(...mapped);
@@ -246,18 +265,28 @@ function render() {
     list.forEach(a => {
         const due = formatDueLabel(a);
         const li = document.createElement('li');
-        li.className = 'assignment-item';
+        li.className = 'assignment-item' + (a.isExternal ? ' is-external' : '');
+        // ป้าย External สำหรับ assignment ที่มาจาก scraper
+        const externalBadge = a.isExternal
+            ? `<span class="ext-badge" title="From external source">
+                   <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
+               </span>`
+            : '';
         li.innerHTML = `
             <div class="assign-avatar">${a.className}</div>
             <div class="assign-info">
-                <p class="assign-name">${a.name}</p>
+                <p class="assign-name">${a.name} ${externalBadge}</p>
                 <p class="assign-due-label ${due.cls}">${due.text}</p>
                 <p class="assign-class">${a.className}</p>
             </div>
             <div class="assign-right">${rightContent(a)}</div>
         `;
         li.addEventListener('click', () => {
-            window.location.href = `student-assign-submit.html?id=${a.id}&course_id=${a.course_id}`;
+            // external -> เปิดลิงก์ภายนอกในแท็บใหม่ , internal -> หน้า submit เดิม
+            window.ScraperMerge?.handleAssignmentClick(
+                a,
+                (item) => `student-assign-submit.html?id=${item.id}&course_id=${item.course_id}`
+            );
         });
         assignList.appendChild(li);
     });
@@ -324,3 +353,12 @@ document.querySelectorAll('.filter-option').forEach(btn => {
 
 updateContainerRadius();
 fetchAssignments();
+
+// Bind ปุ่ม Sync (เรียก scraper ให้ล้าง+ดึงใหม่ แล้ว reload list)
+// TODO: confirm endpoint/method กับ backend ใน scraper-merge.js
+window.ScraperMerge?.bindSyncButton(
+    document.getElementById('sync-btn'),
+    BASE_URL,
+    TOKEN,
+    fetchAssignments
+);
