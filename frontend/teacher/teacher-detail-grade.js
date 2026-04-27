@@ -1,63 +1,13 @@
-<<<<<<< HEAD
-const _gradeUrlParams = new URLSearchParams(window.location.search);
-const _gradeCourseId = _gradeUrlParams.get('course_id');
-
-function goBack() {
-    if (_gradeCourseId) {
-        window.location.href = 'courses-detail/courses-detail.html?course_id=' + _gradeCourseId;
-    } else {
-        history.back();
-    }
-}
-
-function loadTeacherSidebarNavbar() {
-  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(r => r.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-
-      const sidebar = doc.querySelector('#sidebar');
-      const navbar = doc.querySelector('.navbar');
-      if (sidebar) document.getElementById('sidebar-placeholder').appendChild(sidebar);
-      if (navbar) document.getElementById('navbar-placeholder').appendChild(navbar);
-
-      const sidebarScript = document.createElement('script');
-      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
-      document.body.appendChild(sidebarScript);
-
-      const navbarScript = document.createElement('script');
-      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
-      document.body.appendChild(navbarScript);
-    })
-    .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  loadTeacherSidebarNavbar();
-});
-const students = [
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-  { id: "6709111111", name: "นางสาวขวัญใจ เมืองน่าน", a1: 12, a2: 18, midterm: 40 },
-];
-=======
 const BASE_URL = "http://127.0.0.1:8000";
-const course_id = "406a44f1-06af-411d-b8e1-3bce4376f8c4";
->>>>>>> frontend-login
+const urlParams = new URLSearchParams(window.location.search);
+const course_id = urlParams.get('course_id') || "83e1b5e0-c7e0-455e-9e47-56b48796bec6";
+function goBack() {
+  if (course_id) {
+    window.location.href = 'courses-detail/courses-detail.html?course_id=' + course_id;
+  } else {
+    history.back();
+  }
+}
 
 const editSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -99,41 +49,28 @@ document.getElementById("searchInput").addEventListener("input", (e) => {
   renderTable(filtered);
 });
 
-fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById('sidebar-placeholder').innerHTML = data;
-    const script = document.createElement("script");
-    script.src = "../components/teacher-sidebar-navbar/teacher-navbar.js";
-    document.body.appendChild(script);
-  });
-  
-  // โหลด Sidebar + Navbar 
 function loadTeacherSidebarNavbar() {
-  fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(r => r.text())
     .then(html => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      const container = document.getElementById('sidebar-placeholder');
-      if (!container) return;
-
       const sidebar = doc.querySelector('#sidebar');
       const navbar = doc.querySelector('.navbar');
-      if (sidebar) container.appendChild(sidebar);
-      if (navbar) container.appendChild(navbar);
-
-      const logoImg = document.getElementById('logo-img');
-      if (logoImg) logoImg.src = '../../components/image/tulogo.png';
+      if (sidebar) document.getElementById('sidebar-placeholder').appendChild(sidebar);
+      if (navbar) document.getElementById('navbar-placeholder').appendChild(navbar);
 
       const sidebarScript = document.createElement('script');
-      sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.js';
+      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
       document.body.appendChild(sidebarScript);
 
       const navbarScript = document.createElement('script');
-      navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
+      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
       document.body.appendChild(navbarScript);
-    });
+    })
+    .catch(err => console.error("Error loading sidebar/navbar:", err));
 }
 
-loadTeacherSidebarNavbar();
+document.addEventListener("DOMContentLoaded", function () {
+  loadTeacherSidebarNavbar();
+});
