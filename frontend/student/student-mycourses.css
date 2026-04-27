@@ -7,28 +7,30 @@ body {
 }
 
 .page {
-  padding: 60px 100px;
-  margin-top: 20px;
+  width: 100%;
+  padding: 40px;
+  margin-left:250px;
+  margin-top: 60px;
 }
 
 .page-title {
   font-size: 28px;
   font-weight: 700;
   color: #6B5CE7;
-  margin-bottom: 28px;
-  margin-left: 180px;
+  margin-bottom: 20px;
 }
 
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 100px;
-  margin-left: 180px;
+  /* auto-fill: จำนวน column จะลดลงตอนจอแคบ
+     minmax(220px, 1fr): card ไม่เล็กกว่า 220px (ไม่ถูกบีบ) — ถ้าไม่พอ จะ wrap ขึ้นแถวใหม่ */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 32px;
 }
 
 /* ── Card ── */
 .course-card {
-  width: 120%;
+  width: 100%;
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
