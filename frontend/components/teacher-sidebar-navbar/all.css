@@ -57,3 +57,10 @@ main {
 body.sidebar-collapsed main {
   margin-left: var(--sidebar-collapsed-width, 75px);
 }
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3B3392;
+    margin: 0;
+}

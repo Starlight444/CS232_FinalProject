@@ -124,7 +124,7 @@ async function loadHomeData() {
     if (!user) return;
 
     // แสดงชื่อ
-    document.querySelector('.welcome').textContent = `Welcome, ${user.first_name}`;
+    document.querySelector('.page-title').textContent = `Welcome, ${user.first_name}`;
 
     // 2. ดึง courses ของ user
     const courseRes = await fetch(`${BASE_URL}/courses/my/${user.user_id}?role=${user.role}`);

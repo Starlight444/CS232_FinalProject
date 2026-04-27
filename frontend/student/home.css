@@ -30,7 +30,6 @@ body {
   flex: 1;
   padding: 40px;
   transition: margin-left var(--transition);
-  background: #fff;
   min-height: 100vh;
 }
 
@@ -108,8 +107,16 @@ body.sidebar-collapsed .layout {
   display: flex;
   gap: 0;
   overflow: hidden;
-  padding: 24px 28px;
-  background: #f0f2f5;
+}
+
+/* ห่อ page-title + center-col ให้เรียงแนว column ทางซ้าย */
+.left-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-right: 24px;
+  min-width: 0;
 }
 
 .center-col {
@@ -118,6 +125,11 @@ body.sidebar-collapsed .layout {
   flex-direction: column;
   gap: 0;
   margin-right: 24px;
+}
+
+/* ตอนอยู่ใน .left-col แล้ว ไม่ต้องดัน margin ขวาซ้ำ */
+.left-col .center-col {
+  margin-right: 0;
 }
 
 .right-col {
@@ -203,15 +215,15 @@ body.sidebar-collapsed .layout {
 }
 
 .due-today.active-stat .stat-num {
-  color: #ff6b6b;
+  color: #fff;
 }
 
 .complete .stat-num {
-  color: #27ae60;
+  color: #000000;
 }
 
 .complete.active-stat .stat-num {
-  color: #2ecc71;
+  color: #ffffff;
 }
 
 
