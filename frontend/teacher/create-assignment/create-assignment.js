@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userData = JSON.parse(localStorage.getItem('user') || 'null');
 
     if (!userData || !userData.token || !userData.user_id) {
-        alert('ยังไม่ได้ล็อกอิน หรือ localStorage ไม่มี user');
+        alert('Please login first.');
         window.location.href = '../../auth/login.html';
         return;
     }
@@ -12,11 +12,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const TOKEN = userData.token;
     const USER_ID = userData.user_id;
 
-    console.log('LOGIN USER:', userData);
-
     const urlParams = new URLSearchParams(window.location.search);
     const courseIdFromUrl = urlParams.get('course_id') || '';
 
+    // ==========================================
+    // Go to assignment manage page
+    // ==========================================
+    function goTo(assignmentId, courseId) {
+        window.location.href =
+            `../teacher-assign-manage/teacher-assign-manage.html?id=${assignmentId}&course_id=${courseId}`;
+    }
+
+    // ==========================================
+    // Load sidebar + navbar
+    // ==========================================
     function loadTeacherSidebarNavbar() {
         fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
             .then(r => r.text())
@@ -60,12 +69,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     loadTeacherSidebarNavbar();
 
+    // ==========================================
+    // Load teacher courses into dropdown
+    // ==========================================
     async function loadTeacherCourses() {
         const courseSelect = document.getElementById('assign-course');
         if (!courseSelect) return;
 
         try {
-            courseSelect.innerHTML = '<option value="" disabled selected>กำลังโหลดวิชา...</option>';
+            courseSelect.innerHTML = '<option value="" disabled selected>Loading courses...</option>';
 
             const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`, {
                 method: 'GET',
@@ -80,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('COURSES RESPONSE DATA:', result);
 
             if (!response.ok) {
-                throw new Error(result?.detail || 'ดึงข้อมูลวิชาไม่สำเร็จ');
+                throw new Error(result?.detail || 'Failed to load courses');
             }
 
             const courses = Array.isArray(result) ? result : (result?.data || []);
@@ -88,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             courseSelect.innerHTML = '<option value="" disabled selected>Select Courses</option>';
 
             if (courses.length === 0) {
-                courseSelect.innerHTML = '<option value="" disabled selected>ไม่พบวิชาของ user นี้</option>';
+                courseSelect.innerHTML = '<option value="" disabled selected>No courses found</option>';
                 return;
             }
 
@@ -105,13 +117,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error loading courses:', error);
-            courseSelect.innerHTML = '<option value="" disabled selected>โหลดวิชาไม่สำเร็จ</option>';
-            alert('โหลดวิชาไม่สำเร็จ: ' + error.message);
+            courseSelect.innerHTML = '<option value="" disabled selected>Failed to load courses</option>';
+            alert('Failed to load courses: ' + error.message);
         }
     }
 
     await loadTeacherCourses();
 
+    // ==========================================
+    // File type checkbox
+    // ==========================================
     const anyCheckbox = document.getElementById('check-any');
     const formatCheckboxes = document.querySelectorAll('.format-check');
 
@@ -142,6 +157,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return selected.length > 0 ? selected.join(',') : 'any';
     }
 
+    // ==========================================
+    // Upload file UI
+    // ==========================================
     let selectedTeacherFile = null;
     const dropZone = document.getElementById('drop-zone');
     let fileInput = document.getElementById('file-upload');
@@ -224,6 +242,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     bindFileInput();
 
+    // ==========================================
+    // Submit create assignment
+    // ==========================================
     const form = document.getElementById('create-assignment-form');
     const submitBtn = document.getElementById('submit-btn');
 
@@ -244,17 +265,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const maxScore = parseInt(document.getElementById('assign-points').value, 10) || 0;
 
                 if (!selectedCourseId) {
-                    alert('กรุณาเลือกวิชาก่อน');
+                    alert('Please select a course.');
                     throw new Error('No course selected');
                 }
 
                 if (!title) {
-                    alert('กรุณากรอกชื่อ Assignment');
+                    alert('Please enter assignment title.');
                     throw new Error('No title');
                 }
 
                 if (!dueDate) {
-                    alert('กรุณาเลือก Due Date');
+                    alert('Please select due date.');
                     throw new Error('No due date');
                 }
 
@@ -291,24 +312,51 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const assignmentId = responseData?.data?.assignment_id;
 
                 if (!assignmentId) {
-                    throw new Error('สร้างสำเร็จแต่ backend ไม่ส่ง assignment_id กลับมา');
+                    throw new Error('Assignment created but assignment_id was not returned.');
                 }
 
-                // ตอนนี้ยังไม่ upload file ก่อน เพื่อกัน error ซ้อน
+                // Upload file after assignment created
                 if (selectedTeacherFile) {
-                    console.warn('เลือกไฟล์ไว้ แต่รอบนี้ยังไม่ upload file เพื่อทดสอบการสร้าง assignment ก่อน');
+                    try {
+                        submitBtn.innerHTML = 'Uploading file...';
+
+                        const fileFormData = new FormData();
+                        fileFormData.append('file', selectedTeacherFile);
+
+                        const uploadResponse = await fetch(`${API_BASE_URL}/attachments/assignment/${assignmentId}`, {
+                            method: 'POST',
+                            headers: {
+                                Authorization: `Bearer ${TOKEN}`
+                            },
+                            body: fileFormData
+                        });
+
+                        const uploadData = await uploadResponse.json().catch(() => null);
+
+                        console.log('UPLOAD STATUS:', uploadResponse.status);
+                        console.log('UPLOAD RESPONSE:', uploadData);
+
+                        if (!uploadResponse.ok) {
+                            console.warn('File upload failed:', uploadData);
+                            alert('Assignment created, but file upload failed.');
+                        }
+
+                    } catch (uploadError) {
+                        console.warn('File upload error:', uploadError);
+                        alert('Assignment created, but file upload failed.');
+                    }
                 }
 
-                alert('สร้าง Assignment สำเร็จแล้ว');
+                alert('Assignment created successfully.');
 
-                window.location.href =
-                    `../teacher-assign-manage/teacher-assign-manage.html?id=${assignmentId}&course_id=${selectedCourseId}`;
+                // ส่งต่อ assignment ไปหน้า teacher-assign-manage
+                goTo(assignmentId, selectedCourseId);
 
             } catch (error) {
                 console.error('Submit Error:', error);
 
                 if (!['No course selected', 'No title', 'No due date'].includes(error.message)) {
-                    alert('สร้าง Assignment ไม่สำเร็จ: ' + error.message);
+                    alert('Create assignment failed: ' + error.message);
                 }
 
                 submitBtn.disabled = false;

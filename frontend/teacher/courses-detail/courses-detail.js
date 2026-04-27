@@ -437,11 +437,11 @@ async function renderMembers(members) {
 
     container.innerHTML = `
         <div class="member-section">
-            <div class="member-section-title">👩‍🏫 Teacher</div>
+            <div class="member-section-title"> Teacher</div>
             <div class="member-list">${teachers.map(c => c.html).join('')}</div>
         </div>
         <div class="member-section">
-            <div class="member-section-title">👨‍🎓 Students</div>
+            <div class="member-section-title"> Students</div>
             <div class="member-list">${students.map(c => c.html).join('')}</div>
         </div>`;
 }
