@@ -1,21 +1,31 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // ==========================================
-    // 🌟 ตั้งค่า API
-    // ==========================================
-    const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+    const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (!userData || !userData.token) {
+    const userData = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (!userData || !userData.token || !userData.user_id) {
+        alert('Please login first.');
         window.location.href = '../../auth/login.html';
+        return;
     }
-    const TOKEN   = userData ? userData.token   : '';
-    const USER_ID = userData ? userData.user_id : '';
 
-    // ดึงค่าโหมดและ ID จาก URL
+    const TOKEN = userData.token;
+    const USER_ID = userData.user_id;
+
     const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    const assignmentId = urlParams.get('id');
+    const courseIdFromUrl = urlParams.get('course_id') || '';
 
+    // ==========================================
+    // Go to assignment manage page
+    // ==========================================
+    function goTo(assignmentId, courseId) {
+        window.location.href =
+            `../teacher-assign-manage/teacher-assign-manage.html?id=${assignmentId}&course_id=${courseId}`;
+    }
+
+    // ==========================================
+    // Load sidebar + navbar
+    // ==========================================
     function loadTeacherSidebarNavbar() {
         fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
             .then(r => r.text())
@@ -24,57 +34,76 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const doc = parser.parseFromString(html, 'text/html');
                 const container = document.getElementById('teacher-sidebar-navbar-container');
 
+                if (!container) return;
+
                 const sidebar = doc.querySelector('#sidebar');
                 const navbar = doc.querySelector('.navbar');
+
                 if (sidebar) container.appendChild(sidebar);
                 if (navbar) container.appendChild(navbar);
 
-                // Load sidebar JS (toggle / collapse logic)
                 const sidebarScript = document.createElement('script');
                 sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
                 document.body.appendChild(sidebarScript);
 
-                // Load navbar JS (profile dropdown)
                 const navbarScript = document.createElement('script');
                 navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
                 document.body.appendChild(navbarScript);
 
-                // sidebar.js toggles `.sidebar.collapsed` but teacher-dashboard.css
-                // listens to `body.sidebar-collapsed` — sync them here
                 sidebarScript.onload = () => {
                     const sidebarEl = document.getElementById('sidebar');
+
                     if (sidebarEl) {
                         new MutationObserver(() => {
                             const collapsed = sidebarEl.classList.contains('collapsed');
                             document.body.classList.toggle('sidebar-collapsed', collapsed);
-                            setBottomColumns();
-                        }).observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+                        }).observe(sidebarEl, {
+                            attributes: true,
+                            attributeFilter: ['class']
+                        });
                     }
                 };
             })
-            .catch(err => console.error("Error loading teacher sidebar/navbar:", err));
+            .catch(err => console.error('Error loading teacher sidebar/navbar:', err));
     }
 
     loadTeacherSidebarNavbar();
-    await loadTeacherCourses();
 
     // ==========================================
-    // 1. โหลดข้อมูลรายวิชามาใส่ Dropdown
+    // Load teacher courses into dropdown
     // ==========================================
     async function loadTeacherCourses() {
         const courseSelect = document.getElementById('assign-course');
         if (!courseSelect) return;
 
         try {
-            courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา... </option>';
+            courseSelect.innerHTML = '<option value="" disabled selected>Loading courses...</option>';
 
-            const response = await fetch(`${API_BASE_URL}/courses`, { method: 'GET' });
-            if (!response.ok) throw new Error('ดึงข้อมูลวิชาไม่สำเร็จ');
+            const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`
+                }
+            });
 
-            const result = await response.json();
-            const courses = result.data || [];
+            const result = await response.json().catch(() => null);
+
+            console.log('COURSES RESPONSE STATUS:', response.status);
+            console.log('COURSES RESPONSE DATA:', result);
+
+            if (!response.ok) {
+                throw new Error(result?.detail || 'Failed to load courses');
+            }
+
+            const courses = Array.isArray(result) ? result : (result?.data || []);
 
             courseSelect.innerHTML = '<option value="" disabled selected>Select Courses</option>';
+
+            if (courses.length === 0) {
+                courseSelect.innerHTML = '<option value="" disabled selected>No courses found</option>';
+                return;
+            }
+
             courses.forEach(course => {
                 const option = document.createElement('option');
                 option.value = course.course_id;
@@ -82,80 +111,64 @@ document.addEventListener('DOMContentLoaded', async () => {
                 courseSelect.appendChild(option);
             });
 
+            if (courseIdFromUrl) {
+                courseSelect.value = courseIdFromUrl;
+            }
+
         } catch (error) {
             console.error('Error loading courses:', error);
-            courseSelect.innerHTML = `
-                <option value="" disabled selected>Select Courses</option>
-                <option value="uuid-1234">CS232 - Database Systems (Mock)</option>
-                <option value="uuid-5678">CS261 - Software Engineering (Mock)</option>
-            `;
+            courseSelect.innerHTML = '<option value="" disabled selected>Failed to load courses</option>';
+            alert('Failed to load courses: ' + error.message);
         }
     }
-     // สั่งรันโหลดวิชาทันที
+
+    await loadTeacherCourses();
 
     // ==========================================
-    // 2. จัดการ UI: Checkbox & Drag-Drop ไฟล์
+    // File type checkbox
     // ==========================================
-    let selectedTeacherFile = null; // ตัวแปรเก็บไฟล์ที่อาจารย์เลือก
-
     const anyCheckbox = document.getElementById('check-any');
     const formatCheckboxes = document.querySelectorAll('.format-check');
-    const dropZone = document.getElementById('drop-zone');
-    let fileInput = document.getElementById('file-upload');
 
-    // --- จัดการ Checkbox ---
     if (anyCheckbox) {
         anyCheckbox.addEventListener('change', (e) => {
-            if (e.target.checked) formatCheckboxes.forEach(cb => cb.checked = false);
+            if (e.target.checked) {
+                formatCheckboxes.forEach(cb => cb.checked = false);
+            }
         });
 
         formatCheckboxes.forEach(cb => {
             cb.addEventListener('change', () => {
-                const isAnyChecked = Array.from(formatCheckboxes).some(checkbox => checkbox.checked);
-                anyCheckbox.checked = !isAnyChecked;
+                const hasSelected = Array.from(formatCheckboxes).some(cb => cb.checked);
+                anyCheckbox.checked = !hasSelected;
             });
         });
     }
 
-    // --- ฟังก์ชันเปลี่ยนหน้าตากล่องอัปโหลด ---
-    function updateFileUI(file) {
-        if (!dropZone) return;
-
-        if (file) {
-            // โหมดมีไฟล์: โชว์ไอคอน, ชื่อไฟล์, ขนาดไฟล์ และปุ่มลบ
-            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            dropZone.innerHTML = `
-                <iconify-icon icon="ph:file-text-duotone" width="40" style="color: #6366f1;"></iconify-icon>
-                <p style="margin: 8px 0; font-weight: 500; color: #1f2937;">${file.name}</p>
-                <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #6b7280;">Size: ${fileSizeMB} MB</p>
-                <button type="button" id="remove-file-btn" style="padding: 6px 16px; border: 1px solid #ef4444; color: #ef4444; border-radius: 20px; background: #fef2f2; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
-                    Remove File
-                </button>
-            `;
-
-            // ดักจับการกดปุ่มลบไฟล์
-            document.getElementById('remove-file-btn').addEventListener('click', (e) => {
-                e.preventDefault();
-                selectedTeacherFile = null;
-                resetFileUI(); // คืนค่าหน้าตากลับไปเป็นแบบเดิม
-            });
+    function getAllowedFileTypes() {
+        if (anyCheckbox && anyCheckbox.checked) {
+            return 'any';
         }
+
+        const selected = Array.from(formatCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value.toLowerCase());
+
+        return selected.length > 0 ? selected.join(',') : 'any';
     }
 
-    // --- ฟังก์ชันคืนค่าหน้าตากล่องอัปโหลดกลับเป็นเหมือนเดิม ---
-    function resetFileUI() {
-        if (!dropZone) return;
+    // ==========================================
+    // Upload file UI
+    // ==========================================
+    let selectedTeacherFile = null;
+    const dropZone = document.getElementById('drop-zone');
+    let fileInput = document.getElementById('file-upload');
 
-        // วาด HTML ของเดิมกลับคืนมา
-        dropZone.innerHTML = `
-            <iconify-icon icon="ph:cloud-arrow-up-light" class="upload-icon"></iconify-icon>
-            <p>Drag & drop files or <label for="file-upload" class="browse-link">Browse</label></p>
-            <small>Supported formats: JPG, PNG, MP4, PDF, PSD, AI, Word, PPT, Zip</small>
-            <input type="file" id="file-upload" hidden multiple>
-        `;
-
-        // สำคัญมาก: ต้องผูก Event Listener ให้ปุ่ม Browse ตัวใหม่ที่เพิ่งถูกวาดขึ้นมา
+    function bindFileInput() {
         fileInput = document.getElementById('file-upload');
+
+        if (!fileInput) return;
+
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 selectedTeacherFile = e.target.files[0];
@@ -164,13 +177,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- จัดการ Event การลากไฟล์ลงกล่อง (Drag & Drop) ---
+    function updateFileUI(file) {
+        if (!dropZone || !file) return;
+
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+        dropZone.innerHTML = `
+            <iconify-icon icon="ph:file-text-duotone" width="40" style="color: #6366f1;"></iconify-icon>
+            <p style="margin: 8px 0; font-weight: 500; color: #1f2937;">${file.name}</p>
+            <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #6b7280;">Size: ${fileSizeMB} MB</p>
+            <button
+                type="button"
+                id="remove-file-btn"
+                style="padding: 6px 16px; border: 1px solid #ef4444; color: #ef4444; border-radius: 20px; background: #fef2f2; cursor: pointer; font-size: 0.85rem; font-weight: 500;"
+            >
+                Remove File
+            </button>
+        `;
+
+        const removeBtn = document.getElementById('remove-file-btn');
+
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedTeacherFile = null;
+                resetFileUI();
+            });
+        }
+    }
+
+    function resetFileUI() {
+        if (!dropZone) return;
+
+        dropZone.innerHTML = `
+            <iconify-icon icon="ph:cloud-arrow-up-light" class="upload-icon"></iconify-icon>
+            <p>Drag &amp; drop files or <label for="file-upload" class="browse-link">Browse</label></p>
+            <small>Supported formats: JPG, PNG, MP4, PDF, PSD, AI, Word, PPT, Zip</small>
+            <input type="file" id="file-upload" hidden multiple>
+        `;
+
+        bindFileInput();
+    }
+
     if (dropZone) {
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
         });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
 
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
@@ -178,152 +235,133 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (e.dataTransfer.files.length > 0) {
                 selectedTeacherFile = e.dataTransfer.files[0];
-                updateFileUI(selectedTeacherFile); // เรียกฟังก์ชันเปลี่ยนหน้าตา
+                updateFileUI(selectedTeacherFile);
             }
         });
     }
 
-    // --- จัดการ Event การกดปุ่ม Browse ---
-    if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                selectedTeacherFile = e.target.files[0];
-                updateFileUI(selectedTeacherFile); // เรียกฟังก์ชันเปลี่ยนหน้าตา
-            }
-        });
-    }
+    bindFileInput();
 
     // ==========================================
-    // 3. จัดการโหมด Edit (GET ข้อมูลเก่ามายัดใส่ฟอร์ม)
-    // ==========================================
-    const submitBtn = document.getElementById('submit-btn');
-    const isEdit = mode === 'edit';
-
-    if (isEdit && assignmentId) {
-        const pageTitle = document.getElementById('page-title');
-        if (pageTitle) pageTitle.textContent = 'Edit Assignment';
-        if (submitBtn) submitBtn.textContent = 'Save Changes';
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}`, {
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
-            });
-            if (!response.ok) throw new Error('ดึงข้อมูลเดิมไม่สำเร็จ');
-
-            const result = await response.json();
-            const editData = result.data;
-
-            document.getElementById('assign-title').value = editData.title || '';
-            document.getElementById('assign-desc').value = editData.description || '';
-            document.getElementById('assign-date').value = editData.due_date ? editData.due_date.slice(0, 16) : '';
-            document.getElementById('assign-points').value = editData.max_score || '';
-
-            if (editData.allowed_file_types) {
-                const formats = editData.allowed_file_types.split(',');
-                if (formats.includes('any')) {
-                    if (anyCheckbox) anyCheckbox.checked = true;
-                } else {
-                    if (anyCheckbox) anyCheckbox.checked = false;
-                    formatCheckboxes.forEach(cb => {
-                        if (formats.includes(cb.value.toLowerCase())) cb.checked = true;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching edit data:', error);
-        }
-    }
-
-    // ==========================================
-    // 4. จัดการการกดปุ่ม POST/SAVE (อัปโหลดไฟล์ + สร้างงาน)
+    // Submit create assignment
     // ==========================================
     const form = document.getElementById('create-assignment-form');
+    const submitBtn = document.getElementById('submit-btn');
+
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.style.opacity = '0.8';
+            const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.8';
+            submitBtn.innerHTML = 'Posting...';
 
             try {
-                // 🌟 ขั้นตอนที่ 1: รวบรวมข้อมูลสร้าง Assignment
-                submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> ${isEdit ? 'Saving...' : 'Posting...'}`;
+                const selectedCourseId = document.getElementById('assign-course').value;
+                const title = document.getElementById('assign-title').value.trim();
+                const description = document.getElementById('assign-desc').value.trim();
+                const dueDate = document.getElementById('assign-date').value;
+                const maxScore = parseInt(document.getElementById('assign-points').value, 10) || 0;
 
-                let allowedTypesStr = 'any';
-                if (!anyCheckbox.checked) {
-                    const selectedTypes = Array.from(formatCheckboxes)
-                        .filter(cb => cb.checked).map(cb => cb.value.toLowerCase());
-                    if (selectedTypes.length > 0) allowedTypesStr = selectedTypes.join(',');
+                if (!selectedCourseId) {
+                    alert('Please select a course.');
+                    throw new Error('No course selected');
                 }
 
-                let fetchUrl = '';
-                let fetchMethod = '';
+                if (!title) {
+                    alert('Please enter assignment title.');
+                    throw new Error('No title');
+                }
 
-                if (isEdit) {
-                    fetchUrl = `${API_BASE_URL}/assignments/${assignmentId}`;
-                    fetchMethod = 'PATCH';
-                } else {
-                    const selectedCourseId = document.getElementById('assign-course').value;
-                    if (!selectedCourseId) {
-                        alert('กรุณาเลือกวิชาก่อนนะคะ!');
-                        throw new Error('No course selected');
-                    }
-                    fetchUrl = `${API_BASE_URL}/assignments/`;
-                    fetchMethod = 'POST';
+                if (!dueDate) {
+                    alert('Please select due date.');
+                    throw new Error('No due date');
                 }
 
                 const payload = {
-                    title: document.getElementById('assign-title').value,
-                    description: document.getElementById('assign-desc').value,
-                    due_date: document.getElementById('assign-date').value,
-                    max_score: parseInt(document.getElementById('assign-points').value) || 0,
-                    allowed_file_types: allowedTypesStr,
-                    course_id: isEdit ? undefined : document.getElementById('assign-course').value,
-                    created_by: USER_ID
+                    title: title,
+                    description: description,
+                    due_date: dueDate,
+                    max_score: maxScore,
+                    course_id: selectedCourseId,
+                    created_by: USER_ID,
+                    allowed_file_types: getAllowedFileTypes()
                 };
 
-                const response = await fetch(fetchUrl, {
-                    method: fetchMethod,
+                console.log('CREATE ASSIGNMENT PAYLOAD:', payload);
+
+                const response = await fetch(`${API_BASE_URL}/assignments/`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${TOKEN}`
+                        Authorization: `Bearer ${TOKEN}`
                     },
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error('บันทึกข้อมูล Assignment ไม่สำเร็จ');
+                const responseData = await response.json().catch(() => null);
 
-                // 🌟 ขั้นตอนที่ 2: อัปโหลดไฟล์ (ถ้ามี) — ต้องสร้าง assignment ก่อนเพื่อให้ได้ assignment_id
-                const resultData = await response.json();
-                const newAssignmentId = isEdit ? assignmentId : resultData.data.assignment_id;
+                console.log('CREATE ASSIGNMENT STATUS:', response.status);
+                console.log('CREATE ASSIGNMENT RESPONSE:', responseData);
 
-                if (selectedTeacherFile) {
-                    submitBtn.innerHTML = `<iconify-icon icon="line-md:loading-twotone-loop" width="24"></iconify-icon> Uploading file...`;
-
-                    const fileFormData = new FormData();
-                    fileFormData.append('file', selectedTeacherFile);
-
-                    const uploadRes = await fetch(`${API_BASE_URL}/attachments/assignment/${newAssignmentId}`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${TOKEN}` },
-                        body: fileFormData
-                    });
-
-                    if (!uploadRes.ok) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ');
+                if (!response.ok) {
+                    throw new Error(responseData?.detail || responseData?.message || `HTTP ${response.status}`);
                 }
 
-                alert(isEdit ? 'บันทึกการแก้ไขเรียบร้อยแล้วค่ะ! ' : 'สร้าง Assignment สำเร็จแล้วค่ะ! ');
-                window.location.href = `../teacher-assign-manage/teacher-assign-manage.html?id=${newAssignmentId}`;
+                const assignmentId = responseData?.data?.assignment_id;
+
+                if (!assignmentId) {
+                    throw new Error('Assignment created but assignment_id was not returned.');
+                }
+
+                // Upload file after assignment created
+                if (selectedTeacherFile) {
+                    try {
+                        submitBtn.innerHTML = 'Uploading file...';
+
+                        const fileFormData = new FormData();
+                        fileFormData.append('file', selectedTeacherFile);
+
+                        const uploadResponse = await fetch(`${API_BASE_URL}/attachments/assignment/${assignmentId}`, {
+                            method: 'POST',
+                            headers: {
+                                Authorization: `Bearer ${TOKEN}`
+                            },
+                            body: fileFormData
+                        });
+
+                        const uploadData = await uploadResponse.json().catch(() => null);
+
+                        console.log('UPLOAD STATUS:', uploadResponse.status);
+                        console.log('UPLOAD RESPONSE:', uploadData);
+
+                        if (!uploadResponse.ok) {
+                            console.warn('File upload failed:', uploadData);
+                            alert('Assignment created, but file upload failed.');
+                        }
+
+                    } catch (uploadError) {
+                        console.warn('File upload error:', uploadError);
+                        alert('Assignment created, but file upload failed.');
+                    }
+                }
+
+                alert('Assignment created successfully.');
+
+                // ส่งต่อ assignment ไปหน้า teacher-assign-manage
+                goTo(assignmentId, selectedCourseId);
 
             } catch (error) {
-                console.error("Submit Error:", error);
-                if (error.message !== 'No course selected') {
-                    alert('เกิดข้อผิดพลาด: ' + error.message);
+                console.error('Submit Error:', error);
+
+                if (!['No course selected', 'No title', 'No due date'].includes(error.message)) {
+                    alert('Create assignment failed: ' + error.message);
                 }
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.style.opacity = '1';
+
                 submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.innerHTML = originalText;
             }
         });
     }

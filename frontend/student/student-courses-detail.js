@@ -397,6 +397,7 @@ function getTimeAgo(dateStr) {
 
 async function fetchAnnouncements(courseId) {
     const container = document.getElementById('announcement-list');
+
     try {
         const res = await fetch(`${API_BASE_URL}/announcements/course/${courseId}`, {
             method: 'GET',
@@ -405,28 +406,44 @@ async function fetchAnnouncements(courseId) {
                 'Content-Type': 'application/json'
             }
         });
+
         const data = await res.json();
-        const announcements = data.data || [];
+        let announcements = data.data || [];
 
         if (announcements.length === 0) {
             container.innerHTML = `<div class="empty-state">No announcements yet.</div>`;
             return;
         }
 
-        const personIcon = `<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="50" height="50" rx="25" fill="#E6E6E6"/><path d="M24.9997 21.6666C28.6816 21.6666 31.6663 18.6818 31.6663 14.9999C31.6663 11.318 28.6816 8.33325 24.9997 8.33325C21.3178 8.33325 18.333 11.318 18.333 14.9999C18.333 18.6818 21.3178 21.6666 24.9997 21.6666Z" fill="black"/><path d="M38.3337 34.1667C38.3337 38.3084 38.3337 41.6667 25.0003 41.6667C11.667 41.6667 11.667 38.3084 11.667 34.1667C11.667 30.0251 17.637 26.6667 25.0003 26.6667C32.3637 26.6667 38.3337 30.0251 38.3337 34.1667Z" fill="black"/></svg>`;
+        // เรียงประกาศล่าสุดไว้บนสุด
+        announcements = announcements.sort((a, b) => {
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
 
-        container.innerHTML = announcements.map((a) => {
-            const isNew = (new Date() - new Date(a.created_at)) < 86400000;
+        const personIcon = `
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="50" height="50" rx="25" fill="#E6E6E6"/>
+                <path d="M24.9997 21.6666C28.6816 21.6666 31.6663 18.6818 31.6663 14.9999C31.6663 11.318 28.6816 8.33325 24.9997 8.33325C21.3178 8.33325 18.333 11.318 18.333 14.9999C18.333 18.6818 21.3178 21.6666 24.9997 21.6666Z" fill="black"/>
+                <path d="M38.3337 34.1667C38.3337 38.3084 38.3337 41.6667 25.0003 41.6667C11.667 41.6667 11.667 38.3084 11.667 34.1667C11.667 30.0251 17.637 26.6667 25.0003 26.6667C32.3637 26.6667 38.3337 30.0251 38.3337 34.1667Z" fill="black"/>
+            </svg>
+        `;
+
+        container.innerHTML = announcements.map((a, index) => {
+            // ให้ NEW เฉพาะประกาศล่าสุดอันเดียวเท่านั้น
+            const isLatest = index === 0;
             const timeAgo = getTimeAgo(a.created_at);
+
             return `
                 <div class="announcement-card">
                     <div class="announcement-content-area">
                         <div class="announcement-icon">${personIcon}</div>
+
                         <div class="announcement-card-info">
                             <div class="announcement-title-row">
                                 <span class="announcement-course">${a.title}</span>
-                                ${isNew ? '<span class="announcement-new-badge">New</span>' : ''}
+                                ${isLatest ? '<span class="announcement-new-badge">NEW</span>' : ''}
                             </div>
+
                             <p class="announcement-body">${a.content}</p>
                             <span class="announcement-time">${timeAgo}</span>
                         </div>
@@ -434,6 +451,7 @@ async function fetchAnnouncements(courseId) {
                 </div>
             `;
         }).join('');
+
     } catch (err) {
         console.error('Error fetching announcements:', err);
         container.innerHTML = `<div class="empty-state">Failed to load announcements.</div>`;
