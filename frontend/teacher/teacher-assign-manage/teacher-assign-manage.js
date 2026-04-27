@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadTeacherSidebarNavbar() {
-  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+  fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
     .then(r => r.text())
     .then(html => {
       const parser = new DOMParser();
@@ -54,11 +54,11 @@ function loadTeacherSidebarNavbar() {
             if (navbar) container.appendChild(navbar);
 
             const sidebarScript = document.createElement('script');
-            sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
+            sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
             document.body.appendChild(sidebarScript);
 
             const navbarScript = document.createElement('script');
-            navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
+            navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
             document.body.appendChild(navbarScript);
 
             sidebarScript.onload = () => {
@@ -242,15 +242,27 @@ async function fetchUserName(userId) {
 
         const result = await response.json().catch(() => null);
 
-        if (!response.ok) return '-';
+        if (!response.ok) {
+            return {
+                student_id: '-',
+                full_name: '-'
+            };
+        }
 
-        return result?.data?.full_name
-            || `${result?.data?.first_name || ''} ${result?.data?.last_name || ''}`.trim()
-            || '-';
+        return {
+            student_id: result?.data?.student_id || '-',
+            full_name:
+                result?.data?.full_name ||
+                `${result?.data?.first_name || ''} ${result?.data?.last_name || ''}`.trim() ||
+                '-'
+        };
 
     } catch (err) {
-        console.warn('fetchUserName failed:', userId, err);
-        return '-';
+        console.warn('fetchUser failed:', userId, err);
+        return {
+            student_id: '-',
+            full_name: '-'
+        };
     }
 }
 
@@ -276,7 +288,7 @@ async function loadStudentsByStatus(statusFilter) {
         } else if (statusFilter === 'Missing') {
             const members = await fetchCourseMembers();
             const submittedStudentIds = new Set(
-                submissions.map(s => String(s.student_id))
+                submissions.map(s => String(s.user_id))
             );
 
             const missingStudents = members.filter(m =>
@@ -284,24 +296,33 @@ async function loadStudentsByStatus(statusFilter) {
             );
 
             rows = missingStudents.map(m => ({
+                user_id: m.user_id,
                 student_id: m.user_id,
-                student_name: m.name || '-',
+                student_name: '-',
+                student_code: '-',
                 submitted_at: null,
                 status: 'missing',
                 attachments: []
             }));
         }
-
         const rowsWithNames = await Promise.all(rows.map(async row => {
-            const studentId = row.student_id || row.user_id;
-            const name = row.student_name && row.student_name !== '-'
-                ? row.student_name
-                : await fetchUserName(studentId);
+            const userId = row.user_id || row.student_id;
+            if (row.student_name && row.student_name !== '-') {
+                return {
+                    ...row,
+                    user_id: userId,
+                    student_id: row.student_code || '-',
+                    student_name: row.student_name
+                };
+            }
+
+            const user = await fetchUserName(userId);
 
             return {
                 ...row,
-                student_id: studentId,
-                student_name: name
+                user_id: userId,
+                student_id: user.student_id,
+                student_name: user.full_name
             };
         }));
 
