@@ -41,12 +41,11 @@ body {
 
 .glass-box {
   position: absolute;
-  inset: 35% 20%;  /* ยืด/หดตาม panel */
+  padding: 50px;
   background: rgba(110, 108, 223, 0.1);
   backdrop-filter: blur(10px);         
   -webkit-backdrop-filter: blur(10px);  
   border-radius: 28px;
-  border: 2px solid #6E6CDF;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
@@ -64,6 +63,8 @@ body {
 
 .cstu-logo {
   font-size: clamp(1rem, 3vw, 3rem);
+  font-weight: 700;
+  color: #3d1f8e;
 }
 
 .right-panel {
@@ -232,4 +233,83 @@ body {
   margin-top: 10px;
   text-align: center;
   visibility: hidden; /* ซ่อนแต่ยังจองพื้นที่ไว้ */
+}
+
+/* =========================================
+   Responsive: <= 900px
+   - login-img กลายเป็น background เต็มจอ
+   - glass-box อยู่บน, login-box อยู่ล่าง (column)
+========================================= */
+@media (max-width: 900px) {
+  body {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* รูปพื้นหลัง: ครอบเต็มจอแบบ fixed */
+  .login-img {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+  /* การ์ดทั้งหมดเรียงแนวตั้ง พื้นหลังโปร่ง (โชว์ login-img ด้านหลัง) */
+  .main-card {
+    flex-direction: column;
+    min-height: 100vh;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .left-panel,
+  .right-panel {
+    flex: none;
+    width: 100%;
+    height: auto;
+    background: transparent;
+    padding: 24px 16px;
+  }
+
+  .left-panel {
+    position: static;
+    justify-content: center;
+    align-items: center;
+    padding-top: 40px;
+  }
+
+  /* glass-box ออกจาก absolute, เรียงตาม flow */
+  .glass-box {
+    position: static;
+    width: auto;
+    max-width: min(420px, 90%);
+    padding: 24px 32px;
+    padding-right: 32px;
+    gap: 16px;
+  }
+
+  .tu-logo {
+    width: clamp(50px, 18vw, 110px);
+  }
+
+  .cstu-logo {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+  }
+
+  /* login form ขยายเต็มความกว้างมีจำกัด, อยู่ใต้ glass-box */
+  .right-panel {
+    padding: 8px 16px 32px;
+  }
+
+  .login-wrapper {
+    max-width: 420px;
+    gap: 20px;
+  }
+
+  .login-box {
+    padding: 28px 24px;
+  }
 }
