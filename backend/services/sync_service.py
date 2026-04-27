@@ -60,6 +60,9 @@ class SyncService:
         # เลือก course code อันที่สอง
         return matches[-1]
 
+    def clean_title(self, title: str):
+        return re.sub(r"\s*Assignment\s*$", "", title, flags=re.IGNORECASE)
+
     def sync_assignments(self, user_id, mode="mock"):
         source_name = "Course web"
 
@@ -129,6 +132,10 @@ class SyncService:
             # extract course_code from course_name
             full_name = item.get("external_course_name", "")
             item["external_course_code"] = self.extract_course_code(full_name)
+
+            # clean title
+            if "title" in item:
+                item["title"] = self.clean_title(item["title"])
 
         self.external_assignment_repo.bulk_create(data)
 

@@ -190,9 +190,6 @@ CREATE TABLE IF NOT EXISTS external_assignments (
     time_remaining TEXT,
     last_modified TIMESTAMP,
     file_submission TEXT,
-
-    raw_data JSONB,  -- เก็บ dump เผื่อ debug
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT unique_ext_assign
@@ -209,8 +206,7 @@ CREATE TABLE IF NOT EXISTS external_announcements (
     title TEXT NOT NULL,
     external_link TEXT,
     author TEXT,
-    created_at TIMESTAMP,
-    raw_data JSONB,
+    created_at TIMESTAMP
 
     CONSTRAINT fk_external_announcement_user
         FOREIGN KEY (user_id)

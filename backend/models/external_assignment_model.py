@@ -22,7 +22,6 @@ class ExternalAssignment(Base):
     time_remaining = Column(Text)
     last_modified = Column(DateTime)
     file_submission = Column(Text)
-    raw_data = Column(JSONB)
     created_at = Column(DateTime, server_default=func.now())
 
     __table_args__ = (

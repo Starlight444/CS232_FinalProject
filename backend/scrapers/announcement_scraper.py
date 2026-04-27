@@ -160,8 +160,7 @@ class AnnouncementScraper:
                             "title": post["title"],
                             "external_link": post["link"],
                             "author": post["author"],
-                            "created_at": post["date"],
-                            "raw_data": post
+                            "created_at": post["date"]
                         })
 
             browser.close()

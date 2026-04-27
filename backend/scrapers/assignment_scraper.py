@@ -122,8 +122,7 @@ class AssignmentScraper:
                     "due_date": detail.get("Due date"),
                     "time_remaining": detail.get("Time remaining"),
                     "last_modified": detail.get("Last modified"),
-                    "file_submission": detail.get("File submissions"),
-                    "raw_data": detail
+                    "file_submission": detail.get("File submissions")
                 })
 
         return result

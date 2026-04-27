@@ -18,7 +18,6 @@ class ExternalAnnouncement(Base):
     external_link = Column(Text)
     author = Column(Text)
     created_at = Column(Date)
-    raw_data = Column(JSONB)
 
     __table_args__ = (
         UniqueConstraint("user_id", "source_name", "external_link", name="unique_ext_announce"),

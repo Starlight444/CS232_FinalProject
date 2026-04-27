@@ -21,8 +21,7 @@ class MockAssignmentScraper:
                 "due_date": item.due_date,
                 "time_remaining": item.time_remaining,
                 "last_modified": item.last_modified,
-                "file_submission": item.file_submission,
-                "raw": item.raw_data,
+                "file_submission": item.file_submission
             })
 
         return result

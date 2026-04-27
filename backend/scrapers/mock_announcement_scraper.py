@@ -17,8 +17,7 @@ class MockAnnouncementScraper:
                 "title": item.title,
                 "link": item.external_link,
                 "author": item.author,
-                "date": item.created_at,
-                "raw": item.raw_data,
+                "date": item.created_at
             })
 
         return result
