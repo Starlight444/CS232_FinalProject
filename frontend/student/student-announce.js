@@ -57,20 +57,38 @@ async function loadAnnouncements() {
         const courseMap = {};
         courses.forEach(c => { courseMap[c.course_id] = c; });
 
-        // ดึง announcements ของแต่ละ course แล้วรวมกัน
+        // ดึง announcements ของแต่ละ course (merged: internal + external)
+        // TODO: รอ backend ทำ /announcements/merged/:course_id
+        //       ถ้ายังไม่พร้อม fetchMergedAnnouncements จะคืน [] แล้ว fallback เดิม
         const results = await Promise.all(
-            courses.map(course =>
-                fetch(`${API_BASE_URL}/announcements/course/${course.course_id}`, { headers })
-                    .then(r => r.ok ? r.json() : { data: [] })
-                    .then(r => (r.data ?? [])
+            courses.map(async (course) => {
+                let merged = [];
+                if (window.ScraperMerge) {
+                    merged = await window.ScraperMerge.fetchMergedAnnouncements(
+                        API_BASE_URL, course.course_id, TOKEN, course
+                    );
+                }
+                if (merged.length) return merged;
+
+                // Fallback ใช้ internal endpoint เดิม
+                // TODO: ลบ block นี้เมื่อ merged endpoint พร้อมใช้งานจริง
+                try {
+                    const r = await fetch(
+                        `${API_BASE_URL}/announcements/course/${course.course_id}`,
+                        { headers }
+                    );
+                    const j = r.ok ? await r.json() : { data: [] };
+                    return (j.data ?? [])
                         .filter(a => String(a.course_id).trim() === String(course.course_id).trim())
-                        .map(a => ({ ...a, course_code: course.course_code }))
-                    )
-                    .catch(err => {
-                        console.error(`Error fetching for ${course.course_id}`, err);
-                        return [];
-                    })
-            )
+                        .map(a => window.ScraperMerge.normalizeAnnouncement(
+                            { ...a, source: 'internal' },
+                            course
+                        ));
+                } catch (err) {
+                    console.error(`Error fetching for ${course.course_id}`, err);
+                    return [];
+                }
+            })
         );
         allAnnouncements = results.flat();
 
@@ -158,8 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
     sortLabel.addEventListener('click', () => {
         sortOrder = sortOrder === 'newest' ? 'oldest' : 'newest';
         sortLabel.innerHTML = sortOrder === 'newest'
-            ? `Newest <iconify-icon icon="grommet-icons:link-down" width="14" height="14"></iconify-icon>`
-            : `Oldest <iconify-icon icon="grommet-icons:link-up" width="14" height="14"></iconify-icon>`;
+            ? `Newest <iconify-icon icon="ph:caret-down-bold" width="14" height="14"></iconify-icon>`
+            : `Oldest <iconify-icon icon="ph:caret-up-bold" width="14" height="14"></iconify-icon>`;
         renderAnnouncements();
     });
 
@@ -183,4 +201,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     filterDropdown.addEventListener('click', e => e.stopPropagation());
+
+    // Sync button — เรียก scraper backend ให้ล้างและดึงใหม่ แล้วโหลด announcements ใหม่
+    // TODO: confirm endpoint/method กับ backend ใน scraper-merge.js
+    window.ScraperMerge?.bindSyncButton(
+        document.getElementById('sync-btn'),
+        API_BASE_URL,
+        TOKEN,
+        loadAnnouncements
+    );
 });

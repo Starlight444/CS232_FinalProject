@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS external_announcements (
     title TEXT NOT NULL,
     external_link TEXT,
     author TEXT,
-    created_at TIMESTAMP
+    created_at TIMESTAMP,
 
     CONSTRAINT fk_external_announcement_user
         FOREIGN KEY (user_id)

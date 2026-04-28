@@ -2,6 +2,7 @@ import uuid
 import boto3          # เพิ่ม
 import logging        # เพิ่ม
 from models.announcement_model import Announcement
+from models.user_model import User
 from repositories.announcement_repository import AnnouncementRepository
 
 logger = logging.getLogger(__name__)  # เพิ่ม
@@ -35,7 +36,7 @@ class AnnouncementService:
 
         return saved
 
-    def get_by_course(self, course_id: str) -> list[Announcement]:
+    def get_by_course(self, course_id: str):
         return self.repo.get_by_course(course_id)
 
     def get_by_id(self, announcement_id: str) -> Announcement:
@@ -51,6 +52,43 @@ class AnnouncementService:
         announcement.title   = title
         announcement.content = content
         return self.repo.update(announcement)
+    
+    def get_all_announcements(self, user_id, external_repo, course_repo):
+        internal = (self.repo.db.query(Announcement, User).join(User, Announcement.created_by == User.user_id).all())
+        external = external_repo.get_by_user(user_id)
+
+        result = []
+
+        # ===== INTERNAL =====
+        for a, u in internal:
+            result.append({
+                "id": str(a.announcement_id),
+                "title": a.title,
+                "content": a.content,
+                "created_at": a.created_at,
+                "course_id": str(a.course_id),
+                "author_name": f"{u.first_name} {u.last_name}",
+                "is_external": False
+            })
+
+        # ===== EXTERNAL =====
+        for e in external:
+            # map course_code → course_id
+            course = course_repo.get_course_by_code(e.external_course_code)
+
+            result.append({
+                "id": str(e.id),
+                "title": e.title,
+                "created_at": e.created_at,
+                "course_id": str(course.course_id) if course else None,
+                "author": e.author,
+                "course_name": e.external_course_name,
+                "course_link": e.external_course_url,
+                "box_link": e.external_link,
+                "is_external": True
+            })
+
+        return result
 
     # def _publish_notification(self, announcement: Announcement):   # เพิ่มตอนทำ SNS
     #     self.sns_client.publish(                                    # เพิ่มตอนทำ SNS

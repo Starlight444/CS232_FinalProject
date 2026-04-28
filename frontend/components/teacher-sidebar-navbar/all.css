@@ -57,3 +57,69 @@ main {
 body.sidebar-collapsed main {
   margin-left: var(--sidebar-collapsed-width, 75px);
 }
+
+.page-title {
+    font-family: 'Amiko', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #3B3392 0%, #CF2D2D 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    width: fit-content;
+}
+
+/* =========================================
+   Scraper / External data shared styles
+========================================= */
+.sync-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--primary, #6E6CDF);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+.sync-btn:hover { background: var(--primary-light, #8886E2); }
+.sync-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.sync-btn.syncing iconify-icon { animation: sync-spin 1s linear infinite; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+
+.ext-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 6px;
+    margin-left: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6E6CDF;
+    background: #EEEDFF;
+    border: 1px solid #C9C7F4;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+.is-external { position: relative; }
+.is-external::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #6E6CDF, #8886E2);
+    border-radius: 3px 0 0 3px;
+}
+
+.home-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}

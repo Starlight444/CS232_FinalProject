@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignment Detail Submit</title>
+    <title>All Assignments</title>
     <link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
     <link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
+    <link rel="stylesheet" href="../components/teacher-sidebar-navbar/all.css">
+    <link rel="stylesheet" href="../components/teacher-sidebar-navbar/buttons.css">
     <link rel="stylesheet" href="student-all-assign.css">
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 
@@ -28,22 +30,26 @@
                 <div class="sort-group">
                     <button class="sort-btn" data-sort="further">
                         Newest
-                        <iconify-icon icon="grommet-icons:link-down" width="15" height="15"></iconify-icon>
+                        <iconify-icon icon="ph:caret-down-bold" width="15" height="15"></iconify-icon>
                     </button>
                     <button class="sort-btn active" data-sort="closest">
                         Closest
-                        <iconify-icon icon="grommet-icons:link-down" width="15" height="15"></iconify-icon>
+                        <iconify-icon icon="ph:caret-down-bold" width="15" height="15"></iconify-icon>
                     </button>
                 </div>
                 <div class="filter-wrap">
                     <button class="filter-btn" id="filter-btn">
-                        <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon> Filter
-                        <iconify-icon icon="icon-park-outline:down" width="15" height="15"></iconify-icon>
+                        <iconify-icon icon="ph:funnel-bold" width="20" height="20"></iconify-icon> Filter
+                        <iconify-icon icon="ph:caret-down-bold" width="15" height="15"></iconify-icon>
                     </button>
                     <div class="filter-dropdown" id="filter-dropdown">
                         <button class="filter-option active" data-class="all">All</button>
                     </div>
                 </div>
+                <button class="sync-btn" id="sync-btn" type="button" title="Sync external data">
+                    <iconify-icon icon="ph:arrows-clockwise-bold" width="18" height="18"></iconify-icon>
+                    Sync
+                </button>
             </div>
         </header>
 
@@ -62,6 +68,7 @@
         </div>
     </main>
 
+    <script src="scraper-merge.js"></script>
     <script src="student-all-assign.js"></script>
 </body>
 

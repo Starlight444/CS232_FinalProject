@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
   <link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
   <link rel="stylesheet" href="../student/home.css">
+  <link rel="stylesheet" href="../components/teacher-sidebar-navbar/all.css">
+  <link rel="stylesheet" href="../components/teacher-sidebar-navbar/buttons.css">
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 </head>
 
 <body>
@@ -21,10 +24,18 @@
 
       <!-- Content -->
       <div class="content">
-        <!-- Center -->
-        <div class="center-col">
-          <div class="welcome">Welcome, Student</div>
-          <div class="assignment-card">
+        <!-- Left stack: title + assignments -->
+        <div class="left-col">
+          <div class="home-title-row">
+            <div class="page-title">Welcome, Student</div>
+            <button class="sync-btn" id="sync-btn" type="button" title="Sync external data">
+              <iconify-icon icon="ph:arrows-clockwise-bold" width="18" height="18"></iconify-icon>
+              Sync
+            </button>
+          </div>
+          <!-- Center -->
+          <div class="center-col">
+            <div class="assignment-card">
             <div class="assignment-title">Assignmment</div>
             <div class="stats-row">
               <div class="stat-item due-today active-stat">
@@ -48,6 +59,7 @@
             <div class="assign-list">
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Right -->
@@ -56,9 +68,9 @@
           <div class="calendar-card">
             <div class="calendar-title">Upcoming Deadlines</div>
             <div class="cal-header">
-              <button class="cal-nav">&#8249;</button>
+              <button class="cal-nav"><iconify-icon icon="ph:caret-left-bold" width="20" height="20"></iconify-icon></button>
               <span class="cal-month"></span>
-              <button class="cal-nav">&#8250;</button>
+              <button class="cal-nav"><iconify-icon icon="ph:caret-right-bold" width="20" height="20"></iconify-icon></button>
             </div>
             <div class="cal-grid"></div>
           </div>
@@ -72,6 +84,7 @@
     </div>
   </div>
 </body>
+<script src="scraper-merge.js"></script>
 <script src="home.js"></script>
 
 </html>

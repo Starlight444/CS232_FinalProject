@@ -80,7 +80,7 @@ class SyncService:
             raise Exception("Mock user cannot use real mode")
 
         username = acc.external_username
-        password = self.crypto.decrypt(acc.external_password_encrypted)
+        password = acc.external_password_encrypted
 
         # SELECT SCRAPER
         if mode == "mock":

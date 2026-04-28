@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="../components/student-sidebar/sidebar.css">
     <link rel="stylesheet" href="../components/student-navbar/student-navbar.css">
     <link rel="stylesheet" href="../components/announcement-card/announce-card.css">
+    <link rel="stylesheet" href="../components/teacher-sidebar-navbar/all.css">
+    <link rel="stylesheet" href="../components/teacher-sidebar-navbar/buttons.css">
     <link rel="stylesheet" href="student-announce.css">
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
 </head>
@@ -27,20 +29,24 @@
                 </div>
 
                 <span class="sort-label" id="sort-label">Newest
-                    <iconify-icon icon="grommet-icons:link-down" width="14" height="14"></iconify-icon>
+                    <iconify-icon icon="ph:caret-down-bold" width="14" height="14"></iconify-icon>
                 </span>
 
 
                 <div class="filter-wrap">
                     <button class="filter-btn" id="filter-btn">
-                        <iconify-icon icon="majesticons:filter-line" width="20" height="20"></iconify-icon>
+                        <iconify-icon icon="ph:funnel-bold" width="20" height="20"></iconify-icon>
                         Filter
-                        <iconify-icon icon="icon-park-outline:down" width="14" height="14"></iconify-icon>
+                        <iconify-icon icon="ph:caret-down-bold" width="14" height="14"></iconify-icon>
                     </button>
                     <div class="filter-dropdown" id="filter-dropdown">
                         <button class="filter-option active" data-filter="all">All</button>
                     </div>
                 </div>
+                <button class="sync-btn" id="sync-btn" type="button" title="Sync external data">
+                    <iconify-icon icon="ph:arrows-clockwise-bold" width="18" height="18"></iconify-icon>
+                    Sync
+                </button>
 
 
             </div>
@@ -53,6 +59,7 @@
     </main>
 
     <script src="../components/announcement-card/announce-card.js"></script>
+    <script src="scraper-merge.js"></script>
     <script src="student-announce.js"></script>
 </body>
 

@@ -109,7 +109,7 @@ function updateUISubmitted() {
     if (!document.querySelector('.submit-timestamp')) {
         const stamp = document.createElement('p');
         stamp.className = 'submit-timestamp';
-        stamp.innerHTML = `<i class="fa-regular fa-circle-check"></i> Submitted on ${formatTimestamp(new Date())}`;
+        stamp.innerHTML = `<iconify-icon icon="ph:check-circle-fill" style="color: #1ABC14; vertical-align: middle;"></iconify-icon> Submitted on ${formatTimestamp(new Date())}`;
         bar.appendChild(stamp);
     }
 }
@@ -124,7 +124,7 @@ function updateUIDeadlinePassed() {
     if (!document.querySelector('.submit-timestamp')) {
         const stamp = document.createElement('p');
         stamp.className = 'submit-timestamp';
-        stamp.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> หมดเวลาส่งงานแล้ว`;
+        stamp.innerHTML = `<iconify-icon icon="ph:x-circle-fill" style="color: #E53935; vertical-align: middle;"></iconify-icon> หมดเวลาส่งงานแล้ว`;
         bar.appendChild(stamp);
     }
 }
@@ -137,11 +137,9 @@ async function handleSubmission() {
     }
 
     try {
-        // เปลี่ยนสถานะปุ่มเป็น Uploading
         submitBtn.disabled = true;
         submitBtn.textContent = 'Uploading...';
 
-        // POST /submissions/ — ส่ง FormData (assignment_id, course_id, student_id, file) ครั้งเดียว
         const userData = JSON.parse(localStorage.getItem("user") || '{}');
         const studentId = userData.user_id || '';
 
@@ -152,22 +150,33 @@ async function handleSubmission() {
         formData.append('student_id', studentId);
 
         const submitRes = await fetch(`${BASE_URL}/submissions/`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${TOKEN}` },
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${TOKEN}`
+                // ห้ามใส่ Content-Type เองเวลาใช้ FormData
+            },
             body: formData
         });
+
         const submitData = await submitRes.json();
 
         if (submitData.success) {
             isSubmitted = true;
             updateUISubmitted();
             alert("ส่งงานสำเร็จเรียบร้อย!");
+        } else {
+            console.error("Submit failed:", submitData);
+            alert(submitData.message || "ส่งงานไม่สำเร็จ");
         }
+
     } catch (err) {
         console.error("Submit Error:", err);
         alert("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
     } finally {
         submitBtn.disabled = false;
+        if (!isSubmitted) {
+            submitBtn.textContent = 'Submit';
+        }
     }
 }
 // เรียกทำงานทันทีที่โหลดหน้า
@@ -197,7 +206,7 @@ function addFileCard(file) {
         img.alt = file.name;
         thumb.appendChild(img);
     } else {
-        thumb.innerHTML = `<i class="fa-solid fa-file-lines" style="font-size: 40px; color: #aaa;"></i>`;
+        thumb.innerHTML = `<iconify-icon icon="ph:file-text-bold" style="font-size: 40px; color: #aaa;"></iconify-icon>`;
     }
 
     // remove file button

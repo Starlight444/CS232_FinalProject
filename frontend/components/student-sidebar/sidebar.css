@@ -38,23 +38,24 @@ body.sidebar-collapsed .sidebar {
 
 /* Header and Logo */
 .sidebar-header {
-    padding: 20px;
+    height: 75px;
+    padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: var(--transition);
 }
 
-.sidebar-header i {
+.sidebar-header #toggleBtn {
     color: #333;
-    margin-top: -35px;
-    font-size: 20px;
+    font-size: 24px;
     cursor: pointer;
+    transition: var(--transition);
 }
 
 .logo-wrap {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
     gap: 12px;
     overflow: hidden;
 }
@@ -185,19 +186,19 @@ body.sidebar-collapsed .nav-list {
 }
 
 body.sidebar-collapsed .logo-img,
-body.sidebar-collapsed .sidebar-header i {
-    position: relative;
+body.sidebar-collapsed #toggleBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     transition: opacity 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
 body.sidebar-collapsed .logo-img {
     opacity: 1;
 }
 
-body.sidebar-collapsed .sidebar-header i {
+body.sidebar-collapsed #toggleBtn {
     opacity: 0;
 }
 
@@ -205,7 +206,7 @@ body.sidebar-collapsed .sidebar-header:hover .logo-img {
     opacity: 0;
 }
 
-body.sidebar-collapsed .sidebar-header:hover i {
+body.sidebar-collapsed .sidebar-header:hover #toggleBtn {
     opacity: 1;
 }
 
@@ -219,11 +220,9 @@ body.sidebar-collapsed .arrow-icon {
 
 body.sidebar-collapsed .sidebar-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    height: 60px;
     cursor: pointer;
 }
 

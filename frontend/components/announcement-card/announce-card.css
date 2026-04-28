@@ -74,6 +74,13 @@
     max-height: 300px;
 }
 
+/* CTA สำหรับ external announcement ที่ไม่มี content */
+.desc-external-cta {
+    color: #6E6CDF;
+    font-weight: 500;
+    font-style: italic;
+}
+
 .time {
     font-size: 12px;
     color: #aaa;

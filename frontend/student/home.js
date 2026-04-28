@@ -124,7 +124,7 @@ async function loadHomeData() {
     if (!user) return;
 
     // แสดงชื่อ
-    document.querySelector('.welcome').textContent = `Welcome, ${user.first_name}`;
+    document.querySelector('.page-title').textContent = `Welcome, ${user.first_name}`;
 
     // 2. ดึง courses ของ user
     const courseRes = await fetch(`${BASE_URL}/courses/my/${user.user_id}?role=${user.role}`);
@@ -139,40 +139,75 @@ async function loadHomeData() {
     let allAssignments = [];
     let allAnnouncements = [];
 
-    // 3. get assignments from every course
+    // 3. get assignments + announcements ของทุกวิชา (merged: internal + external)
+    // TODO: รอ backend confirm /assignments/merged และ /announcements/merged
     for (const course of courses) {
-      const [asgRes, annRes] = await Promise.all([
-        fetch(`${BASE_URL}/assignments/${course.course_id}`),
-        fetch(`${BASE_URL}/announcements/course/${course.course_id}`)
-      ]);
+      // ----- ASSIGNMENTS -----
+      let mergedAsg = [];
+      if (window.ScraperMerge) {
+        mergedAsg = await window.ScraperMerge.fetchMergedAssignments(
+          BASE_URL, course.course_id, user.token || '', course
+        );
+      }
+      // Fallback: internal เดิม
+      // TODO: ลบเมื่อ merged พร้อมจริง
+      if (!mergedAsg.length) {
+        const asgRes = await fetch(`${BASE_URL}/assignments/${course.course_id}`);
+        const asgJson = await asgRes.json();
+        mergedAsg = (asgJson.data || []).map(a =>
+          window.ScraperMerge.normalizeAssignment({ ...a, source: 'internal' }, course)
+        );
+      }
 
-      const asgJson = await asgRes.json();
-      const annJson = await annRes.json();
+      // ----- ANNOUNCEMENTS -----
+      let mergedAnn = [];
+      if (window.ScraperMerge) {
+        mergedAnn = await window.ScraperMerge.fetchMergedAnnouncements(
+          BASE_URL, course.course_id, user.token || '', course
+        );
+      }
+      if (!mergedAnn.length) {
+        const annRes = await fetch(`${BASE_URL}/announcements/course/${course.course_id}`);
+        const annJson = await annRes.json();
+        mergedAnn = (annJson.data || []).map(a =>
+          window.ScraperMerge.normalizeAnnouncement({ ...a, source: 'internal' }, course)
+        );
+      }
 
-      const assignments = asgJson.data || [];
-      const announcements = annJson.data || [];
+      // ใส่ course_name ให้ครบ
+      mergedAnn.forEach(a => { a.course_name = course.course_name; });
+      allAnnouncements.push(...mergedAnn);
 
-      // เก็บชื่อวิชาไว้ใช้ render
-      announcements.forEach(a => {
-        a.course_name = course.course_name;
-      });
-
-      allAnnouncements.push(...announcements);
-
-        // 4. check submission per assignment
-        for (const assignment of assignments) {
-          const subRes = await fetch(
-            `${BASE_URL}/submissions/assignment/${assignment.assignment_id}/student/${user.user_id}`
-          );
-
-          const subJson = await subRes.json();
-
-          assignment.submission = subJson.data;
-          assignment.course_name = course.course_name;
-          assignment.course_code = course.course_code;
-
-          allAssignments.push(assignment);
+      // 4. check submission per assignment (เฉพาะ internal)
+      for (const m of mergedAsg) {
+        let submission = null;
+        if (!m.isExternal) {
+          try {
+            const subRes = await fetch(
+              `${BASE_URL}/submissions/assignment/${m.id}/student/${user.user_id}`
+            );
+            const subJson = await subRes.json();
+            submission = subJson.data;
+          } catch { /* noop */ }
         }
+        // เก็บใน shape เดิมที่ส่วนอื่นๆ ของ home.js ใช้
+        allAssignments.push({
+          assignment_id: m.id,
+          title: m.title,
+          due_date: m.due_date,
+          max_score: m.max_score,
+          course_id: m.course_id,
+          course_name: course.course_name,
+          course_code: course.course_code,
+          submission,
+            // ✅ เพิ่มอันนี้
+          submission_status: m.submission_status,
+          // ฟิลด์เพิ่มสำหรับ external
+          isExternal: m.isExternal,
+          external_url: m.external_url,
+          source: m.source,
+        });
+      }
     }
 
     // 4) categorize
@@ -213,17 +248,28 @@ function categorizeAssignments(assignments) {
 
   assignments.forEach(a => {
     const due = new Date(a.due_date);
-    const submitted = a.submission && a.submission.submission_id;
 
-  if (submitted) {
-    result.complete.push(a);
-  } else if (due < now) {
-    result.overdue.push(a);
-  } else if (due.toDateString() === today) {
-    result.dueToday.push(a);
-  } else {
-    result.upcoming.push(a);
-  }
+    // ✅ แก้ตรงนี้: แยก internal vs external
+    let submitted = false;
+
+    if (a.isExternal) {
+      // external: ใช้ submission_status จาก scraper
+      submitted = a.submission_status === "Submitted for grading";
+    } else {
+      // internal: ใช้ submission object เดิม
+      submitted = a.submission && a.submission.submission_id;
+    }
+
+    // ✅ logic ใหม่
+    if (submitted) {
+      result.complete.push(a); // ส่งแล้ว = complete เสมอ
+    } else if (due < now) {
+      result.overdue.push(a);
+    } else if (due.toDateString() === today) {
+      result.dueToday.push(a);
+    } else {
+      result.upcoming.push(a);
+    }
   });
 
   return result;
@@ -286,20 +332,32 @@ function renderAssignmentList(assignments) {
     const dueText = getDueText(a);
 
     const item = document.createElement('div');
-    item.className = 'assign-item';
+    item.className = 'assign-item' + (a.isExternal ? ' is-external' : '');
+
+    const externalBadge = a.isExternal
+      ? `<span class="ext-badge" title="From external source">
+             <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
+         </span>`
+      : '';
 
     item.innerHTML = `
       <div class="assign-avatar">${a.course_code}</div>
       <div class="assign-info">
-        <div class="assign-name">${a.title}</div>
+        <div class="assign-name">${a.title} ${externalBadge}</div>
         <div class="assign-due">${dueText}</div>
         <div class="assign-class">${a.course_name}</div>
       </div>
-      <div class="assign-points">${a.max_score} Point</div>
+      <div class="assign-points"> ${a.isExternal ? '' : `${a.max_score} Point`}</div>
     `;
 
-    // click card event
+    // click card event — external เปิด link ภายนอก, internal ไปหน้า submit
     item.addEventListener('click', () => {
+      if (a.isExternal) {
+        if (a.external_url) {
+          window.open(a.external_url, '_blank', 'noopener,noreferrer');
+        }
+        return;
+      }
       window.location.href = `../student/student-assign-submit.html?id=${a.assignment_id}&course_id=${a.course_id}`;
     });
 
@@ -359,9 +417,19 @@ function renderAnnouncements(announcements) {
 
   // เอาแค่ 5 อันล่าสุด
   sorted.slice(0, 5).forEach(a => {
+    const isExternal = !!a.isExternal;
+    const externalUrl = a.external_url || '';
+    const onclickAttr = isExternal && externalUrl
+      ? `onclick="window.open('${externalUrl}','_blank','noopener,noreferrer')" style="cursor:pointer;"`
+      : '';
+    const externalBadge = isExternal
+      ? `<span class="ext-badge" title="From external source">
+             <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
+         </span>`
+      : '';
     container.innerHTML += `
-      <div class="ann-item">
-        <div class="ann-item-title">${a.course_name}</div>
+      <div class="ann-item${isExternal ? ' is-external' : ''}" ${onclickAttr}>
+        <div class="ann-item-title">${a.course_name} ${externalBadge}</div>
         <div class="ann-item-body">${a.title}</div>
         <div class="ann-item-time">${getTimeAgo(a.created_at)}</div>
       </div>
@@ -389,3 +457,13 @@ function getTimeAgo(dateString) {
 
 // เรียกใช้ตอนหน้าโหลด
 loadHomeData();
+
+// Bind ปุ่ม Sync (เรียก scraper backend ให้ล้าง+ดึงใหม่ แล้ว reload home)
+// TODO: confirm endpoint/method กับ backend ใน scraper-merge.js
+const _user = JSON.parse(localStorage.getItem("user") || "null");
+window.ScraperMerge?.bindSyncButton(
+  document.getElementById('sync-btn'),
+  BASE_URL,
+  _user?.token || '',
+  loadHomeData
+);

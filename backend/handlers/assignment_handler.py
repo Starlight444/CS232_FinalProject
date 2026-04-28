@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-
+from dependencies import get_current_user_id
 from database import get_db
 
+from repositories.course_repository import CourseRepository
 from repositories.assignment_repository import AssignmentRepository
 from repositories.course_member_repository import CourseMemberRepository
 from repositories.external_account_repository import ExternalAccountRepository
@@ -87,8 +88,10 @@ def get_assignment(
     }
 
 @router.post("/sync")
-def sync_assignments(user_id: str, db: Session = Depends(get_db)):
-
+def sync_assignments(
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user_id),
+):
     external_repo = ExternalAccountRepository(db)
     external_assignment_repo = ExternalAssignmentRepository(db)
     external_announcement_repo = ExternalAnnouncementRepository(db)
@@ -112,19 +115,26 @@ def sync_assignments(user_id: str, db: Session = Depends(get_db)):
     )
 
     settings = Settings()
-
     mode = "mock" if settings.USE_MOCK else "real"
 
-    data = service.sync_assignments(user_id=user_id, mode=mode)
+    try:
+        data = service.sync_assignments(user_id=user_id, mode=mode)
 
-    return {
-        "success": True,
-        "mode": mode,
-        "data": data
-    }
+        return {
+            "success": True,
+            "mode": mode,
+            "data": data
+        }
+
+    except Exception as e:
+        import traceback
+        print("SYNC ASSIGNMENTS ERROR:", str(e))
+        print(traceback.format_exc())
+
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/external")
-def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
+def get_external_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
     
     repo = ExternalAssignmentRepository(db)
     data = repo.get_by_user(user_id)
@@ -138,7 +148,7 @@ def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
             "course_name": item.external_course_name,
             "course_link": item.external_course_url,
             "title": item.title,
-            "link": item.external_link,
+            "box_link": item.external_link,
             "submission_status": item.submission_status,
             "grading_status": item.grading_status,
             "due_date": item.due_date,
@@ -148,6 +158,27 @@ def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
         })
 
     return result
+
+@router.get("/all")
+def get_all_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
+
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    external_repo = ExternalAssignmentRepository(db)
+    course_repo = CourseRepository(db)
+
+    service = AssignmentService(repo, member_repo)
+
+    data = service.get_all_assignments(
+        user_id=user_id,
+        course_repo=course_repo,
+        external_repo=external_repo
+    )
+
+    return {
+        "success": True,
+        "data": data
+    }
 
 @router.get("/{course_id}")
 def get_assignments(
