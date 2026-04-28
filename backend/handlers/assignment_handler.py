@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-
+from dependencies import get_current_user_id
 from database import get_db
 
 from repositories.course_repository import CourseRepository
@@ -88,7 +88,7 @@ def get_assignment(
     }
 
 @router.post("/sync")
-def sync_assignments(user_id: str, db: Session = Depends(get_db)):
+def sync_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
 
     external_repo = ExternalAccountRepository(db)
     external_assignment_repo = ExternalAssignmentRepository(db)
@@ -125,7 +125,7 @@ def sync_assignments(user_id: str, db: Session = Depends(get_db)):
     }
 
 @router.get("/external")
-def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
+def get_external_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
     
     repo = ExternalAssignmentRepository(db)
     data = repo.get_by_user(user_id)
@@ -151,7 +151,7 @@ def get_external_assignments(user_id: str, db: Session = Depends(get_db)):
     return result
 
 @router.get("/all")
-def get_all_assignments(user_id: str, db: Session = Depends(get_db)):
+def get_all_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
 
     repo = AssignmentRepository(db)
     member_repo = CourseMemberRepository(db)

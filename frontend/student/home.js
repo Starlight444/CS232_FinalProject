@@ -200,6 +200,8 @@ async function loadHomeData() {
           course_name: course.course_name,
           course_code: course.course_code,
           submission,
+            // ✅ เพิ่มอันนี้
+          submission_status: m.submission_status,
           // ฟิลด์เพิ่มสำหรับ external
           isExternal: m.isExternal,
           external_url: m.external_url,
@@ -246,17 +248,28 @@ function categorizeAssignments(assignments) {
 
   assignments.forEach(a => {
     const due = new Date(a.due_date);
-    const submitted = a.submission && a.submission.submission_id;
 
-  if (submitted) {
-    result.complete.push(a);
-  } else if (due < now) {
-    result.overdue.push(a);
-  } else if (due.toDateString() === today) {
-    result.dueToday.push(a);
-  } else {
-    result.upcoming.push(a);
-  }
+    // ✅ แก้ตรงนี้: แยก internal vs external
+    let submitted = false;
+
+    if (a.isExternal) {
+      // external: ใช้ submission_status จาก scraper
+      submitted = a.submission_status === "Submitted for grading";
+    } else {
+      // internal: ใช้ submission object เดิม
+      submitted = a.submission && a.submission.submission_id;
+    }
+
+    // ✅ logic ใหม่
+    if (submitted) {
+      result.complete.push(a); // ส่งแล้ว = complete เสมอ
+    } else if (due < now) {
+      result.overdue.push(a);
+    } else if (due.toDateString() === today) {
+      result.dueToday.push(a);
+    } else {
+      result.upcoming.push(a);
+    }
   });
 
   return result;
@@ -334,7 +347,7 @@ function renderAssignmentList(assignments) {
         <div class="assign-due">${dueText}</div>
         <div class="assign-class">${a.course_name}</div>
       </div>
-      <div class="assign-points">${a.max_score} Point</div>
+      <div class="assign-points"> ${a.isExternal ? '' : `${a.max_score} Point`}</div>
     `;
 
     // click card event — external เปิด link ภายนอก, internal ไปหน้า submit

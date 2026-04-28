@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from uuid import UUID
 from database import get_db
 
 from repositories.course_repository import CourseRepository
@@ -69,7 +70,7 @@ def _serialize(a) -> dict:
     }
 
 @router.post("/sync")
-def sync_announcements(user_id: str, db: Session = Depends(get_db)):
+def sync_announcements(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
     external_repo = ExternalAccountRepository(db)
     external_assignment_repo = ExternalAssignmentRepository(db)
     external_announcement_repo = ExternalAnnouncementRepository(db)
@@ -105,7 +106,7 @@ def sync_announcements(user_id: str, db: Session = Depends(get_db)):
     }
 
 @router.get("/external")
-def get_external_announcements(user_id: str, db: Session = Depends(get_db)):
+def get_external_announcements(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
 
     repo = ExternalAnnouncementRepository(db)
     data = repo.get_by_user(user_id)
@@ -127,7 +128,7 @@ def get_external_announcements(user_id: str, db: Session = Depends(get_db)):
     return result
 
 @router.get("/all")
-def get_all_announcements(user_id: str, db: Session = Depends(get_db)):
+def get_all_announcements(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
 
     ann_repo = AnnouncementRepository(db)
     ext_repo = ExternalAnnouncementRepository(db)
@@ -147,7 +148,7 @@ def get_all_announcements(user_id: str, db: Session = Depends(get_db)):
     }
 
 @router.get("/{announcement_id}")
-def get_detail(announcement_id: str, db: Session = Depends(get_db)):
+def get_detail(announcement_id: UUID, db: Session = Depends(get_db)):
     service = AnnouncementService(AnnouncementRepository(db))
     try:
         announcement = service.get_by_id(announcement_id)
@@ -157,7 +158,7 @@ def get_detail(announcement_id: str, db: Session = Depends(get_db)):
 
 @router.put("/{announcement_id}")
 def update_announcement(
-    announcement_id: str,
+    announcement_id: UUID,
     request: UpdateAnnouncementRequest,
     db: Session = Depends(get_db),
     requester_id: str = Depends(get_current_user_id),

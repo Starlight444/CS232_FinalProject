@@ -36,20 +36,59 @@ const USER_ID = userData ? userData.user_id : '';
 
 let ASSIGNMENTS = [];
 
+function parseLocalDate(dateInput) {
+    //  FIX: ถ้าเป็น Date อยู่แล้ว → ใช้เลย
+    if (dateInput instanceof Date) {
+        return dateInput;
+    }
+
+    //  FIX: ถ้าเป็น string ค่อย parse
+    if (typeof dateInput === "string") {
+        const [datePart, timePart] = dateInput.split("T");
+        if (!datePart || !timePart) return new Date(dateInput);
+
+        const [y, m, d] = datePart.split("-").map(Number);
+        const [hh, mm, ss] = timePart.split(":").map(Number);
+
+        return new Date(y, m - 1, d, hh, mm, ss || 0);
+    }
+
+    // fallback กันตาย
+    return new Date(dateInput);
+}
+
 function mapStatus(a) {
     const now = new Date();
-    const dueDate = new Date(a.due_date);
+    const dueDate = parseLocalDate(a.due);
 
-    // ถ้าส่งแล้ว 
-    if (a.status === 'submitted' || a.status === 'graded') {
-        return 'complete';
+    // 1. COMPLETE (ต้องเช็คก่อน)
+    if (a.isExternal) {
+        if (a.submission_status === "Submitted for grading") {
+            return "complete";
+        }
+    } else {
+        if (a.status === 'submitted' || a.status === 'graded') {
+            return "complete";
+        }
     }
-    // ถ้ายังไม่ส่งและเลยกำหนด
+
+    //  2. DUE TODAY (แก้หลัก)
+    const isSameDay =
+        dueDate.getFullYear() === now.getFullYear() &&
+        dueDate.getMonth() === now.getMonth() &&
+        dueDate.getDate() === now.getDate();
+
+    if (isSameDay) {
+        return "due-today";
+    }
+
+    //  3. OVERDUE
     if (dueDate < now) {
-        return 'overdue';
+        return "overdue";
     }
-    // ถ้ายังไม่ส่งและยังไม่ถึงกำหนด
-    return 'upcoming';
+
+    //  4. UPCOMING
+    return "upcoming";
 }
 
 async function fetchAssignments() {
@@ -124,8 +163,15 @@ async function fetchAssignments() {
                 className: m.course_code,
                 points: m.max_score || 0,
                 due: m.due_date ? new Date(m.due_date) : new Date(),
-                status: mapStatus({ status: m.status, due_date: m.due_date }),
-                // === ฟิลด์ที่เพิ่มจาก scraper ===
+
+                // 🔥 ส่งข้อมูลครบให้ mapStatus
+                status: mapStatus({
+                    status: m.status,                      // internal
+                    submission_status: m.submission_status, // external
+                    due: m.due_date ? new Date(m.due_date) : new Date(),
+                    isExternal: m.isExternal
+                }),
+
                 isExternal: m.isExternal,
                 external_url: m.external_url,
                 source: m.source,
@@ -183,32 +229,67 @@ function updateContainerRadius() {
 }
 
 function formatDueLabel(a) {
-    if (a.status === 'due-today') {
-        const mins = a.minutesLeft;
-        if (mins < 60) return { text: `Due in ${mins} minutes`, cls: 'due-urgent' };
-        return { text: `Due in ${Math.round(mins / 60)} hours`, cls: 'due-urgent' };
+    const now = new Date();
+    const due = parseLocalDate(a.due); //  ใช้ตัว parse ที่เคยแก้ไว้
+
+    const diff = due - now; // milliseconds
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(mins / 60);
+    const days = Math.floor(diff / 86400000);
+
+    // COMPLETE
+    if (a.status === 'complete') {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return {
+            text: `${due.getDate()} ${months[due.getMonth()]} ${due.getFullYear()}`,
+            cls: 'due-done'
+        };
     }
+
+    // OVERDUE
     if (a.status === 'overdue') {
-        const days = Math.round((now - a.due) / 86400000);
-        return { text: `Overdue by ${days} day${days !== 1 ? 's' : ''}`, cls: 'due-urgent' };
+        const overdueDays = Math.abs(Math.floor(diff / 86400000));
+        return {
+            text: `Overdue by ${overdueDays} day${overdueDays !== 1 ? 's' : ''}`,
+            cls: 'due-urgent'
+        };
     }
-    if (a.status === 'upcoming') {
-        const days = Math.round((a.due - now) / 86400000);
-        if (days <= 0) return { text: 'Due today', cls: 'due-urgent' };
-        return { text: `Due in ${days} day${days !== 1 ? 's' : ''}`, cls: 'due-normal' };
+
+    // DUE TODAY
+    if (a.status === 'due-today') {
+        if (mins <= 0) {
+            return { text: "Due now", cls: 'due-urgent' };
+        }
+        if (mins < 60) {
+            return { text: `Due in ${mins} minutes`, cls: 'due-urgent' };
+        }
+        return { text: `Due in ${hours} hours`, cls: 'due-urgent' };
     }
-    // complete
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return { text: `${a.due.getDate()} ${months[a.due.getMonth()]} ${a.due.getFullYear()}`, cls: 'due-done' };
+
+    // UPCOMING
+    if (days <= 0) {
+        return { text: "Due today", cls: 'due-urgent' };
+    }
+
+    return {
+        text: `Due in ${days} day${days !== 1 ? 's' : ''}`,
+        cls: 'due-normal'
+    };
 }
 
 function rightContent(a) {
+    // FIX: external ไม่ต้องแสดงอะไรเลย
+    if (a.isExternal) {
+        return '';
+    }
     if (a.status === 'complete') {
         return `<iconify-icon icon="ph:check-circle-fill" style="color: #1ABC14; font-size: 20px;"></iconify-icon>`;
     }
     if (a.status === 'overdue') {
         return `<iconify-icon icon="ph:prohibit-bold" style="color: #E53935; font-size: 20px;"></iconify-icon>`;
     }
+    // NORMAL (internal เท่านั้น)
     return `<span class="assign-points-label">${a.points} Point</span>`;
 }
 
