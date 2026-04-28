@@ -4,7 +4,7 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const SIDEBAR_API_BASE_URL = 'http://127.0.0.1:8000';
 
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
@@ -187,7 +187,7 @@ async function fetchSidebarCourses() {
     const USER_ID = userData ? userData.user_id : '';
 
     try {
-        const res = await fetch(`${BASE_URL}/courses/my/${USER_ID}`, {
+        const res = await fetch(`${SIDEBAR_API_BASE_URL}/courses/my/${USER_ID}`, {
             headers: { 'Authorization': `Bearer ${TOKEN}` }
         });
         const data = await res.json();
