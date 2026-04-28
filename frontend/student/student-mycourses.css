@@ -13,13 +13,6 @@ body {
   margin-top: 60px;
 }
 
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #6B5CE7;
-  margin-bottom: 20px;
-}
-
 .courses-grid {
   display: grid;
   /* auto-fill: จำนวน column จะลดลงตอนจอแคบ
