@@ -23,25 +23,45 @@ const gearSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" str
 function renderCourses(courses) {
   const grid = document.getElementById("coursesGrid");
   grid.innerHTML = "";
+
   courses.forEach((c) => {
     const bg = colorMap[c.course_code] || "#999";
+
     const card = document.createElement("div");
     card.className = "course-card";
+    card.style.cursor = "pointer";
+
     card.innerHTML = `
       <div class="card-banner" style="background:${bg};">
         <div class="card-banner-icons">
           <span class="icon-doc">${docSVG}</span>
+
           <span class="icon-gear-wrap">
             <span class="icon-gear">${gearSVG}</span>
             <span class="red-dot"></span>
           </span>
         </div>
+
         <span class="course-code">${c.course_code}</span>
       </div>
+
       <div class="card-body">
-        <div class="course-name">${c.course_name.toUpperCase()}</div>
+        <div class="course-name">${(c.course_name || "").toUpperCase()}</div>
       </div>
     `;
+
+    card.addEventListener("click", () => {
+      const courseId = c.course_id || c.id;
+
+      if (!courseId) {
+        console.error("Course id not found:", c);
+        alert("ไม่พบ course_id ของวิชานี้");
+        return;
+      }
+
+      window.location.href = `./courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
+    });
+
     grid.appendChild(card);
   });
 }
