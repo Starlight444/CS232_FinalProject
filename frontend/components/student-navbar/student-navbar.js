@@ -82,23 +82,38 @@ profileInfo();
 // ข้อมูลใน notification dropdown
 async function loadNotifications() {
     try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user) return;
+        const token = user.token;
 
-        // 1) ดึงรายวิชาของ user
+        // 🔹 1. ดึง announcements
+        const res = await fetch(`${API_BASE_URL}/announcements/all`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        const json = await res.json();
+        const announcements = json.data || [];
+
+        // 🔹 2. ดึง courses
         const courseRes = await fetch(
             `${API_BASE_URL}/courses/my/${user.user_id}?role=${user.role}`
         );
         const courseJson = await courseRes.json();
         const courses = Array.isArray(courseJson) ? courseJson : (courseJson.data || []);
 
-        let notifications = [];
+        // 🔹 3. map course_id → course_code
+        const courseMap = {};
+        courses.forEach(c => {
+            courseMap[c.course_id] = c.course_code;
+        });
 
-        // 2) ดึง announcement ของทุกวิชา
-        for (const course of courses) {
-            const annRes = await fetch(
-                `${API_BASE_URL}/announcements/course/${course.course_id}`
-            );
+        // 🔹 4. รวมข้อมูล
+        const notifications = announcements.map(a => ({
+            id: a.announcement_id,
+            course_code: courseMap[a.course_id] || "Unknown",
+            text: a.title,
+            time: getTimeAgo(a.created_at),
+            created_at: a.created_at
+        }));
 
             const annJson = await annRes.json();
             const announcements = annJson.data || [];
@@ -117,7 +132,6 @@ async function loadNotifications() {
                     sort_time: sort_time
                 });
             });
-        }
 
         // 3) เรียงใหม่ล่าสุดก่อน (ใช้ sort_time เพื่อให้ประกาศที่แก้ไขล่าสุดขึ้นก่อน)
         notifications.sort(
@@ -150,9 +164,18 @@ function renderNotifications(notifications) {
         (a, b) => new Date(b.sort_time) - new Date(a.sort_time)
     );
 
-    sorted.slice(0, 10).forEach(n => {
+    sorted.slice(0, 5).forEach(n => {
         notifList.innerHTML += createNotificationItem(n);
     });
+
+    // append ปุ่มด้านล่าง
+    notifList.innerHTML += `
+        <li class="notif-more">
+            <a href="/frontend/student/student-announce.html">
+                View all announcements
+            </a>
+        </li>
+    `;
 
     notifBadge.style.display = "flex";
     notifBadge.textContent = sorted.length;

@@ -51,6 +51,42 @@ class AnnouncementService:
         announcement.title   = title
         announcement.content = content
         return self.repo.update(announcement)
+    
+    def get_all_announcements(self, user_id, external_repo, course_repo):
+        internal = self.repo.db.query(Announcement).all()
+        external = external_repo.get_by_user(user_id)
+
+        result = []
+
+        # ===== INTERNAL =====
+        for a in internal:
+            result.append({
+                "id": str(a.announcement_id),
+                "title": a.title,
+                "content": a.content,
+                "created_at": a.created_at,
+                "course_id": str(a.course_id),
+                "is_external": False
+            })
+
+        # ===== EXTERNAL =====
+        for e in external:
+            # map course_code → course_id
+            course = course_repo.get_course_by_code(e.external_course_code)
+
+            result.append({
+                "id": str(e.id),
+                "title": e.title,
+                "created_at": e.created_at,
+                "course_id": str(course.course_id) if course else None,
+                "author": e.author,
+                "course_name": e.external_course_name,
+                "course_link": e.external_course_url,
+                "box_link": e.external_link,
+                "is_external": True
+            })
+
+        return result
 
     # def _publish_notification(self, announcement: Announcement):   # เพิ่มตอนทำ SNS
     #     self.sns_client.publish(                                    # เพิ่มตอนทำ SNS
