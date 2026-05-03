@@ -52,7 +52,7 @@ function isNew(dateString) {
 
 function createAnnouncementCard(announcement, index) {
     const color = getCardColor(announcement.course_id ?? index);
-    const teacher = announcement.created_by?.name ?? String(announcement.created_by ?? '');
+    const teacher = announcement.created_by_name || announcement.created_by?.name || String(announcement.created_by ?? '');
 
     // External announcements (จาก scraper) จะคลิกแล้วเปิด link ภายนอก
     // box_link ถูกแปลงเป็น external_url แล้วใน scraper-merge.normalizeAnnouncement

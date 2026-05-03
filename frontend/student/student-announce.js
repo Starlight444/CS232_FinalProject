@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+//const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
@@ -11,6 +12,7 @@ const USER_ID = userData ? userData.user_id : '';
 let allAnnouncements = [];
 let sortOrder = 'newest';
 let activeFilter = 'all';
+const creatorNameCache = {};
 
 // Load Components
 function loadSidebar() {
@@ -91,7 +93,7 @@ async function loadAnnouncements() {
             })
         );
         allAnnouncements = results.flat();
-
+        await resolveAnnouncementCreators(allAnnouncements);
 
         buildFilterOptions(courses);
         renderAnnouncements();
@@ -122,6 +124,51 @@ function buildFilterOptions(courses) {
             document.getElementById('filter-btn').classList.remove('active');
             renderAnnouncements();
         });
+    });
+}
+
+// ==========================================
+// ฟังก์ชันแสดงชื่อผู้สร้างประกาศ (สำหรับ internal)
+// ==========================================
+async function resolveAnnouncementCreators(announcements) {
+    const ids = Array.from(new Set(
+        announcements
+            .filter(a => a.source === 'internal')
+            .map(a => String(a.created_by || a._raw?.created_by || '').trim())
+            .filter(id => id && !creatorNameCache[id])
+    ));
+
+    if (!ids.length) return;
+
+    const headers = { 'Authorization': `Bearer ${TOKEN}` };
+    const results = await Promise.all(ids.map(async user_id => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${user_id}`, { headers });
+            if (!res.ok) return null;
+            const json = await res.json();
+            const data = json.data || {};
+            const fullName = data.full_name || `${data.first_name || ''} ${data.last_name || ''}`.trim();
+            return { user_id, name: fullName || user_id };
+        } catch (err) {
+            console.error('Failed to fetch user name for', user_id, err);
+            return null;
+        }
+    }));
+
+    results.forEach(item => {
+        if (item?.user_id) {
+            creatorNameCache[item.user_id] = item.name;
+        }
+    });
+
+    announcements.forEach(a => {
+        if (a.source === 'internal') {
+            const id = String(a.created_by || a._raw?.created_by || '').trim();
+            if (id) {
+                a.created_by_name = creatorNameCache[id] || id;
+                a.created_by = id;
+            }
+        }
     });
 }
 
