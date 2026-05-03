@@ -133,7 +133,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             return announcements.map(a => ({
                                 ...a,
                                 course_code: course.course_code,
-                                course_name: course.course_name
+                                course_name: course.course_name,
+                                source: 'internal'
                             }));
                         })
                         .catch(err => {
@@ -145,6 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 3) รวม announcements ทุกวิชา
             allAnnouncements = results.flat();
+            await resolveAnnouncementCreators(allAnnouncements);
 
             console.log('[Announcements] courses:', courses);
             console.log('[Announcements] allAnnouncements:', allAnnouncements);
@@ -155,6 +157,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Critical Error:', err);
             listEl.innerHTML = '<p class="loading-state">ไม่สามารถโหลดข้อมูลประกาศได้ กรุณาลองใหม่อีกครั้ง</p>';
         }
+    }
+
+    // ==========================================
+    // ฟังก์ชันแสดงชื่อผู้สร้างประกาศ (สำหรับ internal)
+    // ==========================================
+    async function resolveAnnouncementCreators(announcements) {
+        const ids = Array.from(new Set(
+            announcements
+                .filter(a => a.source === 'internal')
+                .map(a => String(a.created_by || '').trim())
+                .filter(id => id)
+        ));
+
+        if (!ids.length) return;
+
+        const headers = {
+            'Authorization': `Bearer ${TOKEN}`
+        };
+
+        const creatorNames = {};
+
+        await Promise.all(ids.map(async user_id => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/users/${user_id}`, { headers });
+                if (!res.ok) return;
+                const json = await res.json();
+                const data = json.data || {};
+                const fullName = data.full_name || `${data.first_name || ''} ${data.last_name || ''}`.trim();
+                creatorNames[user_id] = fullName || user_id;
+            } catch (err) {
+                console.error('Failed to fetch user name for', user_id, err);
+            }
+        }));
+
+        announcements.forEach(a => {
+            if (a.source === 'internal') {
+                const id = String(a.created_by || '').trim();
+                if (id) {
+                    a.created_by_name = creatorNames[id] || id;
+                }
+            }
+        });
     }
 
     // ==========================================
@@ -202,8 +246,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         filtered.sort((a, b) => {
-            const dateA = new Date(a.created_at || 0);
-            const dateB = new Date(b.created_at || 0);
+            const dateA = new Date(a.updated_at || a.created_at || 0);
+            const dateB = new Date(b.updated_at || b.created_at || 0);
             const diff = dateB - dateA;
 
             return sortOrder === 'newest' ? diff : -diff;
@@ -216,7 +260,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ใช้ createAnnouncementCard จาก announce-card.js
         listEl.innerHTML = filtered
-            .map((a, i) => createAnnouncementCard(a, i))
+            .map((a, i) => createAnnouncementCard(a, i, {
+                editUrl: String(a.created_by) === String(USER_ID)
+                    ? `announcement-create.html?mode=edit&id=${a.announcement_id}`
+                    : null
+            }))
             .join('');
     }
 
@@ -272,6 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 filterDropdown.classList.remove('open');
                 filterBtn.classList.remove('active');
             }
+            document.querySelectorAll('.card-menu-dropdown.open').forEach(d => d.classList.remove('open'));
         });
 
         filterDropdown.addEventListener('click', e => {

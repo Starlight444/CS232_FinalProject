@@ -148,6 +148,10 @@ body.sidebar-collapsed .navbar {
     margin-top: auto;
 }
 
+.notif-edited {
+    font-size: 9px;
+}
+
 /* Student Profile Dropdown*/
 .profile-dropdown {
     width: 220px;

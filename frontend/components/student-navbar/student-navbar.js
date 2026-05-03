@@ -105,19 +105,23 @@ async function loadNotifications() {
             
 
             announcements.forEach(a => {
+                const isEdited = a.updated_at && a.updated_at !== a.created_at;
+                const sort_time = isEdited ? a.updated_at : a.created_at;
                 notifications.push({
                     id: a.announcement_id,
                     course_code: course.course_code,
                     text: a.title,
-                    time: getTimeAgo(a.created_at),
-                    created_at: a.created_at
+                    created_at: a.created_at,
+                    updated_at: a.updated_at,
+                    isEdited: isEdited,
+                    sort_time: sort_time
                 });
             });
         }
 
-        // 3) เรียงใหม่ล่าสุดก่อน
+        // 3) เรียงใหม่ล่าสุดก่อน (ใช้ sort_time เพื่อให้ประกาศที่แก้ไขล่าสุดขึ้นก่อน)
         notifications.sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            (a, b) => new Date(b.sort_time) - new Date(a.sort_time)
         );
 
         currentNotifications = notifications;
@@ -143,7 +147,7 @@ function renderNotifications(notifications) {
     }
 
     const sorted = notifications.sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a, b) => new Date(b.sort_time) - new Date(a.sort_time)
     );
 
     sorted.slice(0, 10).forEach(n => {
@@ -156,13 +160,15 @@ function renderNotifications(notifications) {
 
 // create noti per each
 function createNotificationItem(n) {
+    const editedLabel = n.isEdited ? '<span class="notif-edited">Edited</span>' : '';
     return `
         <li class="notif-item">
             <div class="notif-subject-tag">${n.course_code}</div>
             <div class="notif-body">
                 <p class="notif-text">${n.text}</p>
-                <p class="notif-time">${getTimeAgo(n.created_at)}</p>
+                <p class="notif-time">${getTimeAgo(n.sort_time)} ${editedLabel}</p>
             </div>
+        </li>
     `;
 }
 

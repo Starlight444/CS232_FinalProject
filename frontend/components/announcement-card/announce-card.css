@@ -51,7 +51,7 @@
 .teacher {
     font-weight: 400;
     font-size: 12px;
-    margin-top: 6px;
+    margin-top: 3px;
 }
 
 .desc {
@@ -87,14 +87,90 @@
     margin-top: 6px;
 }
 
-.badge {
+
+
+.card-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.card-top-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.card-menu {
+    position: relative;
+}
+
+.btn-card-menu {
+    background: none;
+    border: none;
+    padding: 4px 5px;
+    cursor: pointer;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-card-menu:hover {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.card-menu-dropdown {
+    display: none;
     position: absolute;
-    right: 14px;
-    top: 14px;
-    background: #e53935;
+    right: 0;
+    right: 10px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    min-width: 160px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.card-menu-dropdown.open {
+    display: block;
+}
+
+.card-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    text-align: left;
+}
+
+.card-menu-item:hover {
+    background: #f3f4f6;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
     color: white;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 9px;
-    border-radius: 12px;
+    background-color: #e53935;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    line-height: 1;
+    white-space: nowrap;
 }
