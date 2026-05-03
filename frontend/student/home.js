@@ -42,10 +42,10 @@ function renderCalendar(assignments) {
   const now = new Date();
 
   document.querySelector('.cal-month').textContent =
-  now.toLocaleString('en-US', {
-    month: 'long',
-    year: 'numeric'
-  });
+    now.toLocaleString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
 
   const year = now.getFullYear();
   const month = now.getMonth(); // เดือนปัจจุบัน
@@ -132,8 +132,8 @@ async function loadHomeData() {
     const courses = courseJson;
 
     if (!courses || courses.length === 0) {
-    renderAssignmentList([]);
-    return;
+      renderAssignmentList([]);
+      return;
     }
 
     let allAssignments = [];
@@ -200,7 +200,7 @@ async function loadHomeData() {
           course_name: course.course_name,
           course_code: course.course_code,
           submission,
-            // ✅ เพิ่มอันนี้
+          // ✅ เพิ่มอันนี้
           submission_status: m.submission_status,
           // ฟิลด์เพิ่มสำหรับ external
           isExternal: m.isExternal,
@@ -410,13 +410,16 @@ function renderAnnouncements(announcements) {
     return;
   }
 
-  // เรียงใหม่ล่าสุดก่อน
-  const sorted = announcements.sort(
-    (a, b) => new Date(b.created_at) - new Date(a.created_at)
-  );
+  // เรียงใหม่ล่าสุดก่อน (ใช้ _raw.updated_at เพราะ normalizeAnnouncement ไม่ map updated_at ออกมา)
+  const sorted = announcements.sort((a, b) => {
+    const tA = a._raw?.updated_at || a.updated_at || a.created_at;
+    const tB = b._raw?.updated_at || b.updated_at || b.created_at;
+    return new Date(tB) - new Date(tA);
+  });
 
   // เอาแค่ 5 อันล่าสุด
   sorted.slice(0, 5).forEach(a => {
+    const updatedAt = a._raw?.updated_at || a.updated_at || null;
     const isExternal = !!a.isExternal;
     const externalUrl = a.external_url || '';
     const onclickAttr = isExternal && externalUrl
@@ -427,11 +430,13 @@ function renderAnnouncements(announcements) {
              <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
          </span>`
       : '';
+    const hasBeenEdited = updatedAt && updatedAt !== a.created_at;
+    const editedBadge = hasBeenEdited ? '<span class="ann-edited">Edited</span>' : '';
     container.innerHTML += `
       <div class="ann-item${isExternal ? ' is-external' : ''}" ${onclickAttr}>
         <div class="ann-item-title">${a.course_name} ${externalBadge}</div>
         <div class="ann-item-body">${a.title}</div>
-        <div class="ann-item-time">${getTimeAgo(a.created_at)}</div>
+        <div class="ann-item-time">${getTimeAgo(updatedAt || a.created_at)} ${editedBadge}</div>
       </div>
     `;
   });

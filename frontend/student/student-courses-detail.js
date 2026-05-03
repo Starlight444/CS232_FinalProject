@@ -23,7 +23,7 @@ function loadNavbar() {
         .then(data => {
             const container = document.getElementById('student-navbar-container') || document.getElementById('student-container');
             if (container) {
-                container.innerHTML = data; 
+                container.innerHTML = data;
             }
             const script = document.createElement('script');
             script.src = '../components/student-navbar/student-navbar.js';
@@ -127,7 +127,7 @@ const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
     window.location.href = "../auth/login.html";
 }
-const TOKEN   = userData ? userData.token   : '';
+const TOKEN = userData ? userData.token : '';
 const USER_ID = userData ? userData.user_id : '';
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -244,8 +244,8 @@ function renderAssignments(tasks) {
 
     tasks.forEach(task => {
         const dueDate = new Date(task.due_date);
-        const isSubmitted = task.status === 'submitted'; 
-        
+        const isSubmitted = task.status === 'submitted';
+
         const cardHTML = createCardHTML(task);
 
         if (isSubmitted) {
@@ -309,7 +309,7 @@ async function renderMembers(members) {
 
             const userData = await res.json();
 
-            const name = userData.data?.full_name 
+            const name = userData.data?.full_name
                 || `${userData.data?.first_name || ''} ${userData.data?.last_name || ''}`.trim()
                 || "Unknown";
 
@@ -381,12 +381,12 @@ function getRelativeTime(dueDate, isSubmitted) {
 
     const now = new Date();
     const diffInMs = dueDate - now;
-    
-    
+
+
     const diffInMin = Math.floor(diffInMs / (1000 * 60));
     const diffInHrs = Math.floor(diffInMs / (1000 * 60 * 60));
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    
+
     // 1. ถ้าเลยกำหนด (Past)
     if (diffInMs < 0) {
         const absDays = Math.abs(diffInDays);
@@ -453,9 +453,11 @@ async function fetchAnnouncements(courseId) {
             return;
         }
 
-        // เรียงประกาศล่าสุดไว้บนสุด
+        // เรียงประกาศล่าสุดไว้บนสุด โดยยึดเวลาแก้ไขเป็นหลัก(ถ้ามี)
         announcements = announcements.sort((a, b) => {
-            return new Date(b.created_at) - new Date(a.created_at);
+            const timeA = new Date(a._raw?.updated_at || a.updated_at || a.created_at);
+            const timeB = new Date(b._raw?.updated_at || b.updated_at || b.created_at);
+            return timeB - timeA;
         });
 
         const personIcon = `
@@ -469,7 +471,10 @@ async function fetchAnnouncements(courseId) {
         container.innerHTML = announcements.map((a, index) => {
             // ให้ NEW เฉพาะประกาศล่าสุดอันเดียวเท่านั้น
             const isLatest = index === 0;
-            const timeAgo = getTimeAgo(a.created_at);
+            const updatedAt = a._raw?.updated_at || a.updated_at || null;
+            const hasBeenEdited = updatedAt && updatedAt !== a.created_at;
+            const displayTime = hasBeenEdited ? updatedAt : a.created_at;
+            const timeAgo = getTimeAgo(displayTime);
 
             // External announcement -> เปิด link ภายนอกเมื่อคลิก
             const isExternal = !!a.isExternal;
@@ -481,6 +486,9 @@ async function fetchAnnouncements(courseId) {
                 ? `<span class="ext-badge" title="From external source">
                        <iconify-icon icon="ph:link-bold" width="12" height="12"></iconify-icon> External
                    </span>`
+                : '';
+            const editedLabel = hasBeenEdited
+                ? '<span class="announcement-edited">Edited</span>'
                 : '';
 
             return `
@@ -495,7 +503,7 @@ async function fetchAnnouncements(courseId) {
                             </div>
 
                             <p class="announcement-body">${a.content}</p>
-                            <span class="announcement-time">${timeAgo}</span>
+                            <span class="announcement-time">${getTimeAgo(displayTime)} ${editedLabel}</span>
                         </div>
                     </div>
                 </div>
@@ -538,23 +546,23 @@ const _MAT_ASSIGN = `<svg width="17" height="20" viewBox="0 0 17 20" xmlns="http
 </svg>`;
 
 const MATERIALS_WEEKS = [
-    { num: 1,  range: '6 January \u2013 12 January',    isNow: false, items: [{ type:'pdf', name:'Module_01.pdf' }, { type:'mp4', name:'Module_01.mp4' }] },
-    { num: 2,  range: '13 January \u2013 19 January',   isNow: false, items: [{ type:'pdf', name:'Module_02.pdf' }, { type:'mp4', name:'Module_02.mp4' }] },
-    { num: 3,  range: '20 January \u2013 26 January',   isNow: false, items: [{ type:'pdf', name:'Module_03.pdf' }, { type:'mp4', name:'Module_03.mp4' }] },
-    { num: 4,  range: '27 January \u2013 2 February',   isNow: false, items: [{ type:'pdf', name:'Module_04.pdf' }, { type:'mp4', name:'Module_04.mp4' }] },
-    { num: 5,  range: '3 February \u2013 9 February',   isNow: false, items: [{ type:'pdf', name:'Module_05.pdf' }, { type:'mp4', name:'Module_05.mp4' }] },
-    { num: 6,  range: '10 February \u2013 16 February', isNow: false, items: [{ type:'pdf', name:'Module_06.pdf' }, { type:'mp4', name:'Module_06.mp4' }] },
-    { num: 7,  range: '17 February \u2013 23 February', isNow: false, items: [{ type:'pdf', name:'Module_07.pdf' }, { type:'mp4', name:'Module_07.mp4' }] },
-    { num: 8,  range: '24 February \u2013 2 March',     isNow: false, items: [{ type:'pdf', name:'Module_08.pdf' }, { type:'mp4', name:'Module_08.mp4' }] },
-    { num: 9,  range: '3 March \u2013 9 March',         isNow: false, items: [{ type:'pdf', name:'Module_09.pdf' }, { type:'mp4', name:'Module_09.mp4' }] },
-    { num: 10, range: '10 March \u2013 16 March',       isNow: false, items: [{ type:'pdf', name:'Module_10.pdf' }, { type:'mp4', name:'Module_10.mp4' }] },
-    { num: 11, range: '17 March \u2013 23 March',       isNow: false, items: [{ type:'pdf', name:'Module_11.pdf' }, { type:'mp4', name:'Module_11.mp4' }] },
-    { num: 12, range: '24 March \u2013 30 March',       isNow: false, items: [{ type:'pdf', name:'Module_12.pdf' }, { type:'mp4', name:'Module_12.mp4' }] },
-    { num: 13, range: '31 March \u2013 6 April',        isNow: false, items: [{ type:'pdf', name:'Module_13.pdf' }, { type:'mp4', name:'Module_13.mp4' }] },
-    { num: 14, range: '7 April \u2013 13 April',        isNow: false, items: [{ type:'pdf', name:'Module_14.pdf' }, { type:'mp4', name:'Module_14.mp4' }] },
-    { num: 15, range: '14 April \u2013 20 April',       isNow: false, items: [{ type:'pdf', name:'Module_15.pdf' }, { type:'mp4', name:'Module_15.mp4' }] },
-    { num: 16, range: '21 April \u2013 27 April',       isNow: true,  items: [{ type:'pdf', name:'Module_16.pdf' }, { type:'mp4', name:'Module_16.mp4' }] },
-    { num: 17, range: '28 April \u2013 4 May',          isNow: false, items: [] },
+    { num: 1, range: '6 January \u2013 12 January', isNow: false, items: [{ type: 'pdf', name: 'Module_01.pdf' }, { type: 'mp4', name: 'Module_01.mp4' }] },
+    { num: 2, range: '13 January \u2013 19 January', isNow: false, items: [{ type: 'pdf', name: 'Module_02.pdf' }, { type: 'mp4', name: 'Module_02.mp4' }] },
+    { num: 3, range: '20 January \u2013 26 January', isNow: false, items: [{ type: 'pdf', name: 'Module_03.pdf' }, { type: 'mp4', name: 'Module_03.mp4' }] },
+    { num: 4, range: '27 January \u2013 2 February', isNow: false, items: [{ type: 'pdf', name: 'Module_04.pdf' }, { type: 'mp4', name: 'Module_04.mp4' }] },
+    { num: 5, range: '3 February \u2013 9 February', isNow: false, items: [{ type: 'pdf', name: 'Module_05.pdf' }, { type: 'mp4', name: 'Module_05.mp4' }] },
+    { num: 6, range: '10 February \u2013 16 February', isNow: false, items: [{ type: 'pdf', name: 'Module_06.pdf' }, { type: 'mp4', name: 'Module_06.mp4' }] },
+    { num: 7, range: '17 February \u2013 23 February', isNow: false, items: [{ type: 'pdf', name: 'Module_07.pdf' }, { type: 'mp4', name: 'Module_07.mp4' }] },
+    { num: 8, range: '24 February \u2013 2 March', isNow: false, items: [{ type: 'pdf', name: 'Module_08.pdf' }, { type: 'mp4', name: 'Module_08.mp4' }] },
+    { num: 9, range: '3 March \u2013 9 March', isNow: false, items: [{ type: 'pdf', name: 'Module_09.pdf' }, { type: 'mp4', name: 'Module_09.mp4' }] },
+    { num: 10, range: '10 March \u2013 16 March', isNow: false, items: [{ type: 'pdf', name: 'Module_10.pdf' }, { type: 'mp4', name: 'Module_10.mp4' }] },
+    { num: 11, range: '17 March \u2013 23 March', isNow: false, items: [{ type: 'pdf', name: 'Module_11.pdf' }, { type: 'mp4', name: 'Module_11.mp4' }] },
+    { num: 12, range: '24 March \u2013 30 March', isNow: false, items: [{ type: 'pdf', name: 'Module_12.pdf' }, { type: 'mp4', name: 'Module_12.mp4' }] },
+    { num: 13, range: '31 March \u2013 6 April', isNow: false, items: [{ type: 'pdf', name: 'Module_13.pdf' }, { type: 'mp4', name: 'Module_13.mp4' }] },
+    { num: 14, range: '7 April \u2013 13 April', isNow: false, items: [{ type: 'pdf', name: 'Module_14.pdf' }, { type: 'mp4', name: 'Module_14.mp4' }] },
+    { num: 15, range: '14 April \u2013 20 April', isNow: false, items: [{ type: 'pdf', name: 'Module_15.pdf' }, { type: 'mp4', name: 'Module_15.mp4' }] },
+    { num: 16, range: '21 April \u2013 27 April', isNow: true, items: [{ type: 'pdf', name: 'Module_16.pdf' }, { type: 'mp4', name: 'Module_16.mp4' }] },
+    { num: 17, range: '28 April \u2013 4 May', isNow: false, items: [] },
 ];
 
 const SEMESTER_START = new Date('2026-01-06T00:00:00');
@@ -664,9 +672,9 @@ function createCardHTML(task) {
     const dueDate = new Date(task.due_date);
     const isSubmitted = task.status === 'submitted';
     const isPast = dueDate < new Date() && !isSubmitted;
-    
+
     const relativeStatus = getRelativeTime(dueDate, isSubmitted);
-    
+
     const fullDeadline = dueDate.toLocaleString('en-GB', {
         day: 'numeric',
         month: 'short',

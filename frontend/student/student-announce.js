@@ -11,6 +11,7 @@ const USER_ID = userData ? userData.user_id : '';
 let allAnnouncements = [];
 let sortOrder = 'newest';
 let activeFilter = 'all';
+const creatorNameCache = {};
 
 // Load Components
 function loadSidebar() {
@@ -91,7 +92,7 @@ async function loadAnnouncements() {
             })
         );
         allAnnouncements = results.flat();
-
+        await resolveAnnouncementCreators(allAnnouncements);
 
         buildFilterOptions(courses);
         renderAnnouncements();
@@ -125,6 +126,61 @@ function buildFilterOptions(courses) {
     });
 }
 
+// ==========================================
+// ฟังก์ชันแสดงชื่อผู้สร้างประกาศ (สำหรับ internal)
+// ==========================================
+async function resolveAnnouncementCreators(announcements) {
+    const extractCreatorId = (creator) => {
+        if (!creator) return '';
+        if (typeof creator === 'string') return creator.trim();
+        if (typeof creator === 'object') return String(creator.user_id || creator.id || '').trim();
+        return '';
+    };
+
+    const ids = Array.from(new Set(
+        announcements
+            .filter(a => a.source === 'internal')
+            .map(a => extractCreatorId(a.created_by) || extractCreatorId(a._raw?.created_by))
+            .filter(id => id && !creatorNameCache[id])
+    ));
+
+    if (!ids.length) return;
+
+    const headers = { 'Authorization': `Bearer ${TOKEN}` };
+    const results = await Promise.all(ids.map(async user_id => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${user_id}`, { headers });
+            if (!res.ok) return null;
+            const json = await res.json();
+            const data = json.data || {};
+            const fullName = data.full_name || `${data.first_name || ''} ${data.last_name || ''}`.trim();
+            return { user_id, name: fullName || user_id };
+        } catch (err) {
+            console.error('Failed to fetch user name for', user_id, err);
+            return null;
+        }
+    }));
+
+    results.forEach(item => {
+        if (item?.user_id) {
+            creatorNameCache[item.user_id] = item.name;
+        }
+    });
+
+    announcements.forEach(a => {
+        if (a.source === 'internal') {
+            const rawCreator = a._raw?.created_by;
+            const id = extractCreatorId(a.created_by) || extractCreatorId(rawCreator);
+            const nameFromRaw = rawCreator?.name || (rawCreator?.first_name && rawCreator?.last_name)
+                ? `${rawCreator.first_name} ${rawCreator.last_name}`.trim()
+                : null;
+
+            a.created_by_name = nameFromRaw || (id ? creatorNameCache[id] : null) || id;
+            if (id) a.created_by = id;
+        }
+    });
+}
+
 // Render
 function renderAnnouncements() {
     const listEl = document.getElementById('announcement-list');
@@ -140,8 +196,8 @@ function renderAnnouncements() {
     });
 
     filtered.sort((a, b) => {
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
+        const dateA = new Date(a.updated_at || a.created_at);
+        const dateB = new Date(b.updated_at || b.created_at);
 
         // ถ้าเป็น newest เอาใหม่ขึ้นก่อน (b - a)
         // ถ้าเป็น oldest เอาเก่าขึ้นก่อน (a - b)

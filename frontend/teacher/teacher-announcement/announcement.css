@@ -25,6 +25,10 @@ body {
     margin: 0;
 }
 
+.teacher {
+    margin-top: -10px;
+}
+
 .btn-add-announce {
     display: inline-flex;
     align-items: center;

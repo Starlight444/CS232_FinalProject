@@ -358,15 +358,17 @@ function renderAnnouncements(announcements) {
   }
 
   const sorted = announcements.sort(
-    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    (a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)
   );
 
   sorted.slice(0, 5).forEach(a => {
+    const hasBeenEdited = a.updated_at && a.updated_at !== a.created_at;
+    const editedBadge = hasBeenEdited ? '<span class="ann-edited">Edited</span>' : '';
     container.innerHTML += `
       <div class="ann-card">
         <div class="ann-title">${a.title || "Untitled Announcement"}</div>
         <div class="ann-body">${a.course_code || "-"}</div>
-        <div class="ann-time">${getTimeAgo(a.created_at)}</div>
+        <div class="ann-time">${getTimeAgo(a.updated_at || a.created_at)} ${editedBadge}</div>
       </div>
     `;
   });
