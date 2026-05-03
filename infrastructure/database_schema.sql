@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status submission_status NOT NULL,
     score INT,
+    graded_at TIMESTAMP,
     feedback TEXT,
 
     CONSTRAINT fk_submission_assignment

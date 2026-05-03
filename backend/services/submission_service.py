@@ -1,5 +1,6 @@
 from models.submission_model import Submission
 from models.attachment_model import Attachment
+from datetime import datetime
 import uuid
 import os
 
@@ -13,53 +14,69 @@ class SubmissionService:
         self.attachment_repo = attachment_repo
         self.storage = storage
 
-    def submit_assignment(self, assignment_id, student_id, course_id, file):
+    def submit_assignment(self, assignment_id, student_id, course_id, files):
 
         role = self.member_repo.get_role(student_id, course_id)
 
         if not role or role != "student":
             raise Exception("Only students can submit assignments")
 
-        submission = Submission(
-            assignment_id=assignment_id,
-            student_id=student_id,
-            status="submitted"
-        )
+        existing = self.repo.find_submission(assignment_id, student_id)
 
-        created = self.repo.create(submission)
-
-        filename = file.filename
-        filetype = filename.split(".")[-1]
-        
-        if self.storage:
-            key = f"submissions/{assignment_id}/{student_id}/{uuid.uuid4()}"
-            file_url = self.storage.upload_file(file.file, key)
-
+        if existing:
+            existing.status = "submitted"
+            self.repo.update(existing)
+            submission_id = existing.submission_id
+            self.attachment_repo.delete_by_submission(submission_id)
         else:
-            os.makedirs("uploads/submissions", exist_ok=True)
+            submission = Submission(
+                assignment_id=assignment_id,
+                student_id=student_id,
+                status="submitted"
+            )
+            created = self.repo.create(submission)
+            submission_id = created.submission_id
 
-            unique_name = f"{uuid.uuid4()}_{filename}"
-            file_path = f"uploads/submissions/{unique_name}"
+        attachments = []
 
-            with open(file_path, "wb") as f:
-                file.file.seek(0)
-                f.write(file.file.read())
+        for file in files:
+            filename = file.filename
+            filetype = filename.split(".")[-1]
 
-            file_url = file_path
+            if self.storage:
+                key = f"submissions/{assignment_id}/{student_id}/{uuid.uuid4()}"
+                file_url = self.storage.upload_file(file.file, key)
 
+            else:
+                os.makedirs("uploads/submissions", exist_ok=True)
 
-        attachment = Attachment(
-            submission_id=created.submission_id,
-            file_name=filename,
-            file_url=file_url,
-            file_type=filetype
-        )
+                unique_name = f"{uuid.uuid4()}_{filename}"
+                file_path = f"uploads/submissions/{unique_name}"
 
-        self.attachment_repo.create(attachment)
+                with open(file_path, "wb") as f:
+                    file.file.seek(0)
+                    f.write(file.file.read())
+
+                file_url = file_path
+
+            attachment = Attachment(
+                submission_id=submission_id,
+                file_name=filename,
+                file_url=file_url,
+                file_type=filetype
+            )
+
+            created_attachment = self.attachment_repo.create(attachment)
+            attachments.append({
+                "attachment_id": str(created_attachment.attachment_id),
+                "file_name": created_attachment.file_name,
+                "file_url": created_attachment.file_url,
+                "file_type": created_attachment.file_type
+            })
 
         return {
-            "submission_id": str(created.submission_id),
-            "file_url": file_url
+            "submission_id": str(submission_id),
+            "attachments": attachments
         }
     
     def grade_submission(self, submission_id, grader_id, course_id, score, feedback):
@@ -77,6 +94,7 @@ class SubmissionService:
         submission.score = score
         submission.feedback = feedback
         submission.status = "graded"
+        submission.graded_at = datetime.utcnow()
 
 
         updated = self.repo.update(submission)

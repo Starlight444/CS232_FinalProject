@@ -29,3 +29,7 @@ class AttachmentRepository:
             .filter(Attachment.submission_id == submission_id)
             .all()
         )
+    
+    def delete_by_submission(self, submission_id):
+        self.db.query(Attachment).filter(Attachment.submission_id == submission_id).delete()
+        self.db.commit()
