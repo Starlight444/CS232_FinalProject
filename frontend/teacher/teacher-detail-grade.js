@@ -1,20 +1,8 @@
-<<<<<<< HEAD
-const BASE_URL = "http://127.0.0.1:8000";
-const urlParams = new URLSearchParams(window.location.search);
-const course_id = urlParams.get('course_id') || "83e1b5e0-c7e0-455e-9e47-56b48796bec6";
-function goBack() {
-  if (course_id) {
-    window.location.href = 'courses-detail/courses-detail.html?course_id=' + course_id;
-  } else {
-    history.back();
-  }
-}
-=======
 (() => {
   const gradeUrlParams = new URLSearchParams(window.location.search);
   const gradeCourseId = gradeUrlParams.get('course_id');
 
-  const GRADE_API_BASE_URL = 'http://127.0.0.1:8000';
+  const GRADE_API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
 
   const userData = JSON.parse(localStorage.getItem('user') || 'null');
   const TOKEN = userData ? userData.token : '';
@@ -48,7 +36,6 @@ function goBack() {
         if (navbar && navbarPlaceholder) {
           navbarPlaceholder.appendChild(navbar);
         }
->>>>>>> 942e99ee96bfebb78ecc1f35777f9547a673fa4a
 
         const sidebarScript = document.createElement('script');
         sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js?v=3';
@@ -81,33 +68,6 @@ function goBack() {
         }
       });
 
-<<<<<<< HEAD
-function loadTeacherSidebarNavbar() {
-  fetch('../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
-    .then(r => r.text())
-    .then(html => {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const sidebar = doc.querySelector('#sidebar');
-      const navbar = doc.querySelector('.navbar');
-      if (sidebar) document.getElementById('sidebar-placeholder').appendChild(sidebar);
-      if (navbar) document.getElementById('navbar-placeholder').appendChild(navbar);
-
-      const sidebarScript = document.createElement('script');
-      sidebarScript.src = '../components/teacher-sidebar-navbar/teacher-sidebar.js';
-      document.body.appendChild(sidebarScript);
-
-      const navbarScript = document.createElement('script');
-      navbarScript.src = '../components/teacher-sidebar-navbar/teacher-navbar.js';
-      document.body.appendChild(navbarScript);
-    })
-    .catch(err => console.error("Error loading sidebar/navbar:", err));
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  loadTeacherSidebarNavbar();
-});
-=======
       const result = await response.json().catch(() => null);
 
       if (!response.ok || !result || !result.data) {
@@ -269,4 +229,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 })();
->>>>>>> 942e99ee96bfebb78ecc1f35777f9547a673fa4a
