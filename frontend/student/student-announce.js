@@ -131,10 +131,17 @@ function buildFilterOptions(courses) {
 // ฟังก์ชันแสดงชื่อผู้สร้างประกาศ (สำหรับ internal)
 // ==========================================
 async function resolveAnnouncementCreators(announcements) {
+    const extractCreatorId = (creator) => {
+        if (!creator) return '';
+        if (typeof creator === 'string') return creator.trim();
+        if (typeof creator === 'object') return String(creator.user_id || creator.id || '').trim();
+        return '';
+    };
+
     const ids = Array.from(new Set(
         announcements
             .filter(a => a.source === 'internal')
-            .map(a => String(a.created_by || a._raw?.created_by || '').trim())
+            .map(a => extractCreatorId(a.created_by) || extractCreatorId(a._raw?.created_by))
             .filter(id => id && !creatorNameCache[id])
     ));
 
@@ -163,11 +170,14 @@ async function resolveAnnouncementCreators(announcements) {
 
     announcements.forEach(a => {
         if (a.source === 'internal') {
-            const id = String(a.created_by || a._raw?.created_by || '').trim();
-            if (id) {
-                a.created_by_name = creatorNameCache[id] || id;
-                a.created_by = id;
-            }
+            const rawCreator = a._raw?.created_by;
+            const id = extractCreatorId(a.created_by) || extractCreatorId(rawCreator);
+            const nameFromRaw = rawCreator?.name || (rawCreator?.first_name && rawCreator?.last_name)
+                ? `${rawCreator.first_name} ${rawCreator.last_name}`.trim()
+                : null;
+
+            a.created_by_name = nameFromRaw || (id ? creatorNameCache[id] : null) || id;
+            if (id) a.created_by = id;
         }
     });
 }
@@ -187,8 +197,8 @@ function renderAnnouncements() {
     });
 
     filtered.sort((a, b) => {
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
+        const dateA = new Date(a.updated_at || a.created_at);
+        const dateB = new Date(b.updated_at || b.created_at);
 
         // ถ้าเป็น newest เอาใหม่ขึ้นก่อน (b - a)
         // ถ้าเป็น oldest เอาเก่าขึ้นก่อน (a - b)

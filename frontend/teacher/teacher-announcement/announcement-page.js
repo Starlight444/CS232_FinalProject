@@ -246,8 +246,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         filtered.sort((a, b) => {
-            const dateA = new Date(a.created_at || 0);
-            const dateB = new Date(b.created_at || 0);
+            const dateA = new Date(a.updated_at || a.created_at || 0);
+            const dateB = new Date(b.updated_at || b.created_at || 0);
             const diff = dateB - dateA;
 
             return sortOrder === 'newest' ? diff : -diff;
@@ -260,7 +260,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ใช้ createAnnouncementCard จาก announce-card.js
         listEl.innerHTML = filtered
-            .map((a, i) => createAnnouncementCard(a, i))
+            .map((a, i) => createAnnouncementCard(a, i, {
+                editUrl: String(a.created_by) === String(USER_ID)
+                    ? `announcement-create.html?mode=edit&id=${a.announcement_id}`
+                    : null
+            }))
             .join('');
     }
 
@@ -316,6 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 filterDropdown.classList.remove('open');
                 filterBtn.classList.remove('active');
             }
+            document.querySelectorAll('.card-menu-dropdown.open').forEach(d => d.classList.remove('open'));
         });
 
         filterDropdown.addEventListener('click', e => {

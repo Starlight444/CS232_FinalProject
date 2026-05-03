@@ -50,7 +50,7 @@ function isNew(dateString) {
     return (Date.now() - new Date(dateString)) / 3600000 < 24;
 }
 
-function createAnnouncementCard(announcement, index) {
+function createAnnouncementCard(announcement, index, options = {}) {
     const color = getCardColor(announcement.course_id ?? index);
     const teacher = announcement.created_by_name || announcement.created_by?.name || String(announcement.created_by ?? '');
 
@@ -68,6 +68,23 @@ function createAnnouncementCard(announcement, index) {
            </span>`
         : '';
 
+    const editUrl = options.editUrl || null;
+    const cardMenu = editUrl
+        ? `<div class="card-menu">
+               <button class="btn-card-menu"
+                   onclick="event.stopPropagation(); document.querySelectorAll('.card-menu-dropdown.open').forEach(function(d){ if(d !== this.nextElementSibling) d.classList.remove('open'); }.bind(this)); this.nextElementSibling.classList.toggle('open');"
+                   title="ตัวเลือก">
+                   <iconify-icon icon="bx:dots-vertical-rounded" width="20" height="20"></iconify-icon>
+               </button>
+               <div class="card-menu-dropdown">
+                   <button class="card-menu-item" onclick="event.stopPropagation(); window.location.href='${editUrl}'">
+                       <iconify-icon icon="bx:edit" width="14" height="14"></iconify-icon>
+                       แก้ไขประกาศ
+                   </button>
+               </div>
+           </div>`
+        : '';
+
     // External ไม่ส่ง content มา → แสดง CTA ลิงก์ไป Moodle แทน
     const rawContent = announcement.content ?? '';
     const descHtml = (isExternal && !rawContent && externalUrl)
@@ -79,22 +96,32 @@ function createAnnouncementCard(announcement, index) {
         ? (announcement.author || '')
         : (teacher || '');
 
+    const updatedAt = announcement._raw?.updated_at || announcement.updated_at || null;
+    const hasBeenEdited = updatedAt && updatedAt !== announcement.created_at;
+    const displayTime = hasBeenEdited ? updatedAt : announcement.created_at;
+    const editedBadge = hasBeenEdited ? '<span class="edited-badge">Edited</span>' : '';
+    const timeDisplay = `<div class="time">${formatTime(displayTime)} ${editedBadge}</div>`;
+
     return `
         <div class="card${isExternal ? ' is-external' : ''}" ${externalAttrs}
              onclick="${isExternal && externalUrl ? `window.open('${externalUrl}','_blank','noopener,noreferrer')` : ''}">
             <div class="card-bar" style="background:${color}"></div>
 
             <div class="card-content">
-                <div class="course-info" style="font-weight: bold; color: ${color}; font-size: 0.85em;">
-                    ${announcement.course_code ?? announcement.course_name ?? 'Unknown Course'} ${externalBadge}
+                <div class="card-header-row">
+                    <div class="course-info" style="font-weight: bold; color: ${color}; font-size: 0.85em;">
+                        ${announcement.course_code ?? announcement.course_name ?? 'Unknown Course'} ${externalBadge}
+                    </div>
+                    <div class="card-top-right">
+                        ${isNew(announcement.created_at) ? '<span class="badge">New</span>' : ''}
+                        ${cardMenu}
+                    </div>
                 </div>
                 <div class="teacher">${authorLine}</div>
                 <h3 class="title">${announcement.title ?? ''}</h3>
                 ${descHtml}
-                <div class="time">${formatTime(announcement.created_at)}</div>
+                ${timeDisplay}
             </div>
-
-            ${isNew(announcement.created_at) ? '<div class="badge">New</div>' : ''}
         </div>
     `;
 }
