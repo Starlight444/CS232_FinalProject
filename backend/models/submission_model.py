@@ -15,6 +15,7 @@ class Submission(Base):
     student_id = Column(UUID, nullable=False)
 
     submitted_at = Column(DateTime, default=datetime.utcnow)
+    graded_at = Column(DateTime, nullable=True)
 
     status = Column(String, default="submitted")
 

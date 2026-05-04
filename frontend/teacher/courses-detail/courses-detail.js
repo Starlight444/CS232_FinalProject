@@ -1,5 +1,5 @@
 // ── Auth & URL params ──────────────────────────────────────────────────────
-const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
+const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
 const userData = JSON.parse(localStorage.getItem('user'));
 if (!userData || !userData.token) {

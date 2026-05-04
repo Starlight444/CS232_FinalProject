@@ -196,10 +196,13 @@ body.sidebar-collapsed .main-content {
 /*Submit button*/
 .submit-bar {
     margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .submit-btn {
-    width: 100%;
+    flex: 1;
     padding: 14px;
     background: linear-gradient(0deg, #6E6CDF 0%, #6E6CDF 100%);
     color: #fff;
@@ -209,6 +212,25 @@ body.sidebar-collapsed .main-content {
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.cancel-btn {
+    flex: 1;
+    padding: 14px;
+    background: #fff;
+    color: #6E6CDF;
+    font-size: 16px;
+    font-weight: 700;
+    border: 2px solid #6E6CDF;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-items: center;
+    justify-content: center;
+}
+
+.cancel-btn:hover {
+    background: #f3f3ff;
 }
 
 .submit-btn:hover {
@@ -222,11 +244,261 @@ body.sidebar-collapsed .main-content {
 
 .submit-btn.submitted:hover {
     background: #6E6CDF;
-    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
 }
 
 .submit-timestamp {
     font-size: 12px;
-    margin-top: 5px;
+    margin-top: 0;
+    width: 100%;
+}
 
+/* Format badges */
+.format-badges-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.format-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border: 1px solid #e0e0ec;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #555;
+    background: #fff;
+}
+
+/* Teacher attached file button */
+.teacher-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border: 1px solid #e0e0ec;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.teacher-file-btn:hover {
+    background: #f5f5fb;
+}
+
+/* My work file list (Teams-style) */
+.my-work-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.work-file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e0e0ec;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.work-file-row-name {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+}
+
+.work-file-row-name:hover {
+    color: #6E6CDF;
+    text-decoration: underline;
+}
+
+.file-menu-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.work-file-row-menu {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #bbb;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.work-file-row-menu:hover {
+    background: #ebebf5;
+    color: #555;
+}
+
+.file-row-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: #fff;
+    border: 1px solid #e4e4f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
+    z-index: 200;
+    min-width: 160px;
+    overflow: hidden;
+    display: none;
+    padding: 4px;
+}
+
+.dropdown-option {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 500;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 6px;
+    transition: background 0.12s;
+}
+
+.dropdown-option:hover {
+    background: #f4f4fb;
+}
+
+.dropdown-option-danger {
+    color: #e53935;
+}
+
+.dropdown-option-danger:hover {
+    background: #fff1f1;
+}
+
+/* Drop zone upload */
+.drop-zone {
+    border: 2px dashed #c8c8dc;
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafafa;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #555;
+}
+
+.drop-zone.dragover {
+    border-color: #7c6fc4;
+    background: rgba(124, 111, 196, 0.04);
+}
+
+.drop-zone.locked {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.browse-link {
+    color: #6E6CDF;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Assign header layout */
+.assign-header-left {
+    flex: 1;
+}
+
+.assign-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Returned line */
+.assign-returned {
+    font-size: 12px;
+    color: #6E6CDF;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+/* Grade at top right */
+.assign-grade-top {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    text-align: right;
+}
+
+.assign-grade-score {
+    font-size: 22px;
+    font-weight: 700;
+    color: #6E6CDF;
+}
+
+.assign-grade-slash {
+    font-size: 16px;
+    color: #aaa;
+}
+
+.assign-grade-max {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+}
+
+.assign-grade-pts {
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* Feedback section */
+.grade-feedback-box {
+    border: 1px solid #e0e0ec;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: #fafafa;
+}
+
+.grade-feedback-text {
+    font-size: 14px;
+    color: #333;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin: 0;
 }

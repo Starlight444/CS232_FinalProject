@@ -1,4 +1,4 @@
-const BASE_URL = "https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com";
+const BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
 
 const colorMap = {
   "CS222": "#E8926A",

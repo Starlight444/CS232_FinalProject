@@ -13,7 +13,7 @@ let currentNotifications = [];
 
 const user = JSON.parse(localStorage.getItem("user")); //ดึงข้อมูล user จาก local storage
 
-const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
+const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
 //เปิด Notification Dropdown
 bellBtn.addEventListener('click', (e) => {

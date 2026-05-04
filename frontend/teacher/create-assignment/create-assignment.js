@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
+    const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
     const userData = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const USER_ID = userData.user_id;
 
     const urlParams = new URLSearchParams(window.location.search);
+    const assignmentIdFromUrl = urlParams.get('id') || '';
     const courseIdFromUrl = urlParams.get('course_id') || '';
+    const isEditMode = Boolean(assignmentIdFromUrl);
 
     // ==========================================
     // Go to assignment manage page
@@ -21,6 +23,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function goTo(assignmentId, courseId) {
         window.location.href =
             `../teacher-assign-manage/teacher-assign-manage.html?id=${assignmentId}&course_id=${courseId}`;
+    }
+
+    function formatDateTimeLocal(value) {
+        if (!value) return '';
+
+        const date = new Date(value);
+        if (isNaN(date)) return '';
+
+        const pad = n => String(n).padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
 
     // ==========================================
@@ -122,8 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    await loadTeacherCourses();
-
     // ==========================================
     // File type checkbox
     // ==========================================
@@ -157,12 +167,102 @@ document.addEventListener('DOMContentLoaded', async () => {
         return selected.length > 0 ? selected.join(',') : 'any';
     }
 
+    function applyAllowedFileTypes(allowedFileTypes) {
+        const allowed = (allowedFileTypes || 'any')
+            .split(',')
+            .map(type => type.trim().toLowerCase())
+            .filter(Boolean);
+
+        const isAny = allowed.length === 0 || allowed.includes('any');
+
+        if (anyCheckbox) {
+            anyCheckbox.checked = isAny;
+        }
+
+        formatCheckboxes.forEach(cb => {
+            cb.checked = !isAny && allowed.includes(cb.value.toLowerCase());
+        });
+    }
+
+    async function loadAssignmentForEdit() {
+        if (!isEditMode) return;
+
+        const pageTitle = document.getElementById('page-title');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (pageTitle) pageTitle.textContent = 'Edit Assignment';
+        if (submitBtn) submitBtn.textContent = 'Save';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/assignments/detail/${assignmentIdFromUrl}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`
+                }
+            });
+
+            const result = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                throw new Error(result?.detail || `HTTP ${response.status}`);
+            }
+
+            const assignment = result?.data || {};
+            const titleEl = document.getElementById('assign-title');
+            const courseEl = document.getElementById('assign-course');
+            const descEl = document.getElementById('assign-desc');
+            const dateEl = document.getElementById('assign-date');
+            const pointsEl = document.getElementById('assign-points');
+
+            if (titleEl) titleEl.value = assignment.title || '';
+            if (courseEl) courseEl.value = assignment.course_id || courseIdFromUrl || '';
+            if (descEl) descEl.value = assignment.description || '';
+            if (dateEl) dateEl.value = formatDateTimeLocal(assignment.due_date);
+            if (pointsEl) pointsEl.value = assignment.max_score ?? 0;
+
+            applyAllowedFileTypes(assignment.allowed_file_types);
+        } catch (error) {
+            console.error('Error loading assignment for edit:', error);
+            alert('Failed to load assignment: ' + error.message);
+            history.back();
+        }
+    }
+
+    await loadTeacherCourses();
+    await loadAssignmentForEdit();
+
     // ==========================================
     // Upload file UI
     // ==========================================
-    let selectedTeacherFile = null;
+    let selectedTeacherFiles = [];
     const dropZone = document.getElementById('drop-zone');
     let fileInput = document.getElementById('file-upload');
+
+    function escapeHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function getSelectedFilePanel() {
+        let panel = document.getElementById('selected-file-panel');
+
+        if (!panel && dropZone) {
+            panel = document.createElement('div');
+            panel.id = 'selected-file-panel';
+            panel.className = 'selected-file-panel';
+            dropZone.insertAdjacentElement('afterend', panel);
+        }
+
+        return panel;
+    }
+
+    function addTeacherFiles(files) {
+        selectedTeacherFiles = selectedTeacherFiles.concat(Array.from(files));
+        updateFileUI();
+    }
 
     function bindFileInput() {
         fileInput = document.getElementById('file-upload');
@@ -171,21 +271,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                selectedTeacherFile = e.target.files[0];
-                updateFileUI(selectedTeacherFile);
+                addTeacherFiles(e.target.files);
             }
+            fileInput.value = '';
         });
     }
 
-    function updateFileUI(file) {
-        if (!dropZone || !file) return;
+    function updateFileUI() {
+        const panel = getSelectedFilePanel();
+        if (!panel) return;
 
-        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        if (selectedTeacherFiles.length === 0) {
+            panel.innerHTML = '';
+            return;
+        }
 
-        dropZone.innerHTML = `
-            <iconify-icon icon="ph:file-text-duotone" width="40" style="color: #6366f1;"></iconify-icon>
-            <p style="margin: 8px 0; font-weight: 500; color: #1f2937;">${file.name}</p>
-            <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #6b7280;">Size: ${fileSizeMB} MB</p>
+        const totalSizeMB = selectedTeacherFiles
+            .reduce((sum, file) => sum + file.size, 0) / (1024 * 1024);
+
+        const fileListHtml = selectedTeacherFiles.map((file, index) => {
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            return `
+                <li class="selected-file-item">
+                    <iconify-icon icon="ph:file-text-duotone" width="18" style="color: #6366f1;"></iconify-icon>
+                    <span>${escapeHtml(file.name)}</span>
+                    <small>${fileSizeMB} MB</small>
+                    <button class="selected-file-remove" type="button" data-file-index="${index}" aria-label="Remove file">
+                        <iconify-icon icon="ph:x-bold" width="14" height="14"></iconify-icon>
+                    </button>
+                </li>
+            `;
+        }).join('');
+
+        panel.innerHTML = `
+            <p style="margin: 12px 0 8px; font-weight: 500; color: #1f2937;">${selectedTeacherFiles.length} file${selectedTeacherFiles.length > 1 ? 's' : ''} selected</p>
+            <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #6b7280;">Total size: ${totalSizeMB.toFixed(2)} MB</p>
+            <ul class="selected-file-list">${fileListHtml}</ul>
             <button
                 type="button"
                 id="remove-file-btn"
@@ -195,13 +316,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             </button>
         `;
 
+        panel.querySelectorAll('.selected-file-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = Number(btn.dataset.fileIndex);
+                selectedTeacherFiles.splice(index, 1);
+                updateFileUI();
+            });
+        });
+
         const removeBtn = document.getElementById('remove-file-btn');
 
         if (removeBtn) {
             removeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                selectedTeacherFile = null;
-                resetFileUI();
+                selectedTeacherFiles = [];
+                updateFileUI();
             });
         }
     }
@@ -234,8 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             dropZone.classList.remove('dragover');
 
             if (e.dataTransfer.files.length > 0) {
-                selectedTeacherFile = e.dataTransfer.files[0];
-                updateFileUI(selectedTeacherFile);
+                addTeacherFiles(e.dataTransfer.files);
             }
         });
     }
@@ -255,7 +383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.8';
-            submitBtn.innerHTML = 'Posting...';
+            submitBtn.innerHTML = isEditMode ? 'Saving...' : 'Posting...';
 
             try {
                 const selectedCourseId = document.getElementById('assign-course').value;
@@ -291,8 +419,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 console.log('CREATE ASSIGNMENT PAYLOAD:', payload);
 
-                const response = await fetch(`${API_BASE_URL}/assignments/`, {
-                    method: 'POST',
+                const assignmentUrl = isEditMode
+                    ? `${API_BASE_URL}/assignments/${assignmentIdFromUrl}`
+                    : `${API_BASE_URL}/assignments/`;
+
+                const response = await fetch(assignmentUrl, {
+                    method: isEditMode ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${TOKEN}`
@@ -309,45 +441,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                     throw new Error(responseData?.detail || responseData?.message || `HTTP ${response.status}`);
                 }
 
-                const assignmentId = responseData?.data?.assignment_id;
+                const assignmentId = responseData?.data?.assignment_id || assignmentIdFromUrl;
 
                 if (!assignmentId) {
-                    throw new Error('Assignment created but assignment_id was not returned.');
+                    throw new Error('Assignment saved but assignment_id was not returned.');
                 }
 
-                // Upload file after assignment created
-                if (selectedTeacherFile) {
-                    try {
-                        submitBtn.innerHTML = 'Uploading file...';
+                // Upload files after assignment created/updated.
+                if (selectedTeacherFiles.length > 0) {
+                    let uploadFailed = false;
 
+                    for (let i = 0; i < selectedTeacherFiles.length; i++) {
+                        const file = selectedTeacherFiles[i];
+                        submitBtn.innerHTML = `Uploading file ${i + 1}/${selectedTeacherFiles.length}...`;
                         const fileFormData = new FormData();
-                        fileFormData.append('file', selectedTeacherFile);
+                        fileFormData.append('file', file);
 
-                        const uploadResponse = await fetch(`${API_BASE_URL}/attachments/assignment/${assignmentId}`, {
-                            method: 'POST',
-                            headers: {
-                                Authorization: `Bearer ${TOKEN}`
-                            },
-                            body: fileFormData
-                        });
+                        try {
+                            const uploadResponse = await fetch(`${API_BASE_URL}/attachments/assignment/${assignmentId}`, {
+                                method: 'POST',
+                                headers: {
+                                    Authorization: `Bearer ${TOKEN}`
+                                },
+                                body: fileFormData
+                            });
 
-                        const uploadData = await uploadResponse.json().catch(() => null);
+                            const uploadData = await uploadResponse.json().catch(() => null);
 
-                        console.log('UPLOAD STATUS:', uploadResponse.status);
-                        console.log('UPLOAD RESPONSE:', uploadData);
+                            console.log('UPLOAD STATUS:', uploadResponse.status);
+                            console.log('UPLOAD RESPONSE:', uploadData);
 
-                        if (!uploadResponse.ok) {
-                            console.warn('File upload failed:', uploadData);
-                            alert('Assignment created, but file upload failed.');
+                            if (!uploadResponse.ok) {
+                                console.warn('File upload failed:', uploadData);
+                                uploadFailed = true;
+                            }
+                        } catch (uploadError) {
+                            console.warn('File upload error:', uploadError);
+                            uploadFailed = true;
                         }
+                    }
 
-                    } catch (uploadError) {
-                        console.warn('File upload error:', uploadError);
-                        alert('Assignment created, but file upload failed.');
+                    if (uploadFailed) {
+                        alert('Assignment saved, but some files failed to upload.');
                     }
                 }
 
-                alert('Assignment created successfully.');
+                alert(isEditMode ? 'Assignment updated successfully.' : 'Assignment created successfully.');
 
                 // ส่งต่อ assignment ไปหน้า teacher-assign-manage
                 goTo(assignmentId, selectedCourseId);
@@ -356,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('Submit Error:', error);
 
                 if (!['No course selected', 'No title', 'No due date'].includes(error.message)) {
-                    alert('Create assignment failed: ' + error.message);
+                    alert((isEditMode ? 'Update' : 'Create') + ' assignment failed: ' + error.message);
                 }
 
                 submitBtn.disabled = false;

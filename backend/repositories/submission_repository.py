@@ -46,10 +46,15 @@ class SubmissionRepository:
                     "submitted_at": submission.submitted_at,
                     "status": submission.status,
                     "score": submission.score,
+                    "feedback": submission.feedback,
                     "attachments": []
                 }
             if attachment:
-                submission_map[sid]["attachments"].append(attachment.file_url)
+                submission_map[sid]["attachments"].append({
+                    "file_name": attachment.file_name,
+                    "file_url": attachment.file_url,
+                    "file_type": attachment.file_type
+                })
 
         return list(submission_map.values())
     
@@ -76,6 +81,17 @@ class SubmissionRepository:
             .scalar()
         )
     
+    def find_submission(self, assignment_id, student_id):
+        return (
+            self.db.query(Submission)
+            .filter(
+                Submission.assignment_id == assignment_id,
+                Submission.student_id == student_id
+            )
+            .order_by(Submission.submitted_at.desc())
+            .first()
+        )
+    
     def get_by_assignment_and_student(self, assignment_id, student_id):
         submission = (
             self.db.query(Submission)
@@ -83,6 +99,7 @@ class SubmissionRepository:
                 Submission.assignment_id == assignment_id,
                 Submission.student_id == student_id
             )
+            .order_by(Submission.submitted_at.desc())
             .first()
         )
         if not submission:
@@ -97,6 +114,8 @@ class SubmissionRepository:
             "submission_id": submission.submission_id,
             "status": submission.status,
             "submitted_at": submission.submitted_at,
+            "graded_at": submission.graded_at,
             "score": submission.score,
+            "feedback": submission.feedback,
             "attachments": [a.file_url for a in attachments]
         }

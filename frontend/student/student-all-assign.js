@@ -23,7 +23,7 @@ fetch('../components/student-navbar/student-navbar.html')
 
 
 // api
-const BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
+const BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));

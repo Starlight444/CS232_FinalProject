@@ -73,6 +73,49 @@ class AssignmentService:
             "status": a.status,
             "submit_count": count
         }
+
+    def update_assignment(
+        self,
+        assignment_id,
+        title,
+        description,
+        due_date,
+        max_score,
+        course_id,
+        user_id,
+        allowed_file_types
+    ):
+        assignment = self.repo.get_by_id(assignment_id)
+
+        if not assignment:
+            return None
+
+        role = self.member_repo.get_role(user_id, course_id)
+
+        if not role or getattr(role, "value", role) not in ["teacher", "ta"]:
+            raise Exception("Only teacher or TA can update assignments")
+
+        assignment.title = title
+        assignment.description = description
+        assignment.due_date = due_date
+        assignment.max_score = max_score
+        assignment.course_id = course_id
+        assignment.allowed_file_types = allowed_file_types
+
+        return self.repo.update(assignment)
+
+    def delete_assignment(self, assignment_id, user_id):
+        assignment = self.repo.get_by_id(assignment_id)
+
+        if not assignment:
+            return None
+
+        role = self.member_repo.get_role(user_id, assignment.course_id)
+
+        if not role or getattr(role, "value", role) not in ["teacher", "ta"]:
+            raise Exception("Only teacher or TA can delete assignments")
+
+        return self.repo.delete(assignment_id)
     
     def get_all_assignments(self, user_id, course_repo, external_repo):
         result = []

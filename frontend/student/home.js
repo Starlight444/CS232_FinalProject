@@ -1,4 +1,4 @@
-const BASE_URL = "https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com";
+const BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
 
 fetch('../components/student-sidebar/sidebar.html')
   .then(response => response.text())

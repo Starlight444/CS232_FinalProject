@@ -88,7 +88,7 @@ function changeWeek(days) {
 renderCalendar();
 
 // ── API ──
-const API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
+const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
 // --- Dashboard Summary ---
 async function updateDashboardSummary() {

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Depends, Form
 from sqlalchemy.orm import Session
+from typing import List
 from uuid import UUID
 
 from database import get_db
@@ -39,7 +40,7 @@ async def submit_assignment(
     assignment_id: UUID = Form(...),
     course_id: UUID = Form(...),
     student_id: UUID = Form(...),
-    file: UploadFile = File(...),
+    file: List[UploadFile] = File(...),
     db: Session = Depends(get_db)
 ):
 
