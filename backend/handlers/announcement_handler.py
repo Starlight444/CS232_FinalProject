@@ -6,11 +6,9 @@ from database import get_db
 
 from repositories.course_repository import CourseRepository
 from repositories.announcement_repository import AnnouncementRepository
+from repositories.external_announcement_repository import ExternalAnnouncementRepository
 
 from services.announcement_service import AnnouncementService
-
-
-
 
 from dependencies import get_current_user_id
 from config import Settings

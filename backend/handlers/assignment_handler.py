@@ -9,13 +9,9 @@ from database import get_db
 from repositories.course_repository import CourseRepository
 from repositories.assignment_repository import AssignmentRepository
 from repositories.course_member_repository import CourseMemberRepository
-
-
+from repositories.external_assignment_repository import ExternalAssignmentRepository
 
 from services.assignment_service import AssignmentService
-
-
-from config import Settings
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
 
