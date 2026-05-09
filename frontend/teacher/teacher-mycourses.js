@@ -67,7 +67,7 @@ function renderCourses(courses) {
         return;
       }
 
-      window.location.href = `../courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
+      window.location.href = `../teacher/courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
     });
 
     grid.appendChild(card);

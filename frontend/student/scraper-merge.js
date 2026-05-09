@@ -27,11 +27,14 @@
 //   POST /assignments/sync    -> { success, mode, data: [...scraped raw...] }
 //   POST /announcements/sync  -> { success, mode, data: [...scraped raw...] }
 // per-course filter ทำที่ฝั่ง client โดยใช้ field `course_id`
+const API_BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
+const SCRAPER_BASE_URL = "http://54.237.5.32:8080";
+
 const SCRAPER_ENDPOINTS = {
     mergedAssignmentsAll: () => `/assignments/all`,
     mergedAnnouncementsAll: () => `/announcements/all`,
-    syncAssignments: () => `/assignments/sync`,
-    syncAnnouncements: () => `/announcements/sync`,
+    syncAssignments: () => `/sync/assignments`,
+    syncAnnouncements: () => `/sync/announcements`,
 };
 
 // -------------------------------------------------------------------------
@@ -142,11 +145,11 @@ async function _fetchJson(baseUrl, path, token) {
  * ดึง assignments ทั้งหมดของ user (internal + external รวมกัน)
  * @returns {Promise<Array>} normalized assignments (ยังไม่ filter)
  */
-function fetchAllMergedAssignments(baseUrl, token, { force = false } = {}) {
+function fetchAllMergedAssignments(token, { force = false } = {}) {
     if (!force && _cache.assignments) return _cache.assignments;
     const p = (async () => {
         try {
-            const list = await _fetchJson(baseUrl, SCRAPER_ENDPOINTS.mergedAssignmentsAll(), token);
+            const list = await _fetchJson(API_BASE_URL, SCRAPER_ENDPOINTS.mergedAssignmentsAll(), token);
             return list.map(item => normalizeAssignment(item));
         } catch (err) {
             console.warn('[scraper-merge] /assignments/all failed:', err);
@@ -163,8 +166,8 @@ function fetchAllMergedAssignments(baseUrl, token, { force = false } = {}) {
  * — ใช้ /assignments/all แล้ว filter ด้วย course_id ใน client
  *   (cache ทำให้ลูปวนทุกวิชายิง backend ครั้งเดียว)
  */
-async function fetchMergedAssignments(baseUrl, courseId, token, course = {}) {
-    const all = await fetchAllMergedAssignments(baseUrl, token);
+async function fetchMergedAssignments(courseId, token, course = {}) {
+    const all = await fetchAllMergedAssignments(token);
     return all
         .filter(a => a.course_id === courseId)
         .map(a => ({
@@ -177,11 +180,11 @@ async function fetchMergedAssignments(baseUrl, courseId, token, course = {}) {
 /**
  * ดึง announcements ทั้งหมด (รอ backend confirm endpoint จริง)
  */
-function fetchAllMergedAnnouncements(baseUrl, token, { force = false } = {}) {
+function fetchAllMergedAnnouncements(token, { force = false } = {}) {
     if (!force && _cache.announcements) return _cache.announcements;
     const p = (async () => {
         try {
-            const list = await _fetchJson(baseUrl, SCRAPER_ENDPOINTS.mergedAnnouncementsAll(), token);
+            const list = await _fetchJson(API_BASE_URL, SCRAPER_ENDPOINTS.mergedAnnouncementsAll(), token);
             return list.map(item => normalizeAnnouncement(item));
         } catch (err) {
             console.warn('[scraper-merge] /announcements/all failed:', err);
@@ -196,8 +199,8 @@ function fetchAllMergedAnnouncements(baseUrl, token, { force = false } = {}) {
 /**
  * Backward-compat: ดึง announcements ของวิชาเดียว
  */
-async function fetchMergedAnnouncements(baseUrl, courseId, token, course = {}) {
-    const all = await fetchAllMergedAnnouncements(baseUrl, token);
+async function fetchMergedAnnouncements(courseId, token, course = {}) {
+    const all = await fetchAllMergedAnnouncements(token);
     return all
         .filter(a => a.course_id === courseId)
         .map(a => ({
@@ -237,10 +240,10 @@ async function _postSync(baseUrl, path, token) {
  * @returns {Promise<{ assignments: boolean, announcements: boolean, ok: boolean }>}
  *   `ok` จะเป็น true เมื่อทั้งสองสำเร็จ
  */
-async function triggerScraperSync(baseUrl, token) {
+async function triggerScraperSync(token) {
     const [assignments, announcements] = await Promise.all([
-        _postSync(baseUrl, SCRAPER_ENDPOINTS.syncAssignments(), token),
-        _postSync(baseUrl, SCRAPER_ENDPOINTS.syncAnnouncements(), token),
+        _postSync(SCRAPER_BASE_URL, SCRAPER_ENDPOINTS.syncAssignments(), token),
+        _postSync(SCRAPER_BASE_URL, SCRAPER_ENDPOINTS.syncAnnouncements(), token),
     ]);
     return { assignments, announcements, ok: assignments && announcements };
 }
@@ -249,11 +252,11 @@ async function triggerScraperSync(baseUrl, token) {
  * Bind ปุ่ม sync ใน DOM กับการเรียก backend แล้ว reload list หลัง sync เสร็จ
  *
  * @param {HTMLElement} btn        - element ปุ่ม
- * @param {string}      baseUrl
  * @param {string}      token
  * @param {Function}    reloadFn   - ฟังก์ชันโหลดข้อมูลใหม่ (เช่น fetchAssignments)
  */
-function bindSyncButton(btn, baseUrl, token, reloadFn) {
+
+function bindSyncButton(btn, token, reloadFn) {
     if (!btn) return;
     btn.addEventListener('click', async () => {
         btn.disabled = true;
@@ -261,7 +264,7 @@ function bindSyncButton(btn, baseUrl, token, reloadFn) {
         btn.innerHTML = `<iconify-icon icon="ph:arrows-clockwise-bold" width="18" height="18"></iconify-icon> Syncing...`;
         btn.classList.add('syncing');
 
-        const result = await triggerScraperSync(baseUrl, token);
+        const result = await triggerScraperSync(token);
 
         // ล้าง cache เพื่อให้ reloadFn ดึงข้อมูลใหม่จาก backend จริง ๆ
         invalidateCache();
