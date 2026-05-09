@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
@@ -12,10 +13,10 @@ from repositories.external_announcement_repository import ExternalAnnouncementRe
 from services.announcement_service import AnnouncementService
 
 from dependencies import get_current_user_id
-from config import Settings
-
 
 router = APIRouter(prefix="/announcements", tags=["announcements"])
+
+security = HTTPBearer()
 
 class CreateAnnouncementRequest(BaseModel):
     title:     str
@@ -93,10 +94,14 @@ def get_all_announcements(db: Session = Depends(get_db), user_id: str = Depends(
     }
 
 @router.post("/scraper")
-def sync_scraper():
+def sync_scraper(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
     SCRAPER_URL = "http://54.237.5.32:8080"
     response = requests.post(
-        f"{SCRAPER_URL}/sync/announcements"
+        f"{SCRAPER_URL}/sync/announcements",
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
     )
 
     return response.json()

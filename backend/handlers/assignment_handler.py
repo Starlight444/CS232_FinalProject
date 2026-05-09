@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
@@ -15,6 +16,8 @@ from repositories.external_assignment_repository import ExternalAssignmentReposi
 from services.assignment_service import AssignmentService
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
+
+security = HTTPBearer()
 
 class CreateAssignmentRequest(BaseModel):
     title: str
@@ -175,10 +178,14 @@ def get_all_assignments(db: Session = Depends(get_db), user_id: str = Depends(ge
     }
 
 @router.post("/scraper")
-def sync_scraper():
+def sync_scraper(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
     SCRAPER_URL = "http://54.237.5.32:8080"
     response = requests.post(
-        f"{SCRAPER_URL}/sync/assignments"
+        f"{SCRAPER_URL}/sync/assignments",
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
     )
 
     return response.json()
