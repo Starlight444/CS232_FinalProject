@@ -4,9 +4,11 @@ fetch('../components/student-sidebar/sidebar.html')
     .then(data => {
         document.getElementById('sidebar-placeholder').innerHTML = data;
 
-        const script = document.createElement("script");
-        script.src = "../components/student-sidebar/sidebar.js";
-        document.body.appendChild(script);
+        if (!document.querySelector('script[src="../components/student-sidebar/sidebar.js"]')) {
+            const script = document.createElement("script");
+            script.src = "../components/student-sidebar/sidebar.js";
+            document.body.appendChild(script);
+        }
     });
 
 // navbar
@@ -15,9 +17,11 @@ fetch('../components/student-navbar/student-navbar.html')
     .then(data => {
         document.getElementById('navbar-placeholder').innerHTML = data;
 
-        const script = document.createElement("script");
-        script.src = "../components/student-navbar/student-navbar.js";
-        document.body.appendChild(script);
+        if (!document.querySelector('script[src="../components/student-navbar/student-navbar.js"]')) {
+            const script = document.createElement("script");
+            script.src = "../components/student-navbar/student-navbar.js";
+            document.body.appendChild(script);
+        }
     });
 
 
@@ -120,7 +124,7 @@ async function fetchAssignments() {
             let merged = [];
             if (window.ScraperMerge) {
                 merged = await window.ScraperMerge.fetchMergedAssignments(
-                    BASE_URL, course.course_id, TOKEN, course
+                    course.course_id, TOKEN, course
                 );
             }
 

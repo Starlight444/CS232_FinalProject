@@ -19,9 +19,11 @@ function loadSidebar() {
         .then(res => res.text())
         .then(html => {
             document.getElementById('sidebar-placeholder').innerHTML = html;
-            const script = document.createElement('script');
-            script.src = '../components/student-sidebar/sidebar.js';
-            document.body.appendChild(script);
+            if (!document.querySelector('script[src="../components/student-sidebar/sidebar.js"]')) {
+                const script = document.createElement("script");
+                script.src = "../components/student-sidebar/sidebar.js";
+                document.body.appendChild(script);
+            }
         })
         .catch(err => console.error('Error loading sidebar:', err));
 }
@@ -31,9 +33,11 @@ function loadNavbar() {
         .then(res => res.text())
         .then(html => {
             document.getElementById('navbar-placeholder').innerHTML = html;
-            const script = document.createElement('script');
-            script.src = '../components/student-navbar/student-navbar.js';
+            if (!document.querySelector('script[src="../components/student-navbar/student-navbar.js"]')) {
+            const script = document.createElement("script");
+            script.src = "../components/student-navbar/student-navbar.js";
             document.body.appendChild(script);
+            }
         })
         .catch(err => console.error('Error loading navbar:', err));
 }
@@ -66,7 +70,7 @@ async function loadAnnouncements() {
                 let merged = [];
                 if (window.ScraperMerge) {
                     merged = await window.ScraperMerge.fetchMergedAnnouncements(
-                        API_BASE_URL, course.course_id, TOKEN, course
+                        course.course_id, TOKEN, course
                     );
                 }
                 if (merged.length) return merged;
@@ -262,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: confirm endpoint/method กับ backend ใน scraper-merge.js
     window.ScraperMerge?.bindSyncButton(
         document.getElementById('sync-btn'),
-        API_BASE_URL,
         TOKEN,
         loadAnnouncements
     );

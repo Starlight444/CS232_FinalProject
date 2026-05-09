@@ -91,7 +91,7 @@ async function loadNotifications() {
             }
         });
         const json = await res.json();
-        const announcements = json.data || [];
+        const announcementData = json.data || [];
 
         // 🔹 2. ดึง courses
         const courseRes = await fetch(
@@ -107,31 +107,38 @@ async function loadNotifications() {
         });
 
         // 🔹 4. รวมข้อมูล
-        const notifications = announcements.map(a => ({
-            id: a.announcement_id,
-            course_code: courseMap[a.course_id] || "Unknown",
-            text: a.title,
-            time: getTimeAgo(a.created_at),
-            created_at: a.created_at
-        }));
+        const notifications = announcementData.map(a => {
+            const isEdited = a.updated_at && a.updated_at !== a.created_at;
+            const sort_time = isEdited ? a.updated_at : a.created_at;
 
-            const annJson = await annRes.json();
-            const announcements = annJson.data || [];
+            return {
+                id: a.announcement_id,
+                course_code: courseMap[a.course_id] || "Unknown",
+                text: a.title,
+                created_at: a.created_at,
+                updated_at: a.updated_at,
+                isEdited,
+                sort_time
+            };
+        });
+
+            // const annJson = await annRes.json();
+            // const announcements = annJson.data || [];
             
 
-            announcements.forEach(a => {
-                const isEdited = a.updated_at && a.updated_at !== a.created_at;
-                const sort_time = isEdited ? a.updated_at : a.created_at;
-                notifications.push({
-                    id: a.announcement_id,
-                    course_code: course.course_code,
-                    text: a.title,
-                    created_at: a.created_at,
-                    updated_at: a.updated_at,
-                    isEdited: isEdited,
-                    sort_time: sort_time
-                });
-            });
+            // announcements.forEach(a => {
+            //     const isEdited = a.updated_at && a.updated_at !== a.created_at;
+            //     const sort_time = isEdited ? a.updated_at : a.created_at;
+            //     notifications.push({
+            //         id: a.announcement_id,
+            //         course_code: course.course_code,
+            //         text: a.title,
+            //         created_at: a.created_at,
+            //         updated_at: a.updated_at,
+            //         isEdited: isEdited,
+            //         sort_time: sort_time
+            //     });
+            // });
 
         // 3) เรียงใหม่ล่าสุดก่อน (ใช้ sort_time เพื่อให้ประกาศที่แก้ไขล่าสุดขึ้นก่อน)
         notifications.sort(

@@ -173,7 +173,7 @@ async function fetchAssignments(courseId) {
         let merged = [];
         if (window.ScraperMerge) {
             merged = await window.ScraperMerge.fetchMergedAssignments(
-                API_BASE_URL, courseId, TOKEN, course || {}
+                courseId, TOKEN, course || {}
             );
         }
 

@@ -28,13 +28,12 @@
 //   POST /announcements/sync  -> { success, mode, data: [...scraped raw...] }
 // per-course filter ทำที่ฝั่ง client โดยใช้ field `course_id`
 const API_BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
-const SCRAPER_BASE_URL = "http://54.237.5.32:8080";
 
 const SCRAPER_ENDPOINTS = {
     mergedAssignmentsAll: () => `/assignments/all`,
     mergedAnnouncementsAll: () => `/announcements/all`,
-    syncAssignments: () => `/sync/assignments`,
-    syncAnnouncements: () => `/sync/announcements`,
+    syncAssignments: () => `/assignments/scraper`,
+    syncAnnouncements: () => `/announcements/scraper`,
 };
 
 // -------------------------------------------------------------------------
@@ -242,8 +241,8 @@ async function _postSync(baseUrl, path, token) {
  */
 async function triggerScraperSync(token) {
     const [assignments, announcements] = await Promise.all([
-        _postSync(SCRAPER_BASE_URL, SCRAPER_ENDPOINTS.syncAssignments(), token),
-        _postSync(SCRAPER_BASE_URL, SCRAPER_ENDPOINTS.syncAnnouncements(), token),
+        _postSync(API_BASE_URL, SCRAPER_ENDPOINTS.syncAssignments(), token),
+        _postSync(API_BASE_URL, SCRAPER_ENDPOINTS.syncAnnouncements(), token),
     ]);
     return { assignments, announcements, ok: assignments && announcements };
 }
