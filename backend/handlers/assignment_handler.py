@@ -5,6 +5,7 @@ from uuid import UUID
 from datetime import datetime
 from dependencies import get_current_user_id
 from database import get_db
+import requests
 
 from repositories.course_repository import CourseRepository
 from repositories.assignment_repository import AssignmentRepository
@@ -172,6 +173,15 @@ def get_all_assignments(db: Session = Depends(get_db), user_id: str = Depends(ge
         "success": True,
         "data": data
     }
+
+@router.post("/scraper")
+def sync_scraper():
+    SCRAPER_URL = "http://54.237.5.32:8080"
+    response = requests.post(
+        f"{SCRAPER_URL}/sync/assignments"
+    )
+
+    return response.json()
 
 @router.get("/{course_id}")
 def get_assignments(
