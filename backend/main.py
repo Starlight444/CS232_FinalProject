@@ -9,6 +9,7 @@ from handlers.user_handler import router as user_router
 from handlers.course_handler import router as course_router
 from handlers.course_member_handler import router as course_member_router
 from handlers.announcement_handler import router as announcement_router
+from handlers.notification_handler import router as notification_router
 
 
 app = FastAPI(root_path="/default")
@@ -32,5 +33,6 @@ app.include_router(user_router)
 app.include_router(course_router)
 app.include_router(course_member_router)
 app.include_router(announcement_router)
+app.include_router(notification_router)
 
 handler = Mangum(app)
