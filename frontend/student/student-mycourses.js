@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
 
 const colorMap = {
   "CS222": "#E8926A",
@@ -20,7 +20,7 @@ function renderCourses(courses) {
     card.style.cursor = "pointer";
     card.className = "course-card";
     card.addEventListener("click", () => {
-      window.location.href = `/frontend/student/student-courses-detail.html?course_id=${courseId}`;
+      window.location.href = `student-courses-detail.html?course_id=${courseId}`;
     });
     card.innerHTML = `
       <div class="card-banner" style="background:${bg};">

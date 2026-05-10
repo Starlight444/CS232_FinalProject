@@ -21,15 +21,14 @@ fetch('../components/student-navbar/student-navbar.html')
     });
 
 // main content
-const fileInput = document.getElementById('file-input');
-const workFiles = document.getElementById('work-files');
 const submitBtn = document.getElementById('submit-btn');
 
-let uploadedFiles = [];
+let selectedStudentFiles = [];
+let submittedFileInfos = [];
 let isSubmitted = false;
 
 // api
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
@@ -57,17 +56,83 @@ async function checkCurrentSubmission() {
                 'Content-Type': 'application/json'
             }
         });
-        const json = await response.json()
+        const json = await response.json();
         if (json.data && json.data.status !== 'not_submitted') {
             isSubmitted = true;
             updateUISubmitted();
+            if (json.data.submission_id) {
+                showSubmittedFileFromAPI(json.data.submission_id);
+            }
+            if (json.data.status === 'graded') {
+                showGradeSection(json.data.score, json.data.feedback, json.data.graded_at);
+            }
         }
     } catch (err) {
         console.error("Check submission error:", err);
     }
 }
 
-// ฟังก์ชันดึงข้อมูลการบ้านมาโชว์ 
+function showGradeSection(score, feedback, submittedAt) {
+    // Show feedback section
+    const section = document.getElementById('grade-section');
+    if (section) {
+        section.style.display = '';
+        const feedbackText = document.getElementById('grade-feedback-text');
+        if (feedbackText) feedbackText.textContent = feedback || 'ไม่มี feedback';
+    }
+
+    // Show grade at top right
+    const pointsEl = document.getElementById('assign-points');
+    const gradeTopEl = document.getElementById('assign-grade-top');
+    const gradeScoreEl = document.getElementById('assign-grade-score');
+    const gradeMaxEl = document.getElementById('assign-grade-max');
+
+    const maxRaw = pointsEl?.textContent || '';
+    const maxNum = maxRaw.replace(/[^0-9]/g, '');
+
+    if (pointsEl) pointsEl.style.display = 'none';
+    if (gradeTopEl) gradeTopEl.style.display = '';
+
+    if (gradeScoreEl) gradeScoreEl.textContent = score ?? '-';
+    if (gradeMaxEl) gradeMaxEl.textContent = maxNum || '-';
+
+    // Show "Returned" line with date
+    const returnedEl = document.getElementById('assign-returned');
+    const returnedDateEl = document.getElementById('assign-returned-date');
+    if (returnedEl) {
+        returnedEl.style.display = '';
+        if (returnedDateEl && submittedAt) {
+            returnedDateEl.textContent = formatTimestamp(parseBackendDate(submittedAt));
+        }
+    }
+}
+
+async function showSubmittedFileFromAPI(submissionId) {
+    try {
+        const response = await fetch(`${BASE_URL}/attachments/submission/${submissionId}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.data?.length) return;
+
+        // ถ้า user เลือกไฟล์ใหม่ก่อน API จะตอบ ไม่ overwrite
+        if (selectedStudentFiles.length > 0) return;
+
+        submittedFileInfos = result.data.map((attachment, index) => {
+            const fileUrl = attachment.file_url?.startsWith('http')
+                ? attachment.file_url
+                : `${BASE_URL}/${attachment.file_url}`;
+            return { name: attachment.file_name || `Submitted File ${index + 1}`, fileUrl };
+        });
+        clearFileList();
+        submittedFileInfos.forEach(file => renderFileRow(file.name, file.fileUrl, false));
+    } catch (err) {
+        console.error('Error fetching submitted file:', err);
+    }
+}
+
+// ฟังก์ชันดึงข้อมูลการบ้านมาโชว์
 async function fetchAssignmentDetail() {
     if (!assignment_Id || !courseId) return console.error("No assignment/course ID found");
     try {
@@ -88,6 +153,9 @@ async function fetchAssignmentDetail() {
             document.querySelector('.section-body').textContent = data.description;
             document.querySelector('.assign-points').textContent = `${data.max_score} Points`;
 
+            renderAllowedFormats(data.allowed_file_types || 'any');
+            updateFileInputAccept(data.allowed_file_types || 'any');
+
             if (new Date() > new Date(data.due_date)) {
                 updateUIDeadlinePassed();
             } else {
@@ -97,6 +165,76 @@ async function fetchAssignmentDetail() {
     } catch (err) {
         console.error("Fetch Assignment Error:", err);
     }
+}
+
+async function fetchAssignmentAttachments() {
+    try {
+        const response = await fetch(`${BASE_URL}/attachments/assignment/${assignment_Id}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.data?.length) return;
+
+        const container = document.getElementById('teacher-file-container');
+        if (!container) return;
+
+        const iconHtml = '<iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>';
+
+        container.innerHTML = '';
+        result.data.forEach((attachment, index) => {
+            const fileUrl = attachment.file_url?.startsWith('http')
+                ? attachment.file_url
+                : `${BASE_URL}/${attachment.file_url}`;
+
+            const btn = document.createElement('div');
+            btn.className = 'teacher-file-btn';
+            btn.innerHTML = `${iconHtml}<span>${attachment.file_name || `View File ${index + 1}`}</span>`;
+            btn.addEventListener('click', () => window.open(fileUrl, '_blank'));
+            container.appendChild(btn);
+        });
+    } catch (err) {
+        console.error('Error fetching attachments:', err);
+    }
+}
+
+function showSubmittedFileFromLocal(files) {
+    if (!files || files.length === 0) return;
+    submittedFileInfos = files.map(file => ({
+        name: file.name,
+        fileUrl: URL.createObjectURL(file)
+    }));
+    clearFileList();
+    submittedFileInfos.forEach(file => renderFileRow(file.name, file.fileUrl, false));
+}
+
+function renderAllowedFormats(allowedTypes) {
+    const container = document.getElementById('display-allowed-formats');
+    if (!container) return;
+    container.innerHTML = '';
+    const types = allowedTypes === 'any' ? ['any'] : allowedTypes.split(',');
+    types.forEach(type => {
+        const t = type.trim().toLowerCase();
+        const badge = document.createElement('span');
+        badge.className = 'format-badge';
+        let icon = '<iconify-icon icon="ph:file-duotone"></iconify-icon>';
+        if (t === 'pdf') icon = '<iconify-icon icon="ph:file-pdf-duotone" style="color:#EF4444;"></iconify-icon>';
+        else if (t === 'zip') icon = '<iconify-icon icon="ph:file-archive-duotone" style="color:#333;"></iconify-icon>';
+        else if (t === 'word') icon = '<iconify-icon icon="ph:file-doc-duotone" style="color:#2563EB;"></iconify-icon>';
+        else if (t === 'image') icon = '<iconify-icon icon="ph:image-duotone" style="color:#38BDF8;"></iconify-icon>';
+        else if (t === 'any') icon = '<iconify-icon icon="ph:files-duotone" style="color:#6E6CDF;"></iconify-icon>';
+        badge.innerHTML = `${icon} ${t.toUpperCase()}`;
+        container.appendChild(badge);
+    });
+}
+
+function updateFileInputAccept(allowedTypes) {
+    const input = document.getElementById('file-input');
+    if (!input) return;
+    if (allowedTypes === 'any') { input.removeAttribute('accept'); return; }
+    const typeMap = { pdf: '.pdf', word: '.doc,.docx', image: '.jpg,.jpeg,.png,.gif', zip: '.zip' };
+    const accepts = allowedTypes.split(',').map(t => typeMap[t.trim().toLowerCase()] || '').filter(Boolean);
+    if (accepts.length > 0) input.accept = accepts.join(',');
 }
 
 function updateUISubmitted() {
@@ -131,7 +269,7 @@ function updateUIDeadlinePassed() {
 
 // api : submission
 async function handleSubmission() {
-    if (uploadedFiles.length === 0) {
+    if (selectedStudentFiles.length === 0) {
         alert('Please upload at least one file before submitting.');
         return;
     }
@@ -144,7 +282,9 @@ async function handleSubmission() {
         const studentId = userData.user_id || '';
 
         const formData = new FormData();
-        formData.append('file', uploadedFiles[0]);
+        selectedStudentFiles.forEach(file => {
+            formData.append('file', file);
+        });
         formData.append('assignment_id', assignment_Id);
         formData.append('course_id', courseId);
         formData.append('student_id', studentId);
@@ -163,6 +303,7 @@ async function handleSubmission() {
         if (submitData.success) {
             isSubmitted = true;
             updateUISubmitted();
+            showSubmittedFileFromLocal(selectedStudentFiles);
             alert("ส่งงานสำเร็จเรียบร้อย!");
         } else {
             console.error("Submit failed:", submitData);
@@ -181,102 +322,189 @@ async function handleSubmission() {
 }
 // เรียกทำงานทันทีที่โหลดหน้า
 fetchAssignmentDetail();
+fetchAssignmentAttachments();
 
-// file selection
-fileInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(addFileCard);
-    fileInput.value = ''; // same file can be re-added
-});
+// file list helpers
+function clearFileList() {
+    const list = document.getElementById('my-work-list');
+    if (list) list.innerHTML = '';
+}
 
-// show file
-function addFileCard(file) {
-    uploadedFiles.push(file);
+function renderFileRow(name, fileUrl, canDelete, onDelete) {
+    const list = document.getElementById('my-work-list');
+    if (!list) return;
 
-    const item = document.createElement('div');
-    item.className = 'work-file-item';
+    const ft = (name.split('.').pop() || '').toLowerCase();
+    const iconHtml = ft === 'pdf'
+        ? '<iconify-icon icon="material-icon-theme:pdf" width="22" height="22"></iconify-icon>'
+        : '<iconify-icon icon="ph:file-duotone" width="22" height="22" style="color:#6b7280;"></iconify-icon>';
 
-    const thumb = document.createElement('div');
-    thumb.className = 'work-thumb';
+    const row = document.createElement('div');
+    row.className = 'work-file-row';
+    row.innerHTML = iconHtml;
 
-    // image preview
-    if (file.type.startsWith('image/')) {
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.alt = file.name;
-        thumb.appendChild(img);
-    } else {
-        thumb.innerHTML = `<iconify-icon icon="ph:file-text-bold" style="font-size: 40px; color: #aaa;"></iconify-icon>`;
+    const nameBtn = document.createElement('button');
+    nameBtn.className = 'work-file-row-name';
+    nameBtn.textContent = name;
+    if (fileUrl) nameBtn.addEventListener('click', () => window.open(fileUrl, '_blank'));
+    row.appendChild(nameBtn);
+
+    if (canDelete) {
+        const menuWrapper = document.createElement('div');
+        menuWrapper.className = 'file-menu-wrapper';
+
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'work-file-row-menu';
+        menuBtn.innerHTML = '<iconify-icon icon="ph:dots-three-vertical-bold" width="18" height="18"></iconify-icon>';
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'file-row-dropdown';
+
+        const deleteOpt = document.createElement('button');
+        deleteOpt.className = 'dropdown-option dropdown-option-danger';
+        deleteOpt.innerHTML = '<iconify-icon icon="ph:trash-duotone" width="16" height="16"></iconify-icon> Delete';
+        deleteOpt.addEventListener('click', () => {
+            if (onDelete) onDelete();
+            row.remove();
+            dropdown.style.display = 'none';
+            const zone = document.getElementById('student-drop-zone');
+            if (zone && selectedStudentFiles.length === 0) zone.style.display = 'flex';
+        });
+        dropdown.appendChild(deleteOpt);
+
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.file-row-dropdown').forEach(d => d.style.display = 'none');
+            dropdown.style.display = 'block';
+        });
+
+        menuWrapper.appendChild(menuBtn);
+        menuWrapper.appendChild(dropdown);
+        row.appendChild(menuWrapper);
     }
 
-    // remove file button
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-file';
-    removeBtn.innerHTML = '✕';
-    removeBtn.addEventListener('click', () => {
-        uploadedFiles = uploadedFiles.filter(f => f !== file);
-        item.remove();
+    list.appendChild(row);
+}
+
+function renderSelectedStudentFiles() {
+    clearFileList();
+    selectedStudentFiles.forEach(file => {
+        const localUrl = URL.createObjectURL(file);
+        renderFileRow(file.name, localUrl, true, () => {
+            selectedStudentFiles = selectedStudentFiles.filter(selected => selected !== file);
+        });
     });
-    thumb.appendChild(removeBtn);
 
-    // show file name
-    const nameRow = document.createElement('div');
-    nameRow.className = 'file-name';
-    nameRow.textContent = file.name.length > 18 ? file.name.slice(0, 15) + '...' : file.name;
+    if (dropZone) {
+        dropZone.style.display = 'flex';
+    }
+}
 
-    item.appendChild(thumb);
-    item.appendChild(nameRow);
-    workFiles.appendChild(item);
+// drop zone setup
+const dropZone = document.getElementById('student-drop-zone');
+const fileInput = document.getElementById('file-input');
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.file-row-dropdown').forEach(d => d.style.display = 'none');
+});
+
+if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            selectedStudentFiles = selectedStudentFiles.concat(Array.from(e.target.files));
+            submittedFileInfos = [];
+            renderSelectedStudentFiles();
+        }
+        fileInput.value = '';
+    });
+}
+
+if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            selectedStudentFiles = selectedStudentFiles.concat(Array.from(e.dataTransfer.files));
+            submittedFileInfos = [];
+            renderSelectedStudentFiles();
+        }
+    });
 }
 // timestamp
+function parseBackendDate(str) {
+    if (!str) return null;
+    // backend ส่ง UTC มาแต่ไม่มี Z → ต้องบอก JS ว่าเป็น UTC
+    if (typeof str === 'string' && !str.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(str)) {
+        str = str + 'Z';
+    }
+    return new Date(str);
+}
+
 function formatTimestamp(date) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${days[date.getDay()]} ${String(date.getDate()).padStart(2, '0')} ${months[date.getMonth()]} ${String(date.getFullYear()).slice(-2)}, ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    const thai = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+    return `${days[thai.getDay()]} ${String(thai.getDate()).padStart(2, '0')} ${months[thai.getMonth()]} ${String(thai.getFullYear()).slice(-2)}, ${String(thai.getHours()).padStart(2, '0')}:${String(thai.getMinutes()).padStart(2, '0')}`;
 }
 
 // lock/unlock upload
 function lockWorkBox(locked) {
-    const addBtn = document.querySelector('.add-file-btn');
-    const removeButtons = workFiles.querySelectorAll('.remove-file');
+    const zone = document.getElementById('student-drop-zone');
+    if (!zone) return;
     if (locked) {
-        addBtn.style.pointerEvents = 'none';
-        addBtn.style.opacity = '0.5';
-        removeButtons.forEach(b => b.style.display = 'none');
+        zone.style.display = 'none';
     } else {
-        addBtn.style.pointerEvents = '';
-        addBtn.style.opacity = '';
-        removeButtons.forEach(b => b.style.display = 'flex');
+        // Edit mode: re-render submitted file with canDelete=true (don't clear)
+        if (submittedFileInfos.length > 0) {
+            clearFileList();
+            submittedFileInfos.forEach(file => renderFileRow(file.name, file.fileUrl, true));
+        }
+        selectedStudentFiles = [];
+        zone.style.display = 'flex';
     }
+}
+
+const cancelBtn = document.getElementById('cancel-btn');
+
+function enterEditMode() {
+    isSubmitted = false;
+    submitBtn.textContent = 'Submit';
+    submitBtn.classList.remove('submitted');
+    cancelBtn.style.display = 'inline-flex';
+    lockWorkBox(false);
+    const stamp = document.querySelector('.submit-timestamp');
+    if (stamp) stamp.remove();
+}
+
+function exitEditMode() {
+    isSubmitted = true;
+    cancelBtn.style.display = 'none';
+    updateUISubmitted();
+    if (submittedFileInfos.length > 0) {
+        clearFileList();
+        submittedFileInfos.forEach(file => renderFileRow(file.name, file.fileUrl, false));
+    }
+    selectedStudentFiles = [];
 }
 
 // submit button
 submitBtn.addEventListener('click', () => {
-    // Edit Submission
     if (isSubmitted) {
         if (confirm('Do you want to edit your submission? This will allow you to change files.')) {
-            isSubmitted = false;
-
-            submitBtn.textContent = 'Submit';
-            submitBtn.classList.remove('submitted');
-
-            lockWorkBox(false);
-
-            //Timestamp
-            const stamp = document.querySelector('.submit-timestamp');
-            if (stamp) stamp.remove();
+            enterEditMode();
         }
     } else {
         handleSubmission();
     }
+});
 
-
-    /*isSubmitted = true;
-    submitBtn.textContent = 'Edit Submission';
-    submitBtn.classList.add('submitted');
-
-    lockWorkBox(true);*/
-
+cancelBtn.addEventListener('click', () => {
+    exitEditMode();
 });
 
 // back button

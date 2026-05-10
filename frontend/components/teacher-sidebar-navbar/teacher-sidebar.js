@@ -4,7 +4,7 @@ const submenu = document.getElementById('submenu');
 const coursesItem = document.getElementById('courses-item');
 const courseBtn = document.getElementById('courseBtn');
 
-const SIDEBAR_API_BASE_URL = 'http://127.0.0.1:8000';
+const SIDEBAR_API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
 // คำนวณ base path ไปยัง /frontend/teacher/ ให้ถูกต้องไม่ว่าจะอยู่ที่ depth ไหน
 function getTeacherBasePath() {
@@ -104,7 +104,7 @@ if (logoutLink) {
     logoutLink.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('user');
-        window.location.href = '/frontend/auth/login.html';
+        window.location.href = '/auth/login.html';
     });
 }
 

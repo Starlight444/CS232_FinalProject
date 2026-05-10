@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status submission_status NOT NULL,
     score INT,
+    graded_at TIMESTAMP,
     feedback TEXT,
 
     CONSTRAINT fk_submission_assignment
@@ -153,72 +154,3 @@ ON attachments(submission_id);
 CREATE INDEX IF NOT EXISTS idx_attachment_assignment
 ON attachments(assignment_id);
 
--- save external account: 1 web 1 account
-CREATE TABLE IF NOT EXISTS external_accounts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    is_mock BOOLEAN,
-    source_name VARCHAR(50) NOT NULL,
-    external_username VARCHAR(255) NOT NULL,
-    external_password_encrypted TEXT NOT NULL,
-    is_connected BOOLEAN DEFAULT TRUE,
-    last_synced_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_user
-        FOREIGN KEY(user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_user_source
-        UNIQUE(user_id, source_name)
-);
-
-CREATE TABLE IF NOT EXISTS external_assignments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-    user_id UUID NOT NULL,
-    source_name VARCHAR(50),
-    external_course_name TEXT,
-    external_course_url TEXT,
-    title TEXT,
-    external_link TEXT,
-    submission_status TEXT,
-    grading_status TEXT,
-    due_date TIMESTAMP,
-    time_remaining TEXT,
-    last_modified TIMESTAMP,
-    file_submission TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT unique_ext_assign
-        UNIQUE (user_id, source_name, external_link)
-);
-
-CREATE TABLE IF NOT EXISTS external_announcements (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-    user_id UUID NOT NULL,
-    source_name VARCHAR(100) NOT NULL,
-    external_course_name TEXT,
-    external_course_url TEXT,
-    title TEXT NOT NULL,
-    external_link TEXT,
-    author TEXT,
-    created_at TIMESTAMP
-
-    CONSTRAINT fk_external_announcement_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_ext_announce
-        UNIQUE (user_id, source_name, external_link)
-);
-
-CREATE INDEX IF NOT EXISTS idx_external_announcement_user
-ON external_announcements(user_id);
-
-CREATE INDEX IF NOT EXISTS idx_external_announcement_source
-ON external_announcements(source_name);

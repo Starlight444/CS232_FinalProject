@@ -2,6 +2,7 @@ import uuid
 import boto3          # เพิ่ม
 import logging        # เพิ่ม
 from models.announcement_model import Announcement
+from models.user_model import User
 from repositories.announcement_repository import AnnouncementRepository
 
 logger = logging.getLogger(__name__)  # เพิ่ม
@@ -35,7 +36,7 @@ class AnnouncementService:
 
         return saved
 
-    def get_by_course(self, course_id: str) -> list[Announcement]:
+    def get_by_course(self, course_id: str):
         return self.repo.get_by_course(course_id)
 
     def get_by_id(self, announcement_id: str) -> Announcement:
@@ -53,19 +54,20 @@ class AnnouncementService:
         return self.repo.update(announcement)
     
     def get_all_announcements(self, user_id, external_repo, course_repo):
-        internal = self.repo.db.query(Announcement).all()
+        internal = (self.repo.db.query(Announcement, User).join(User, Announcement.created_by == User.user_id).all())
         external = external_repo.get_by_user(user_id)
 
         result = []
 
         # ===== INTERNAL =====
-        for a in internal:
+        for a, u in internal:
             result.append({
                 "id": str(a.announcement_id),
                 "title": a.title,
                 "content": a.content,
                 "created_at": a.created_at,
                 "course_id": str(a.course_id),
+                "author_name": f"{u.first_name} {u.last_name}",
                 "is_external": False
             })
 

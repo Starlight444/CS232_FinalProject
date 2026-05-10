@@ -6,12 +6,14 @@
 /*icon*/
 /* ตัวอย่างที่ก้อปมาจะเป็นประมาณนี้ */
 .mynaui--file-x-solid {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  background-color: currentColor; /* สีไอคอนจะเปลี่ยนตามสีตัวอักษร */
-  -webkit-mask-image: url("data:image/svg+xml;..."); /* ตัวโค้ดไอคอนจะอยู่ในนี้ */
-  mask-image: url("data:image/svg+xml;...");
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-color: currentColor;
+    /* สีไอคอนจะเปลี่ยนตามสีตัวอักษร */
+    -webkit-mask-image: url("data:image/svg+xml;...");
+    /* ตัวโค้ดไอคอนจะอยู่ในนี้ */
+    mask-image: url("data:image/svg+xml;...");
 }
 
 .back-btn-manage {
@@ -29,22 +31,53 @@
     cursor: pointer;
     transition: color 0.15s, background 0.15s;
 }
+
 .back-btn-manage:hover {
     color: #6E6CDF;
     background: #f0f0fb;
 }
 
 /* คลาสอรรถประโยชน์ */
-.max-w-6xl { max-width: 1152px; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-.mt-2 { margin-top: 8px; }
-.mt-6 { margin-top: 24px; }
-.mb-8 { margin-bottom: 32px; }
-.flex { display: flex; }
-.items-center { align-items: center; }
-.gap-1 { gap: 4px; }
-.gap-2 { gap: 8px; }
-.gap-4 { gap: 16px; }
+.max-w-6xl {
+    max-width: 1152px;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mt-2 {
+    margin-top: 8px;
+}
+
+.mt-6 {
+    margin-top: 24px;
+}
+
+.mb-8 {
+    margin-bottom: 32px;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-1 {
+    gap: 4px;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-4 {
+    gap: 16px;
+}
 
 /* ไอคอน */
 .icon {
@@ -71,10 +104,76 @@
     color: var(--text-muted);
     border: 1px solid var(--border-color, #E0E0E0);
     padding: 4px 12px;
-    border-radius: 8px; /* ขอบมนแคปซูล */
+    border-radius: 8px;
+    /* ขอบมนแคปซูล */
     font-size: 0.8rem;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: 4px;
+}
+
+.feedback-input {
+    width: 100%;
+    min-width: 180px;
+    padding: 6px 10px;
+    border: 1px solid #e0e0ec;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: #333;
+    resize: vertical;
+    background: #fafafa;
+    transition: border-color 0.15s;
+}
+
+.feedback-input:focus {
+    outline: none;
+    border-color: #6E6CDF;
+    background: #fff;
+}
+
+.feedback-input:disabled {
+    background: #f3f4f6;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.assignment-attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 360px;
+}
+
+.assignment-attachment-btn {
+    justify-content: flex-start;
+}
+
+.assignment-attachment-btn span {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.submission-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 220px;
+}
+
+.submission-file-btn {
+    justify-content: flex-start;
+    max-width: 220px;
+}
+
+.submission-file-btn span {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

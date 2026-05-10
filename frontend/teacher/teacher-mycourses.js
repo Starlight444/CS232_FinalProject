@@ -1,4 +1,12 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
+const userData = JSON.parse(localStorage.getItem('user'));
+if (!userData || !userData.token) {
+    window.location.href = '../auth/login.html';
+}
+const TOKEN   = userData ? userData.token   : '';
+const USER_ID = userData ? userData.user_id : '';
+
+const CARD_COLORS = ['#E8926A', '#3BCFCF', '#7B9FD4', '#6DC06D', '#A78BFA', '#F472B6'];
 
 const colorMap = {
   "CS222": "#E8926A",
@@ -7,7 +15,7 @@ const colorMap = {
   "CS251": "#6DC06D",
 };
 
-const docSVG =fetch `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+const docSVG =`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
   <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
   <polyline points="14 2 14 8 20 8"/>
   <line x1="16" y1="13" x2="8" y2="13"/>
@@ -59,14 +67,14 @@ function renderCourses(courses) {
         return;
       }
 
-      window.location.href = `./courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
+      window.location.href = `../courses-detail/courses-detail.html?course_id=${encodeURIComponent(courseId)}`;
     });
 
     grid.appendChild(card);
   });
 }
 
-fetch(`${BASE_URL}/courses/`)
+fetch(`${API_BASE_URL}/courses/`)
   .then(res => res.json())
   .then(data => renderCourses(data))
   .catch(err => console.error(err));

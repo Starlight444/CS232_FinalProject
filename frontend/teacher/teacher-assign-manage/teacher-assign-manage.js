@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
 const urlParams = new URLSearchParams(window.location.search);
 const ASSIGNMENT_ID = urlParams.get('id');
@@ -24,7 +24,9 @@ function goBack() {
 document.addEventListener('DOMContentLoaded', () => {
     loadTeacherSidebarNavbar();
     loadAssignmentDetails();
+    loadAssignmentAttachments();
     loadStudentsByStatus('Needs Grading');
+    bindAssignmentActions();
 
     const activeTab = document.querySelector('.tab-item.active');
     if (activeTab) {
@@ -37,8 +39,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function bindAssignmentActions() {
+    const editBtn = document.getElementById('edit-assignment-btn');
+    const deleteBtn = document.getElementById('delete-assignment-btn');
+
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            const courseQuery = COURSE_ID ? `&course_id=${encodeURIComponent(COURSE_ID)}` : '';
+            window.location.href =
+                `../create-assignment/create-assignment.html?id=${encodeURIComponent(ASSIGNMENT_ID)}${courseQuery}`;
+        });
+    }
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteAssignment);
+    }
+}
+
+async function deleteAssignment() {
+    const confirmed = confirm('Delete this assignment? This will also remove its submissions and attached files.');
+    if (!confirmed) return;
+
+    const deleteBtn = document.getElementById('delete-assignment-btn');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.style.opacity = '0.7';
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/assignments/${ASSIGNMENT_ID}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${TOKEN}`
+            }
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            throw new Error(result?.detail || result?.message || `HTTP ${response.status}`);
+        }
+
+        alert('Assignment deleted successfully.');
+
+        if (COURSE_ID) {
+            window.location.href = `../courses-detail/courses-detail.html?course_id=${COURSE_ID}`;
+        } else {
+            window.location.href = '../teacher-assign-overview/teacher-assign-overview.html';
+        }
+    } catch (error) {
+        console.error('Delete assignment failed:', error);
+        alert('Delete assignment failed: ' + error.message);
+
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.style.opacity = '1';
+        }
+    }
+}
+
 function loadTeacherSidebarNavbar() {
-    fetch('/frontend/components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
+    fetch('../../components/teacher-sidebar-navbar/teacher-sidebar-navbar.html')
         .then(r => r.text())
         .then(html => {
             const parser = new DOMParser();
@@ -54,11 +115,11 @@ function loadTeacherSidebarNavbar() {
             if (navbar) container.appendChild(navbar);
 
             const sidebarScript = document.createElement('script');
-            sidebarScript.src = '/frontend/components/teacher-sidebar-navbar/teacher-sidebar.js';
+            sidebarScript.src = '../../components/teacher-sidebar-navbar/teacher-sidebar.js';
             document.body.appendChild(sidebarScript);
 
             const navbarScript = document.createElement('script');
-            navbarScript.src = '/frontend/components/teacher-sidebar-navbar/teacher-navbar.js';
+            navbarScript.src = '../../components/teacher-sidebar-navbar/teacher-navbar.js';
             document.body.appendChild(navbarScript);
 
             sidebarScript.onload = () => {
@@ -175,11 +236,73 @@ function renderAssignmentDetails(data) {
     }
 
     if (fileNameEl) {
-        fileNameEl.textContent = 'No attachment preview';
+        fileNameEl.textContent = 'No file attached';
     }
 
     if (fileSizeEl) {
         fileSizeEl.textContent = '-';
+    }
+}
+
+function escapeHtml(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+// ==========================================
+// 1b. ดึงไฟล์แนบของ assignment
+// ==========================================
+async function loadAssignmentAttachments() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/attachments/assignment/${ASSIGNMENT_ID}`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${TOKEN}` }
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) return;
+
+        const attachments = result?.data || [];
+        if (attachments.length === 0) return;
+
+        const fileGroup = document.querySelector('.file-preview-group');
+        if (!fileGroup) return;
+
+        const fileButtons = attachments.map(attachment => {
+            const fileType = (attachment.file_type || 'file').toUpperCase();
+            const fileUrl = attachment.file_url?.startsWith('http')
+                ? attachment.file_url
+                : `${API_BASE_URL}/${attachment.file_url}`;
+
+            return `
+                <button class="file-btn assignment-attachment-btn" type="button" data-file-url="${escapeHtml(fileUrl)}">
+                    <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
+                    <span>${escapeHtml(attachment.file_name || `View ${fileType} File`)}</span>
+                </button>
+            `;
+        }).join('');
+
+        fileGroup.innerHTML = `
+            <div class="file-preview-rect">
+                <p>${attachments.length} File${attachments.length > 1 ? 's' : ''}<br><span style="font-size: 0.75rem;">Attached</span></p>
+            </div>
+            <div class="assignment-attachment-list">
+                ${fileButtons}
+            </div>
+        `;
+
+        fileGroup.querySelectorAll('.assignment-attachment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                window.open(btn.dataset.fileUrl, '_blank');
+            });
+        });
+
+    } catch (error) {
+        console.error('Error loading assignment attachments:', error);
     }
 }
 
@@ -231,26 +354,22 @@ async function fetchCourseMembers() {
     return Array.isArray(result) ? result : (result?.data || []);
 }
 
-async function fetchUserName(userId) {
+async function fetchUserInfo(userId) {
     try {
         const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
             method: 'GET',
-            headers: {
-                Authorization: `Bearer ${TOKEN}`
-            }
+            headers: { Authorization: `Bearer ${TOKEN}` }
         });
-
         const result = await response.json().catch(() => null);
-
-        if (!response.ok) return '-';
-
-        return result?.data?.full_name
-            || `${result?.data?.first_name || ''} ${result?.data?.last_name || ''}`.trim()
-            || '-';
-
+        if (!response.ok) return { name: '-', student_code: '-' };
+        const d = result?.data;
+        return {
+            name: d?.full_name || `${d?.first_name || ''} ${d?.last_name || ''}`.trim() || '-',
+            student_code: d?.student_id || '-'
+        };
     } catch (err) {
-        console.warn('fetchUserName failed:', userId, err);
-        return '-';
+        console.warn('fetchUserInfo failed:', userId, err);
+        return { name: '-', student_code: '-' };
     }
 }
 
@@ -276,7 +395,7 @@ async function loadStudentsByStatus(statusFilter) {
         } else if (statusFilter === 'Missing') {
             const members = await fetchCourseMembers();
             const submittedStudentIds = new Set(
-                submissions.map(s => String(s.student_id))
+                submissions.map(s => String(s.user_id || s.student_id))
             );
 
             const missingStudents = members.filter(m =>
@@ -284,24 +403,28 @@ async function loadStudentsByStatus(statusFilter) {
             );
 
             rows = missingStudents.map(m => ({
-                student_id: m.user_id,
-                student_name: m.name || '-',
+                user_id: m.user_id,
                 submitted_at: null,
                 status: 'missing',
                 attachments: []
             }));
         }
-
         const rowsWithNames = await Promise.all(rows.map(async row => {
-            const studentId = row.student_id || row.user_id;
-            const name = row.student_name && row.student_name !== '-'
-                ? row.student_name
-                : await fetchUserName(studentId);
+            const userId = row.user_id || row.student_id;
+            let name = row.student_name && row.student_name !== '-' ? row.student_name : null;
+            let student_code = row.student_code || null;
+
+            if (!name || !student_code) {
+                const info = await fetchUserInfo(userId);
+                if (!name) name = info.name;
+                if (!student_code) student_code = info.student_code;
+            }
 
             return {
                 ...row,
-                student_id: studentId,
-                student_name: name
+                student_id: userId,
+                student_code: student_code || '-',
+                student_name: name || '-'
             };
         }));
 
@@ -358,6 +481,8 @@ function renderTable(studentsData, filterStr) {
     studentsData.forEach(student => {
         const tr = document.createElement('tr');
         tr.className = 'table-row';
+        tr.dataset.submissionId = student.submission_id || '';
+        tr.dataset.feedback = student.feedback || '';
 
         let statusContent = '';
 
@@ -372,14 +497,22 @@ function renderTable(studentsData, filterStr) {
         let submissionContent = '<span style="color: var(--text-muted); font-size: 0.9rem;">No File</span>';
 
         if (student.attachments && student.attachments.length > 0) {
-            const fileUrl = student.attachments[0];
+            const fileButtons = student.attachments.map((attachment, index) => {
+                const rawUrl = typeof attachment === 'string' ? attachment : attachment.file_url;
+                const fileName = typeof attachment === 'string'
+                    ? `View File ${index + 1}`
+                    : (attachment.file_name || `View File ${index + 1}`);
+                const fileUrl = rawUrl?.startsWith('http') ? rawUrl : `${API_BASE_URL}/${rawUrl}`;
 
-            submissionContent = `
-                <button class="file-btn" type="button" onclick="window.open('${fileUrl}', '_blank')">
-                    <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
-                    View File
-                </button>
-            `;
+                return `
+                    <button class="file-btn submission-file-btn" type="button" data-file-url="${escapeHtml(fileUrl)}">
+                        <iconify-icon icon="material-icon-theme:pdf" width="24" height="24"></iconify-icon>
+                        <span>${escapeHtml(fileName)}</span>
+                    </button>
+                `;
+            }).join('');
+
+            submissionContent = `<div class="submission-file-list">${fileButtons}</div>`;
         }
 
         const submittedAt = student.submitted_at
@@ -391,7 +524,7 @@ function renderTable(studentsData, filterStr) {
             : '-';
 
         tr.innerHTML = `
-            <td>${student.student_id || '-'}</td>
+            <td>${student.student_code || student.student_id || '-'}</td>
             <td>${student.student_name || '-'}</td>
             <td>${submittedAt}</td>
             <td>${statusContent}</td>
@@ -405,17 +538,108 @@ function renderTable(studentsData, filterStr) {
                     ${student.status === 'missing' ? 'disabled' : ''}
                 >
             </td>
-            <td align="center">
-                <button
-                    class="feedback-btn"
-                    type="button"
+            <td>
+                <textarea
+                    class="feedback-input"
+                    rows="2"
+                    placeholder="ใส่ feedback..."
                     ${student.status === 'missing' ? 'disabled' : ''}
-                >
-                    💬
-                </button>
+                >${student.feedback || ''}</textarea>
             </td>
         `;
 
         tbody.appendChild(tr);
     });
+
+    tbody.querySelectorAll('.submission-file-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            window.open(btn.dataset.fileUrl, '_blank');
+        });
+    });
 }
+
+// ==========================================
+// 7. (removed – feedback is now inline textarea)
+// ==========================================
+
+// ==========================================
+// 8. Edit & Save Grades buttons
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const editBtn = document.getElementById('edit-grades-btn');
+    const saveBtn = document.getElementById('save-grades-btn');
+
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            const isEditing = editBtn.classList.toggle('active');
+            const inputs = document.querySelectorAll('.grading-table tbody .grade-input');
+            inputs.forEach(inp => {
+                if (!inp.closest('tr')?.dataset.submissionId) return;
+                inp.readOnly = !isEditing;
+                inp.style.background = isEditing ? '' : '#f3f4f6';
+            });
+            editBtn.innerHTML = isEditing
+                ? '<iconify-icon icon="material-symbols:close-rounded" width="20" height="20"></iconify-icon>Cancel'
+                : '<iconify-icon icon="material-symbols:edit-outline-rounded" width="20" height="20"></iconify-icon>Edit';
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+            const rows = document.querySelectorAll('.grading-table tbody tr.table-row');
+            if (!rows.length) return;
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const tr of rows) {
+                const submissionId = tr.dataset.submissionId;
+                if (!submissionId) continue;
+
+                const input = tr.querySelector('.grade-input');
+                if (!input || input.disabled) continue;
+
+                const score = parseInt(input.value, 10);
+                if (isNaN(score)) continue;
+
+                const feedbackEl = tr.querySelector('.feedback-input');
+                const feedback = feedbackEl ? feedbackEl.value : '';
+
+                try {
+                    const url = `${API_BASE_URL}/submissions/${submissionId}/grade?grader_id=${USER_ID}&course_id=${COURSE_ID}&score=${score}&feedback=${encodeURIComponent(feedback)}`;
+                    const response = await fetch(url, {
+                        method: 'PATCH',
+                        headers: { Authorization: `Bearer ${TOKEN}` }
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        const err = await response.json().catch(() => null);
+                        console.error('Grade save failed:', err);
+                        failCount++;
+                    }
+                } catch (err) {
+                    console.error('Grade save error:', err);
+                    failCount++;
+                }
+            }
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Grades';
+
+            if (failCount === 0 && successCount > 0) {
+                alert(`บันทึกคะแนนสำเร็จ ${successCount} รายการ`);
+                const activeTab = document.querySelector('.tab-item.active');
+                loadStudentsByStatus(activeTab?.textContent.trim() || 'Needs Grading');
+            } else if (successCount === 0 && failCount === 0) {
+                alert('ไม่มีคะแนนที่จะบันทึก');
+            } else {
+                alert(`บันทึกสำเร็จ ${successCount} รายการ, ล้มเหลว ${failCount} รายการ`);
+            }
+        });
+    }
+});

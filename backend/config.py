@@ -1,12 +1,12 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     JWT_SECRET: str
-    CRYPTO_SECRET: str
-    USE_MOCK: bool
-    #SNS_TOPIC_ARN: str
+    SNS_TOPIC_ARN: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore"
+    )
 
 settings = Settings()

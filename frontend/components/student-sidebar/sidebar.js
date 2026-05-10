@@ -189,7 +189,7 @@ function renderSidebarCourses(courses) {
 
 // ดึงรายวิชาจาก API แล้วแสดงใน sidebar
 async function fetchSidebarCourses() {
-    const BASE_URL = "http://127.0.0.1:8000";
+    const BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
 
     // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
     const userData = JSON.parse(localStorage.getItem("user"));

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // ตั้งค่า API
     // ==========================================
-    const API_BASE_URL = 'http://127.0.0.1:8000';
+    const API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
     // ==========================================
     // โหลด Sidebar + Navbar

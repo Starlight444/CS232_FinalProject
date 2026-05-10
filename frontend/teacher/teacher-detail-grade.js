@@ -2,7 +2,7 @@
   const gradeUrlParams = new URLSearchParams(window.location.search);
   const gradeCourseId = gradeUrlParams.get('course_id');
 
-  const GRADE_API_BASE_URL = 'https://ayx2aewxn3.execute-api.us-east-1.amazonaws.com';
+  const GRADE_API_BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
 
   const userData = JSON.parse(localStorage.getItem('user') || 'null');
   const TOKEN = userData ? userData.token : '';

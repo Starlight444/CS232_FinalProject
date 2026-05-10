@@ -1,29 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 from dependencies import get_current_user_id
 from database import get_db
+import requests
 
 from repositories.course_repository import CourseRepository
 from repositories.assignment_repository import AssignmentRepository
 from repositories.course_member_repository import CourseMemberRepository
-from repositories.external_account_repository import ExternalAccountRepository
 from repositories.external_assignment_repository import ExternalAssignmentRepository
-from repositories.external_announcement_repository import ExternalAnnouncementRepository
-
-from scrapers.assignment_scraper import AssignmentScraper
-from scrapers.announcement_scraper import AnnouncementScraper
-from scrapers.mock_assignment_scraper import MockAssignmentScraper
-from scrapers.mock_announcement_scraper import MockAnnouncementScraper
 
 from services.assignment_service import AssignmentService
-from services.sync_service import SyncService
-from crypto import Crypto
-from config import Settings
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
+
+security = HTTPBearer()
 
 class CreateAssignmentRequest(BaseModel):
     title: str
@@ -32,6 +26,14 @@ class CreateAssignmentRequest(BaseModel):
     max_score: int
     course_id: UUID
     created_by: UUID
+    allowed_file_types: str = "pdf,docx"
+
+class UpdateAssignmentRequest(BaseModel):
+    title: str
+    description: str
+    due_date: datetime
+    max_score: int
+    course_id: UUID
     allowed_file_types: str = "pdf,docx"
 
 @router.post("/")
@@ -87,68 +89,72 @@ def get_assignment(
         "data": assignment
     }
 
-@router.post("/sync")
-def sync_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
+@router.put("/{assignment_id}")
+def update_assignment(
+    assignment_id: UUID,
+    request: UpdateAssignmentRequest,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user_id)
+):
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    service = AssignmentService(repo, member_repo)
 
-    external_repo = ExternalAccountRepository(db)
-    external_assignment_repo = ExternalAssignmentRepository(db)
-    external_announcement_repo = ExternalAnnouncementRepository(db)
+    try:
+        assignment = service.update_assignment(
+            assignment_id,
+            request.title,
+            request.description,
+            request.due_date,
+            request.max_score,
+            request.course_id,
+            UUID(user_id),
+            request.allowed_file_types
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=403, detail=str(exc))
 
-    real_assignment_scraper = AssignmentScraper()
-    real_announcement_scraper = AnnouncementScraper()
-    mock_assignment_scraper = MockAssignmentScraper(external_assignment_repo)
-    mock_announcement_scraper = MockAnnouncementScraper(external_announcement_repo)
-
-    crypto = Crypto()
-
-    service = SyncService(
-        external_repo,
-        external_assignment_repo,
-        external_announcement_repo,
-        real_assignment_scraper,
-        real_announcement_scraper,
-        mock_assignment_scraper,
-        mock_announcement_scraper,
-        crypto
-    )
-
-    settings = Settings()
-
-    mode = "mock" if settings.USE_MOCK else "real"
-
-    data = service.sync_assignments(user_id=user_id, mode=mode)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
 
     return {
         "success": True,
-        "mode": mode,
-        "data": data
+        "data": {
+            "assignment_id": str(assignment.assignment_id),
+            "title": assignment.title,
+            "description": assignment.description,
+            "due_date": assignment.due_date,
+            "max_score": assignment.max_score,
+            "course_id": str(assignment.course_id),
+            "created_by": str(assignment.created_by),
+            "status": assignment.status,
+            "allowed_file_types": assignment.allowed_file_types
+        }
     }
 
-@router.get("/external")
-def get_external_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
-    
-    repo = ExternalAssignmentRepository(db)
-    data = repo.get_by_user(user_id)
+@router.delete("/{assignment_id}")
+def delete_assignment(
+    assignment_id: UUID,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user_id)
+):
+    repo = AssignmentRepository(db)
+    member_repo = CourseMemberRepository(db)
+    service = AssignmentService(repo, member_repo)
 
-    result = []
+    try:
+        assignment = service.delete_assignment(assignment_id, UUID(user_id))
+    except Exception as exc:
+        raise HTTPException(status_code=403, detail=str(exc))
 
-    for item in data:
-        result.append({
-            "id": str(item.id),
-            "source_name": item.source_name,
-            "course_name": item.external_course_name,
-            "course_link": item.external_course_url,
-            "title": item.title,
-            "box_link": item.external_link,
-            "submission_status": item.submission_status,
-            "grading_status": item.grading_status,
-            "due_date": item.due_date,
-            "time_remaining": item.time_remaining,
-            "last_modified": item.last_modified,
-            "file_submission": item.file_submission,
-        })
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
 
-    return result
+    return {
+        "success": True,
+        "message": "Assignment deleted successfully"
+    }
+
 
 @router.get("/all")
 def get_all_assignments(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
@@ -170,6 +176,19 @@ def get_all_assignments(db: Session = Depends(get_db), user_id: str = Depends(ge
         "success": True,
         "data": data
     }
+
+@router.post("/scraper")
+def sync_scraper(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    SCRAPER_URL = "http://54.237.5.32:8080"
+    response = requests.post(
+        f"{SCRAPER_URL}/sync/assignments",
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
+    )
+
+    return response.json()
 
 @router.get("/{course_id}")
 def get_assignments(

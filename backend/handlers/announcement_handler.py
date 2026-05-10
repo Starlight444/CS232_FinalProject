@@ -1,28 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from uuid import UUID
 from database import get_db
+import requests
 
 from repositories.course_repository import CourseRepository
 from repositories.announcement_repository import AnnouncementRepository
-from repositories.external_account_repository import ExternalAccountRepository
-from repositories.external_assignment_repository import ExternalAssignmentRepository
 from repositories.external_announcement_repository import ExternalAnnouncementRepository
 
 from services.announcement_service import AnnouncementService
-from services.sync_service import SyncService
-
-from scrapers.assignment_scraper import AssignmentScraper
-from scrapers.announcement_scraper import AnnouncementScraper
-from scrapers.mock_assignment_scraper import MockAssignmentScraper
-from scrapers.mock_announcement_scraper import MockAnnouncementScraper
 
 from dependencies import get_current_user_id
-from config import Settings
-from crypto import Crypto
 
 router = APIRouter(prefix="/announcements", tags=["announcements"])
+
+security = HTTPBearer()
 
 class CreateAnnouncementRequest(BaseModel):
     title:     str
@@ -56,76 +50,28 @@ def create_announcement(
 def get_by_course(course_id: str, db: Session = Depends(get_db)):
     service = AnnouncementService(AnnouncementRepository(db))
     announcements = service.get_by_course(course_id)
-    return {"success": True, "data": [_serialize(a) for a in announcements]}
-
-def _serialize(a) -> dict:
-    return {
-        "announcement_id": str(a.announcement_id),
-        "title":           a.title,
-        "content":         a.content,
-        "created_at":      a.created_at.isoformat(),
-        "updated_at":      a.updated_at.isoformat() if a.updated_at else None,
-        "created_by":      str(a.created_by),
-        "course_id":       str(a.course_id),
-    }
-
-@router.post("/sync")
-def sync_announcements(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
-    external_repo = ExternalAccountRepository(db)
-    external_assignment_repo = ExternalAssignmentRepository(db)
-    external_announcement_repo = ExternalAnnouncementRepository(db)
-
-    real_assignment_scraper = AssignmentScraper()
-    real_announcement_scraper = AnnouncementScraper()
-    mock_assignment_scraper = MockAssignmentScraper(external_assignment_repo)
-    mock_announcement_scraper = MockAnnouncementScraper(external_announcement_repo)
-
-    crypto = Crypto()
-
-    service = SyncService(
-        external_repo,
-        external_assignment_repo,
-        external_announcement_repo,
-        real_assignment_scraper,
-        real_announcement_scraper,
-        mock_assignment_scraper,
-        mock_announcement_scraper,
-        crypto
-    )
-    
-    settings = Settings()
-
-    mode = "mock" if settings.USE_MOCK else "real"
-
-    data = service.sync_announcements(user_id=user_id, mode=mode)
-
     return {
         "success": True,
-        "mode": mode,
-        "data": data
+        "data": announcements
     }
 
-@router.get("/external")
-def get_external_announcements(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
+def _serialize(a) -> dict:
+    author_name = None
 
-    repo = ExternalAnnouncementRepository(db)
-    data = repo.get_by_user(user_id)
+    if hasattr(a, "user") and a.user:
+        author_name = f"{a.user.first_name} {a.user.last_name}"
 
-    result = []
+    return {
+        "announcement_id": str(a.announcement_id),
+        "title": a.title,
+        "content": a.content,
+        "created_at": a.created_at.isoformat(),
+        "updated_at": a.updated_at.isoformat() if a.updated_at else None,
+        "created_by": str(a.created_by),
+        "course_id": str(a.course_id),
+        "author_name": author_name
+    }
 
-    for item in data:
-        result.append({
-            "id": str(item.id),
-            "source_name": item.source_name,
-            "course_name": item.external_course_name,
-            "course_link": item.external_course_url,
-            "title": item.title,
-            "link": item.external_link,
-            "author": item.author,
-            "date": item.created_at,
-        })
-
-    return result
 
 @router.get("/all")
 def get_all_announcements(db: Session = Depends(get_db), user_id: str = Depends(get_current_user_id),):
@@ -146,6 +92,19 @@ def get_all_announcements(db: Session = Depends(get_db), user_id: str = Depends(
         "success": True,
         "data": data
     }
+
+@router.post("/scraper")
+def sync_scraper(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    SCRAPER_URL = "http://54.237.5.32:8080"
+    response = requests.post(
+        f"{SCRAPER_URL}/sync/announcements",
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
+    )
+
+    return response.json()
 
 @router.get("/{announcement_id}")
 def get_detail(announcement_id: UUID, db: Session = Depends(get_db)):

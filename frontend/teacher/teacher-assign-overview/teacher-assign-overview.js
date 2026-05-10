@@ -4,7 +4,7 @@
 // =============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    const BASE_URL = 'http://127.0.0.1:8000';
+    const BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
     // const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
 
     // ---------- Sidebar / Navbar loader ----------

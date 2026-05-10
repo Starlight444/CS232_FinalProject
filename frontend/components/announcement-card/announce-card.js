@@ -94,7 +94,7 @@ function createAnnouncementCard(announcement, index, options = {}) {
     // external ใช้ author จาก scraper, internal ใช้ created_by
     const authorLine = isExternal
         ? (announcement.author || '')
-        : (teacher || '');
+        : (announcement.author_name || '');
 
     const updatedAt = announcement._raw?.updated_at || announcement.updated_at || null;
     const hasBeenEdited = updatedAt && updatedAt !== announcement.created_at;

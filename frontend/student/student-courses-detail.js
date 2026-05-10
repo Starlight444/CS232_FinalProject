@@ -120,8 +120,6 @@ function switchTab(element, tabId) {
     }, 10);
 }
 
-// API
-const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
@@ -175,7 +173,7 @@ async function fetchAssignments(courseId) {
         let merged = [];
         if (window.ScraperMerge) {
             merged = await window.ScraperMerge.fetchMergedAssignments(
-                API_BASE_URL, courseId, TOKEN, course || {}
+                courseId, TOKEN, course || {}
             );
         }
 

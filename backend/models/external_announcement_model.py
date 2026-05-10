@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy import Date
 import uuid
@@ -9,7 +9,7 @@ class ExternalAnnouncement(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    user_id = Column(UUID(as_uuid=True),ForeignKey("users.user_id", ondelete="CASCADE"),nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False)
     source_name = Column(String(100), nullable=False)
     external_course_code = Column(String(10))
     external_course_name = Column(Text)

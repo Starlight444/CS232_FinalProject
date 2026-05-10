@@ -4,9 +4,11 @@ fetch('../components/student-sidebar/sidebar.html')
     .then(data => {
         document.getElementById('sidebar-placeholder').innerHTML = data;
 
-        const script = document.createElement("script");
-        script.src = "../components/student-sidebar/sidebar.js";
-        document.body.appendChild(script);
+        if (!document.querySelector('script[src="../components/student-sidebar/sidebar.js"]')) {
+            const script = document.createElement("script");
+            script.src = "../components/student-sidebar/sidebar.js";
+            document.body.appendChild(script);
+        }
     });
 
 // navbar
@@ -15,20 +17,22 @@ fetch('../components/student-navbar/student-navbar.html')
     .then(data => {
         document.getElementById('navbar-placeholder').innerHTML = data;
 
-        const script = document.createElement("script");
-        script.src = "../components/student-navbar/student-navbar.js";
-        document.body.appendChild(script);
+        if (!document.querySelector('script[src="../components/student-navbar/student-navbar.js"]')) {
+            const script = document.createElement("script");
+            script.src = "../components/student-navbar/student-navbar.js";
+            document.body.appendChild(script);
+        }
     });
 
 
 
 // api
-//const BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default';
+
 // [เพิ่ม] ตรวจสอบ Token และดึงข้อมูล User จาก localStorage
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
-    window.location.href = "/frontend/auth/login.html";
+    window.location.href = "../auth/login.html";
 }
 
 const TOKEN = userData ? userData.token : '';
@@ -120,7 +124,7 @@ async function fetchAssignments() {
             let merged = [];
             if (window.ScraperMerge) {
                 merged = await window.ScraperMerge.fetchMergedAssignments(
-                    BASE_URL, course.course_id, TOKEN, course
+                    course.course_id, TOKEN, course
                 );
             }
 

@@ -1,13 +1,15 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://qj1zsidavd.execute-api.us-east-1.amazonaws.com/default";
 
 fetch('../components/student-sidebar/sidebar.html')
   .then(response => response.text())
   .then(data => {
     document.getElementById('sidebar-placeholder').innerHTML = data;
-
+    
+  if (!document.querySelector('script[src="../components/student-sidebar/sidebar.js"]')) {
     const script = document.createElement("script");
     script.src = "../components/student-sidebar/sidebar.js";
     document.body.appendChild(script);
+  }
   });
 
 // navbar
@@ -16,9 +18,11 @@ fetch('../components/student-navbar/student-navbar.html')
   .then(data => {
     document.getElementById('navbar-placeholder').innerHTML = data;
 
-    const script = document.createElement("script");
-    script.src = "../components/student-navbar/student-navbar.js";
-    document.body.appendChild(script);
+    if (!document.querySelector('script[src="../components/student-navbar/student-navbar.js"]')) {
+      const script = document.createElement("script");
+      script.src = "../components/student-navbar/student-navbar.js";
+      document.body.appendChild(script);
+    }
   });
 
 // Nav highlight
@@ -146,7 +150,7 @@ async function loadHomeData() {
       let mergedAsg = [];
       if (window.ScraperMerge) {
         mergedAsg = await window.ScraperMerge.fetchMergedAssignments(
-          BASE_URL, course.course_id, user.token || '', course
+          course.course_id, user.token || '', course
         );
       }
       // Fallback: internal เดิม
@@ -163,7 +167,7 @@ async function loadHomeData() {
       let mergedAnn = [];
       if (window.ScraperMerge) {
         mergedAnn = await window.ScraperMerge.fetchMergedAnnouncements(
-          BASE_URL, course.course_id, user.token || '', course
+          course.course_id, user.token || '', course
         );
       }
       if (!mergedAnn.length) {
@@ -358,7 +362,7 @@ function renderAssignmentList(assignments) {
         }
         return;
       }
-      window.location.href = `/frontend/student/student-assign-submit.html?id=${a.assignment_id}&course_id=${a.course_id}`;
+      window.location.href = `../student/student-assign-submit.html?id=${a.assignment_id}&course_id=${a.course_id}`;
     });
 
     list.appendChild(item);
@@ -468,7 +472,6 @@ loadHomeData();
 const _user = JSON.parse(localStorage.getItem("user") || "null");
 window.ScraperMerge?.bindSyncButton(
   document.getElementById('sync-btn'),
-  BASE_URL,
   _user?.token || '',
   loadHomeData
 );

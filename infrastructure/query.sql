@@ -6,6 +6,5 @@ SELECT * FROM assignments;
 SELECT * FROM submissions;
 SELECT * FROM attachments;
 SELECT * FROM announcements;
-SELECT * FROM external_accounts;
-SELECT * FROM external_assignments;
 SELECT * FROM external_announcements;
+SELECT * FROM external_assignments;

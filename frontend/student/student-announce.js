@@ -1,5 +1,4 @@
-//const API_BASE_URL = 'https://2z3eq1a51d.execute-api.us-east-1.amazonaws.com/default';
-const BASE_URL = 'http://127.0.0.1:8000';
+
 
 const userData = JSON.parse(localStorage.getItem("user"));
 if (!userData || !userData.token) {
@@ -20,9 +19,11 @@ function loadSidebar() {
         .then(res => res.text())
         .then(html => {
             document.getElementById('sidebar-placeholder').innerHTML = html;
-            const script = document.createElement('script');
-            script.src = '../components/student-sidebar/sidebar.js';
-            document.body.appendChild(script);
+            if (!document.querySelector('script[src="../components/student-sidebar/sidebar.js"]')) {
+                const script = document.createElement("script");
+                script.src = "../components/student-sidebar/sidebar.js";
+                document.body.appendChild(script);
+            }
         })
         .catch(err => console.error('Error loading sidebar:', err));
 }
@@ -32,9 +33,11 @@ function loadNavbar() {
         .then(res => res.text())
         .then(html => {
             document.getElementById('navbar-placeholder').innerHTML = html;
-            const script = document.createElement('script');
-            script.src = '../components/student-navbar/student-navbar.js';
+            if (!document.querySelector('script[src="../components/student-navbar/student-navbar.js"]')) {
+            const script = document.createElement("script");
+            script.src = "../components/student-navbar/student-navbar.js";
             document.body.appendChild(script);
+            }
         })
         .catch(err => console.error('Error loading navbar:', err));
 }
@@ -46,7 +49,7 @@ async function loadAnnouncements() {
 
     try {
         const headers = { 'Authorization': `Bearer ${TOKEN}` };
-        const courseRes = await fetch(`${BASE_URL}/courses/my/${USER_ID}?role=${userData.role}`, { headers });
+        const courseRes = await fetch(`${API_BASE_URL}/courses/my/${USER_ID}?role=${userData.role}`, { headers });
         const courseJson = await courseRes.json();
 
         const courses = Array.isArray(courseJson) ? courseJson : (courseJson.data || []);
@@ -67,7 +70,7 @@ async function loadAnnouncements() {
                 let merged = [];
                 if (window.ScraperMerge) {
                     merged = await window.ScraperMerge.fetchMergedAnnouncements(
-                        BASE_URL, course.course_id, TOKEN, course
+                        course.course_id, TOKEN, course
                     );
                 }
                 if (merged.length) return merged;
@@ -76,7 +79,7 @@ async function loadAnnouncements() {
                 // TODO: ลบ block นี้เมื่อ merged endpoint พร้อมใช้งานจริง
                 try {
                     const r = await fetch(
-                        `${BASE_URL}/announcements/course/${course.course_id}`,
+                        `${API_BASE_URL}/announcements/course/${course.course_id}`,
                         { headers }
                     );
                     const j = r.ok ? await r.json() : { data: [] };
@@ -263,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: confirm endpoint/method กับ backend ใน scraper-merge.js
     window.ScraperMerge?.bindSyncButton(
         document.getElementById('sync-btn'),
-        BASE_URL,
         TOKEN,
         loadAnnouncements
     );
