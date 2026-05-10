@@ -25,8 +25,8 @@ Trello cards :
 https://trello.com/b/LDc02PPa/sprint-backlog?filter=member:chalisakan
 
 **Github issue** Since May 8, 2026
-- #22
-- #23
+- [#22](https://github.com/Starlight444/CS232_FinalProject/issues/22)
+- [#23](https://github.com/Starlight444/CS232_FinalProject/issues/23)
 
 ## Mintita Kullapatjirakul SID 6709616822 
 
@@ -43,7 +43,7 @@ Trello cards :
 https://trello.com/b/LDc02PPa/sprint-backlog?filter=member:mintita_6709616822
 
 **Github issue** Since May 8, 2026
-- #20
+- [#20](https://github.com/Starlight444/CS232_FinalProject/issues/20)
 
 ## Mathavee Somjai SID 6709616830 
 
@@ -73,9 +73,9 @@ Trello cards :
 https://trello.com/b/LDc02PPa/sprint-backlog?filter=member:sawiocin
 
 **Github issue** Since May 8, 2026
-- #18
-- #19
-- #21
+- [#18](https://github.com/Starlight444/CS232_FinalProject/issues/18)
+- [#19](https://github.com/Starlight444/CS232_FinalProject/issues/19)
+- [#21](https://github.com/Starlight444/CS232_FinalProject/pull/21)
 
 ## suthaporn phansane SID 6709616889
 
